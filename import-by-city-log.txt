@@ -1,0 +1,9 @@
+[dotenv@17.3.1] injecting env (2) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+=== IMPORTAZIONE COMUNI VUOTI - PROVINCE INTERE ===
+168 tag OSM x 63 province/zone
+
+(node:587) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Caricate 230 categorie
+[1/168] amenity=restaurant -> Ristoranti: RO(+422) PN(+438) GO(+367) IM(+692) MS(+675) AP(+533) 

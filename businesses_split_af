@@ -1,0 +1,300 @@
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Palestra Imperia', (SELECT id FROM business_categories WHERE slug = 'palestre'), false, true, '44000000498', 'palestra498@email.it', '010345498');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000498'), 'Sede Principale', 'Corso Umberto', '51', 'Imperia', 'IM', '18100', '010345498', 'palestra498@email.it', '44000000498', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Panificio Imperia', (SELECT id FROM business_categories WHERE slug = 'panifici'), false, true, '44000000499', 'panificio499@email.it', '010345499');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000499'), 'Sede Principale', 'Via Cavour', '113', 'Imperia', 'IM', '18100', '010345499', 'panificio499@email.it', '44000000499', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pasticceria Imperia', (SELECT id FROM business_categories WHERE slug = 'gelaterie-pasticcerie'), false, true, '44000000500', 'pasticceria500@email.it', '010345500');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000500'), 'Sede Principale', 'Corso Vittorio Emanuele', '68', 'Imperia', 'IM', '18100', '010345500', 'pasticceria500@email.it', '44000000500', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Veterinario Imperia', (SELECT id FROM business_categories WHERE slug = 'veterinari'), false, true, '44000000501', 'veterinario501@email.it', '010345501');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000501'), 'Sede Principale', 'Via Cavour', '166', 'Imperia', 'IM', '18100', '010345501', 'veterinario501@email.it', '44000000501', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Macelleria Imperia', (SELECT id FROM business_categories WHERE slug = 'macellerie'), false, true, '44000000502', 'macelleria502@email.it', '010345502');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000502'), 'Sede Principale', 'Via Verdi', '166', 'Imperia', 'IM', '18100', '010345502', 'macelleria502@email.it', '44000000502', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pescheria Imperia', (SELECT id FROM business_categories WHERE slug = 'pescherie'), false, true, '44000000503', 'pescheria503@email.it', '010345503');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000503'), 'Sede Principale', 'Via Cavour', '122', 'Imperia', 'IM', '18100', '010345503', 'pescheria503@email.it', '44000000503', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Libreria Imperia', (SELECT id FROM business_categories WHERE slug = 'librerie'), false, true, '44000000504', 'libreria504@email.it', '010345504');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000504'), 'Sede Principale', 'Via Roma', '110', 'Imperia', 'IM', '18100', '010345504', 'libreria504@email.it', '44000000504', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Architetto Imperia', (SELECT id FROM business_categories WHERE slug = 'architetti'), false, true, '44000000505', 'architetto505@email.it', '010345505');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000505'), 'Sede Principale', 'Via Dante', '14', 'Imperia', 'IM', '18100', '010345505', 'architetto505@email.it', '44000000505', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Ingegnere Imperia', (SELECT id FROM business_categories WHERE slug = 'ingegneri'), false, true, '44000000506', 'ingegnere506@email.it', '010345506');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000506'), 'Sede Principale', 'Corso Vittorio Emanuele', '101', 'Imperia', 'IM', '18100', '010345506', 'ingegnere506@email.it', '44000000506', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Geometra Imperia', (SELECT id FROM business_categories WHERE slug = 'geometri'), false, true, '44000000507', 'geometra507@email.it', '010345507');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000507'), 'Sede Principale', 'Corso Vittorio Emanuele', '70', 'Imperia', 'IM', '18100', '010345507', 'geometra507@email.it', '44000000507', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Officina Auto Imperia', (SELECT id FROM business_categories WHERE slug = 'officine-auto'), false, true, '44000000508', 'officinaauto508@email.it', '010345508');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000508'), 'Sede Principale', 'Via Dante', '104', 'Imperia', 'IM', '18100', '010345508', 'officinaauto508@email.it', '44000000508', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Gommista Imperia', (SELECT id FROM business_categories WHERE slug = 'gommisti'), false, true, '44000000509', 'gommista509@email.it', '010345509');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '44000000509'), 'Sede Principale', 'Via Verdi', '76', 'Imperia', 'IM', '18100', '010345509', 'gommista509@email.it', '44000000509', true);
+
+-- MARCHE
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Osteria Ancona', (SELECT id FROM business_categories WHERE slug = 'ristoranti'), false, true, '45000000510', 'osteria510@email.it', '071345510');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000510'), 'Sede Principale', 'Via Verdi', '156', 'Ancona', 'AN', '60100', '071345510', 'osteria510@email.it', '45000000510', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pizzeria Ancona', (SELECT id FROM business_categories WHERE slug = 'pizzerie'), false, true, '45000000511', 'pizzeria511@email.it', '071345511');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000511'), 'Sede Principale', 'Via Dante', '96', 'Ancona', 'AN', '60100', '071345511', 'pizzeria511@email.it', '45000000511', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Caffe Ancona', (SELECT id FROM business_categories WHERE slug = 'bar-caffe'), false, true, '45000000512', 'caffe512@email.it', '071345512');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000512'), 'Sede Principale', 'Via Roma', '83', 'Ancona', 'AN', '60100', '071345512', 'caffe512@email.it', '45000000512', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Dentistico Ancona', (SELECT id FROM business_categories WHERE slug = 'studi-dentistici'), false, true, '45000000513', 'studiodentistico513@email.it', '071345513');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000513'), 'Sede Principale', 'Piazza del Duomo', '111', 'Ancona', 'AN', '60100', '071345513', 'studiodentistico513@email.it', '45000000513', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Poliambulatorio Ancona', (SELECT id FROM business_categories WHERE slug = 'studi-medici'), false, true, '45000000514', 'poliambulatorio514@email.it', '071345514');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000514'), 'Sede Principale', 'Corso Italia', '62', 'Ancona', 'AN', '60100', '071345514', 'poliambulatorio514@email.it', '45000000514', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Farmacia Ancona', (SELECT id FROM business_categories WHERE slug = 'farmacie'), false, true, '45000000515', 'farmacia515@email.it', '071345515');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000515'), 'Sede Principale', 'Via Dante', '165', 'Ancona', 'AN', '60100', '071345515', 'farmacia515@email.it', '45000000515', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Legale Ancona', (SELECT id FROM business_categories WHERE slug = 'avvocati'), false, true, '45000000516', 'studiolegale516@email.it', '071345516');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000516'), 'Sede Principale', 'Piazza Garibaldi', '127', 'Ancona', 'AN', '60100', '071345516', 'studiolegale516@email.it', '45000000516', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Commercialisti Ancona', (SELECT id FROM business_categories WHERE slug = 'commercialisti'), false, true, '45000000517', 'studiocommercialisti517@email.it', '071345517');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000517'), 'Sede Principale', 'Corso Vittorio Emanuele', '2', 'Ancona', 'AN', '60100', '071345517', 'studiocommercialisti517@email.it', '45000000517', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Notaio Ancona', (SELECT id FROM business_categories WHERE slug = 'notai'), false, true, '45000000518', 'notaio518@email.it', '071345518');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000518'), 'Sede Principale', 'Corso Vittorio Emanuele', '49', 'Ancona', 'AN', '60100', '071345518', 'notaio518@email.it', '45000000518', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Parrucchiere Ancona', (SELECT id FROM business_categories WHERE slug = 'parrucchieri'), false, true, '45000000519', 'parrucchiere519@email.it', '071345519');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000519'), 'Sede Principale', 'Via Dante', '59', 'Ancona', 'AN', '60100', '071345519', 'parrucchiere519@email.it', '45000000519', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Centro Estetico Ancona', (SELECT id FROM business_categories WHERE slug = 'centri-estetici'), false, true, '45000000520', 'centroestetico520@email.it', '071345520');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000520'), 'Sede Principale', 'Corso Umberto', '36', 'Ancona', 'AN', '60100', '071345520', 'centroestetico520@email.it', '45000000520', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Idraulico Ancona', (SELECT id FROM business_categories WHERE slug = 'idraulici'), false, true, '45000000521', 'idraulico521@email.it', '3331234521');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000521'), 'Sede Principale', 'Piazza del Duomo', '198', 'Ancona', 'AN', '60100', '3331234521', 'idraulico521@email.it', '45000000521', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Elettricista Ancona', (SELECT id FROM business_categories WHERE slug = 'elettricisti'), false, true, '45000000522', 'elettricista522@email.it', '3331234522');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000522'), 'Sede Principale', 'Piazza del Duomo', '25', 'Ancona', 'AN', '60100', '3331234522', 'elettricista522@email.it', '45000000522', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Imbianchino Ancona', (SELECT id FROM business_categories WHERE slug = 'imbianchini'), false, true, '45000000523', 'imbianchino523@email.it', '3331234523');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000523'), 'Sede Principale', 'Corso Umberto', '102', 'Ancona', 'AN', '60100', '3331234523', 'imbianchino523@email.it', '45000000523', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Fabbro Ancona', (SELECT id FROM business_categories WHERE slug = 'fabbri'), false, true, '45000000524', 'fabbro524@email.it', '3331234524');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000524'), 'Sede Principale', 'Via Dante', '140', 'Ancona', 'AN', '60100', '3331234524', 'fabbro524@email.it', '45000000524', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Falegname Ancona', (SELECT id FROM business_categories WHERE slug = 'falegnami'), false, true, '45000000525', 'falegname525@email.it', '3331234525');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000525'), 'Sede Principale', 'Piazza Garibaldi', '45', 'Ancona', 'AN', '60100', '3331234525', 'falegname525@email.it', '45000000525', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Supermercato Ancona', (SELECT id FROM business_categories WHERE slug = 'supermercati'), false, true, '45000000526', 'supermercato526@email.it', '071345526');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000526'), 'Sede Principale', 'Corso Italia', '104', 'Ancona', 'AN', '60100', '071345526', 'supermercato526@email.it', '45000000526', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Ferramenta Ancona', (SELECT id FROM business_categories WHERE slug = 'ferramenta'), false, true, '45000000527', 'ferramenta527@email.it', '071345527');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000527'), 'Sede Principale', 'Via Dante', '21', 'Ancona', 'AN', '60100', '071345527', 'ferramenta527@email.it', '45000000527', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Palestra Ancona', (SELECT id FROM business_categories WHERE slug = 'palestre'), false, true, '45000000528', 'palestra528@email.it', '071345528');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000528'), 'Sede Principale', 'Via Mazzini', '38', 'Ancona', 'AN', '60100', '071345528', 'palestra528@email.it', '45000000528', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Panificio Ancona', (SELECT id FROM business_categories WHERE slug = 'panifici'), false, true, '45000000529', 'panificio529@email.it', '071345529');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000529'), 'Sede Principale', 'Corso Vittorio Emanuele', '21', 'Ancona', 'AN', '60100', '071345529', 'panificio529@email.it', '45000000529', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pasticceria Ancona', (SELECT id FROM business_categories WHERE slug = 'gelaterie-pasticcerie'), false, true, '45000000530', 'pasticceria530@email.it', '071345530');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000530'), 'Sede Principale', 'Corso Vittorio Emanuele', '68', 'Ancona', 'AN', '60100', '071345530', 'pasticceria530@email.it', '45000000530', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Veterinario Ancona', (SELECT id FROM business_categories WHERE slug = 'veterinari'), false, true, '45000000531', 'veterinario531@email.it', '071345531');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000531'), 'Sede Principale', 'Corso Umberto', '111', 'Ancona', 'AN', '60100', '071345531', 'veterinario531@email.it', '45000000531', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Macelleria Ancona', (SELECT id FROM business_categories WHERE slug = 'macellerie'), false, true, '45000000532', 'macelleria532@email.it', '071345532');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000532'), 'Sede Principale', 'Via Cavour', '122', 'Ancona', 'AN', '60100', '071345532', 'macelleria532@email.it', '45000000532', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pescheria Ancona', (SELECT id FROM business_categories WHERE slug = 'pescherie'), false, true, '45000000533', 'pescheria533@email.it', '071345533');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000533'), 'Sede Principale', 'Via Roma', '175', 'Ancona', 'AN', '60100', '071345533', 'pescheria533@email.it', '45000000533', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Libreria Ancona', (SELECT id FROM business_categories WHERE slug = 'librerie'), false, true, '45000000534', 'libreria534@email.it', '071345534');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000534'), 'Sede Principale', 'Via Mazzini', '125', 'Ancona', 'AN', '60100', '071345534', 'libreria534@email.it', '45000000534', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Architetto Ancona', (SELECT id FROM business_categories WHERE slug = 'architetti'), false, true, '45000000535', 'architetto535@email.it', '071345535');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000535'), 'Sede Principale', 'Via Verdi', '97', 'Ancona', 'AN', '60100', '071345535', 'architetto535@email.it', '45000000535', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Ingegnere Ancona', (SELECT id FROM business_categories WHERE slug = 'ingegneri'), false, true, '45000000536', 'ingegnere536@email.it', '071345536');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000536'), 'Sede Principale', 'Via Dante', '57', 'Ancona', 'AN', '60100', '071345536', 'ingegnere536@email.it', '45000000536', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Geometra Ancona', (SELECT id FROM business_categories WHERE slug = 'geometri'), false, true, '45000000537', 'geometra537@email.it', '071345537');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000537'), 'Sede Principale', 'Via Cavour', '99', 'Ancona', 'AN', '60100', '071345537', 'geometra537@email.it', '45000000537', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Officina Auto Ancona', (SELECT id FROM business_categories WHERE slug = 'officine-auto'), false, true, '45000000538', 'officinaauto538@email.it', '071345538');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000538'), 'Sede Principale', 'Corso Vittorio Emanuele', '64', 'Ancona', 'AN', '60100', '071345538', 'officinaauto538@email.it', '45000000538', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Gommista Ancona', (SELECT id FROM business_categories WHERE slug = 'gommisti'), false, true, '45000000539', 'gommista539@email.it', '071345539');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000539'), 'Sede Principale', 'Via Dante', '57', 'Ancona', 'AN', '60100', '071345539', 'gommista539@email.it', '45000000539', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Trattoria Pesaro', (SELECT id FROM business_categories WHERE slug = 'ristoranti'), false, true, '45000000540', 'trattoria540@email.it', '071345540');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000540'), 'Sede Principale', 'Piazza del Duomo', '175', 'Pesaro', 'PU', '61100', '071345540', 'trattoria540@email.it', '45000000540', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pizzeria Pesaro', (SELECT id FROM business_categories WHERE slug = 'pizzerie'), false, true, '45000000541', 'pizzeria541@email.it', '071345541');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000541'), 'Sede Principale', 'Via Verdi', '145', 'Pesaro', 'PU', '61100', '071345541', 'pizzeria541@email.it', '45000000541', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Bar Pasticceria Pesaro', (SELECT id FROM business_categories WHERE slug = 'bar-caffe'), false, true, '45000000542', 'barpasticceria542@email.it', '071345542');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000542'), 'Sede Principale', 'Via Mazzini', '125', 'Pesaro', 'PU', '61100', '071345542', 'barpasticceria542@email.it', '45000000542', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Dentistico Pesaro', (SELECT id FROM business_categories WHERE slug = 'studi-dentistici'), false, true, '45000000543', 'studiodentistico543@email.it', '071345543');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000543'), 'Sede Principale', 'Via Verdi', '199', 'Pesaro', 'PU', '61100', '071345543', 'studiodentistico543@email.it', '45000000543', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Poliambulatorio Pesaro', (SELECT id FROM business_categories WHERE slug = 'studi-medici'), false, true, '45000000544', 'poliambulatorio544@email.it', '071345544');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000544'), 'Sede Principale', 'Via Mazzini', '117', 'Pesaro', 'PU', '61100', '071345544', 'poliambulatorio544@email.it', '45000000544', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Farmacia Pesaro', (SELECT id FROM business_categories WHERE slug = 'farmacie'), false, true, '45000000545', 'farmacia545@email.it', '071345545');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000545'), 'Sede Principale', 'Corso Italia', '152', 'Pesaro', 'PU', '61100', '071345545', 'farmacia545@email.it', '45000000545', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Legale Pesaro', (SELECT id FROM business_categories WHERE slug = 'avvocati'), false, true, '45000000546', 'studiolegale546@email.it', '071345546');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000546'), 'Sede Principale', 'Via Roma', '44', 'Pesaro', 'PU', '61100', '071345546', 'studiolegale546@email.it', '45000000546', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Commercialista Pesaro', (SELECT id FROM business_categories WHERE slug = 'commercialisti'), false, true, '45000000547', 'commercialista547@email.it', '071345547');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000547'), 'Sede Principale', 'Via Verdi', '164', 'Pesaro', 'PU', '61100', '071345547', 'commercialista547@email.it', '45000000547', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Notaio Pesaro', (SELECT id FROM business_categories WHERE slug = 'notai'), false, true, '45000000548', 'notaio548@email.it', '071345548');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000548'), 'Sede Principale', 'Corso Umberto', '7', 'Pesaro', 'PU', '61100', '071345548', 'notaio548@email.it', '45000000548', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Parrucchiere Pesaro', (SELECT id FROM business_categories WHERE slug = 'parrucchieri'), false, true, '45000000549', 'parrucchiere549@email.it', '071345549');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000549'), 'Sede Principale', 'Corso Italia', '144', 'Pesaro', 'PU', '61100', '071345549', 'parrucchiere549@email.it', '45000000549', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Centro Estetico Pesaro', (SELECT id FROM business_categories WHERE slug = 'centri-estetici'), false, true, '45000000550', 'centroestetico550@email.it', '071345550');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000550'), 'Sede Principale', 'Via Verdi', '148', 'Pesaro', 'PU', '61100', '071345550', 'centroestetico550@email.it', '45000000550', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Idraulico Pesaro', (SELECT id FROM business_categories WHERE slug = 'idraulici'), false, true, '45000000551', 'idraulico551@email.it', '3331234551');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000551'), 'Sede Principale', 'Via Verdi', '180', 'Pesaro', 'PU', '61100', '3331234551', 'idraulico551@email.it', '45000000551', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Elettricista Pesaro', (SELECT id FROM business_categories WHERE slug = 'elettricisti'), false, true, '45000000552', 'elettricista552@email.it', '3331234552');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000552'), 'Sede Principale', 'Corso Umberto', '105', 'Pesaro', 'PU', '61100', '3331234552', 'elettricista552@email.it', '45000000552', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Imbianchino Pesaro', (SELECT id FROM business_categories WHERE slug = 'imbianchini'), false, true, '45000000553', 'imbianchino553@email.it', '3331234553');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000553'), 'Sede Principale', 'Via Roma', '176', 'Pesaro', 'PU', '61100', '3331234553', 'imbianchino553@email.it', '45000000553', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Fabbro Pesaro', (SELECT id FROM business_categories WHERE slug = 'fabbri'), false, true, '45000000554', 'fabbro554@email.it', '3331234554');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000554'), 'Sede Principale', 'Via Cavour', '157', 'Pesaro', 'PU', '61100', '3331234554', 'fabbro554@email.it', '45000000554', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Falegname Pesaro', (SELECT id FROM business_categories WHERE slug = 'falegnami'), false, true, '45000000555', 'falegname555@email.it', '3331234555');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000555'), 'Sede Principale', 'Via Cavour', '170', 'Pesaro', 'PU', '61100', '3331234555', 'falegname555@email.it', '45000000555', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Supermercato Pesaro', (SELECT id FROM business_categories WHERE slug = 'supermercati'), false, true, '45000000556', 'supermercato556@email.it', '071345556');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000556'), 'Sede Principale', 'Via Verdi', '105', 'Pesaro', 'PU', '61100', '071345556', 'supermercato556@email.it', '45000000556', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Ferramenta Pesaro', (SELECT id FROM business_categories WHERE slug = 'ferramenta'), false, true, '45000000557', 'ferramenta557@email.it', '071345557');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000557'), 'Sede Principale', 'Via Mazzini', '103', 'Pesaro', 'PU', '61100', '071345557', 'ferramenta557@email.it', '45000000557', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Palestra Pesaro', (SELECT id FROM business_categories WHERE slug = 'palestre'), false, true, '45000000558', 'palestra558@email.it', '071345558');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000558'), 'Sede Principale', 'Via Verdi', '159', 'Pesaro', 'PU', '61100', '071345558', 'palestra558@email.it', '45000000558', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Panificio Pesaro', (SELECT id FROM business_categories WHERE slug = 'panifici'), false, true, '45000000559', 'panificio559@email.it', '071345559');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000559'), 'Sede Principale', 'Via Verdi', '183', 'Pesaro', 'PU', '61100', '071345559', 'panificio559@email.it', '45000000559', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Gelateria Pesaro', (SELECT id FROM business_categories WHERE slug = 'gelaterie-pasticcerie'), false, true, '45000000560', 'gelateria560@email.it', '071345560');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000560'), 'Sede Principale', 'Via Verdi', '62', 'Pesaro', 'PU', '61100', '071345560', 'gelateria560@email.it', '45000000560', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Veterinario Pesaro', (SELECT id FROM business_categories WHERE slug = 'veterinari'), false, true, '45000000561', 'veterinario561@email.it', '071345561');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000561'), 'Sede Principale', 'Corso Vittorio Emanuele', '81', 'Pesaro', 'PU', '61100', '071345561', 'veterinario561@email.it', '45000000561', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Macelleria Pesaro', (SELECT id FROM business_categories WHERE slug = 'macellerie'), false, true, '45000000562', 'macelleria562@email.it', '071345562');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000562'), 'Sede Principale', 'Piazza Garibaldi', '183', 'Pesaro', 'PU', '61100', '071345562', 'macelleria562@email.it', '45000000562', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pescheria Pesaro', (SELECT id FROM business_categories WHERE slug = 'pescherie'), false, true, '45000000563', 'pescheria563@email.it', '071345563');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000563'), 'Sede Principale', 'Piazza Garibaldi', '27', 'Pesaro', 'PU', '61100', '071345563', 'pescheria563@email.it', '45000000563', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Libreria Pesaro', (SELECT id FROM business_categories WHERE slug = 'librerie'), false, true, '45000000564', 'libreria564@email.it', '071345564');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000564'), 'Sede Principale', 'Piazza Garibaldi', '122', 'Pesaro', 'PU', '61100', '071345564', 'libreria564@email.it', '45000000564', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Architetto Pesaro', (SELECT id FROM business_categories WHERE slug = 'architetti'), false, true, '45000000565', 'architetto565@email.it', '071345565');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000565'), 'Sede Principale', 'Corso Umberto', '115', 'Pesaro', 'PU', '61100', '071345565', 'architetto565@email.it', '45000000565', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Ingegneri Pesaro', (SELECT id FROM business_categories WHERE slug = 'ingegneri'), false, true, '45000000566', 'studioingegneri566@email.it', '071345566');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000566'), 'Sede Principale', 'Corso Vittorio Emanuele', '108', 'Pesaro', 'PU', '61100', '071345566', 'studioingegneri566@email.it', '45000000566', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Geometra Pesaro', (SELECT id FROM business_categories WHERE slug = 'geometri'), false, true, '45000000567', 'geometra567@email.it', '071345567');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000567'), 'Sede Principale', 'Piazza del Duomo', '165', 'Pesaro', 'PU', '61100', '071345567', 'geometra567@email.it', '45000000567', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Officina Auto Pesaro', (SELECT id FROM business_categories WHERE slug = 'officine-auto'), false, true, '45000000568', 'officinaauto568@email.it', '071345568');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000568'), 'Sede Principale', 'Corso Umberto', '39', 'Pesaro', 'PU', '61100', '071345568', 'officinaauto568@email.it', '45000000568', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Gommista Pesaro', (SELECT id FROM business_categories WHERE slug = 'gommisti'), false, true, '45000000569', 'gommista569@email.it', '071345569');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000569'), 'Sede Principale', 'Piazza del Duomo', '170', 'Pesaro', 'PU', '61100', '071345569', 'gommista569@email.it', '45000000569', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Trattoria Macerata', (SELECT id FROM business_categories WHERE slug = 'ristoranti'), false, true, '45000000570', 'trattoria570@email.it', '071345570');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000570'), 'Sede Principale', 'Piazza Garibaldi', '1', 'Macerata', 'MC', '62100', '071345570', 'trattoria570@email.it', '45000000570', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pizzeria Macerata', (SELECT id FROM business_categories WHERE slug = 'pizzerie'), false, true, '45000000571', 'pizzeria571@email.it', '071345571');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000571'), 'Sede Principale', 'Corso Italia', '4', 'Macerata', 'MC', '62100', '071345571', 'pizzeria571@email.it', '45000000571', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Bar Macerata', (SELECT id FROM business_categories WHERE slug = 'bar-caffe'), false, true, '45000000572', 'bar572@email.it', '071345572');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000572'), 'Sede Principale', 'Via Dante', '88', 'Macerata', 'MC', '62100', '071345572', 'bar572@email.it', '45000000572', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Dentistico Macerata', (SELECT id FROM business_categories WHERE slug = 'studi-dentistici'), false, true, '45000000573', 'studiodentistico573@email.it', '071345573');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000573'), 'Sede Principale', 'Via Dante', '140', 'Macerata', 'MC', '62100', '071345573', 'studiodentistico573@email.it', '45000000573', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Medico Macerata', (SELECT id FROM business_categories WHERE slug = 'studi-medici'), false, true, '45000000574', 'studiomedico574@email.it', '071345574');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000574'), 'Sede Principale', 'Corso Umberto', '160', 'Macerata', 'MC', '62100', '071345574', 'studiomedico574@email.it', '45000000574', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Farmacia Macerata', (SELECT id FROM business_categories WHERE slug = 'farmacie'), false, true, '45000000575', 'farmacia575@email.it', '071345575');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000575'), 'Sede Principale', 'Via Cavour', '200', 'Macerata', 'MC', '62100', '071345575', 'farmacia575@email.it', '45000000575', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Legale Macerata', (SELECT id FROM business_categories WHERE slug = 'avvocati'), false, true, '45000000576', 'studiolegale576@email.it', '071345576');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000576'), 'Sede Principale', 'Corso Vittorio Emanuele', '191', 'Macerata', 'MC', '62100', '071345576', 'studiolegale576@email.it', '45000000576', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Commercialista Macerata', (SELECT id FROM business_categories WHERE slug = 'commercialisti'), false, true, '45000000577', 'commercialista577@email.it', '071345577');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000577'), 'Sede Principale', 'Corso Vittorio Emanuele', '16', 'Macerata', 'MC', '62100', '071345577', 'commercialista577@email.it', '45000000577', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Notaio Macerata', (SELECT id FROM business_categories WHERE slug = 'notai'), false, true, '45000000578', 'notaio578@email.it', '071345578');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000578'), 'Sede Principale', 'Corso Vittorio Emanuele', '24', 'Macerata', 'MC', '62100', '071345578', 'notaio578@email.it', '45000000578', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Parrucchiere Macerata', (SELECT id FROM business_categories WHERE slug = 'parrucchieri'), false, true, '45000000579', 'parrucchiere579@email.it', '071345579');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000579'), 'Sede Principale', 'Piazza del Duomo', '180', 'Macerata', 'MC', '62100', '071345579', 'parrucchiere579@email.it', '45000000579', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Centro Estetico Macerata', (SELECT id FROM business_categories WHERE slug = 'centri-estetici'), false, true, '45000000580', 'centroestetico580@email.it', '071345580');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000580'), 'Sede Principale', 'Via Mazzini', '117', 'Macerata', 'MC', '62100', '071345580', 'centroestetico580@email.it', '45000000580', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Idraulico Macerata', (SELECT id FROM business_categories WHERE slug = 'idraulici'), false, true, '45000000581', 'idraulico581@email.it', '3331234581');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000581'), 'Sede Principale', 'Via Verdi', '80', 'Macerata', 'MC', '62100', '3331234581', 'idraulico581@email.it', '45000000581', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Elettricista Macerata', (SELECT id FROM business_categories WHERE slug = 'elettricisti'), false, true, '45000000582', 'elettricista582@email.it', '3331234582');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000582'), 'Sede Principale', 'Corso Italia', '162', 'Macerata', 'MC', '62100', '3331234582', 'elettricista582@email.it', '45000000582', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Imbianchino Macerata', (SELECT id FROM business_categories WHERE slug = 'imbianchini'), false, true, '45000000583', 'imbianchino583@email.it', '3331234583');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000583'), 'Sede Principale', 'Corso Italia', '65', 'Macerata', 'MC', '62100', '3331234583', 'imbianchino583@email.it', '45000000583', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Fabbro Macerata', (SELECT id FROM business_categories WHERE slug = 'fabbri'), false, true, '45000000584', 'fabbro584@email.it', '3331234584');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000584'), 'Sede Principale', 'Corso Italia', '116', 'Macerata', 'MC', '62100', '3331234584', 'fabbro584@email.it', '45000000584', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Falegname Macerata', (SELECT id FROM business_categories WHERE slug = 'falegnami'), false, true, '45000000585', 'falegname585@email.it', '3331234585');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000585'), 'Sede Principale', 'Via Roma', '160', 'Macerata', 'MC', '62100', '3331234585', 'falegname585@email.it', '45000000585', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Supermercato Macerata', (SELECT id FROM business_categories WHERE slug = 'supermercati'), false, true, '45000000586', 'supermercato586@email.it', '071345586');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000586'), 'Sede Principale', 'Piazza del Duomo', '30', 'Macerata', 'MC', '62100', '071345586', 'supermercato586@email.it', '45000000586', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Ferramenta Macerata', (SELECT id FROM business_categories WHERE slug = 'ferramenta'), false, true, '45000000587', 'ferramenta587@email.it', '071345587');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000587'), 'Sede Principale', 'Via Mazzini', '117', 'Macerata', 'MC', '62100', '071345587', 'ferramenta587@email.it', '45000000587', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Palestra Macerata', (SELECT id FROM business_categories WHERE slug = 'palestre'), false, true, '45000000588', 'palestra588@email.it', '071345588');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000588'), 'Sede Principale', 'Piazza Garibaldi', '81', 'Macerata', 'MC', '62100', '071345588', 'palestra588@email.it', '45000000588', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Panificio Macerata', (SELECT id FROM business_categories WHERE slug = 'panifici'), false, true, '45000000589', 'panificio589@email.it', '071345589');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000589'), 'Sede Principale', 'Via Cavour', '64', 'Macerata', 'MC', '62100', '071345589', 'panificio589@email.it', '45000000589', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pasticceria Macerata', (SELECT id FROM business_categories WHERE slug = 'gelaterie-pasticcerie'), false, true, '45000000590', 'pasticceria590@email.it', '071345590');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000590'), 'Sede Principale', 'Piazza del Duomo', '148', 'Macerata', 'MC', '62100', '071345590', 'pasticceria590@email.it', '45000000590', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Veterinario Macerata', (SELECT id FROM business_categories WHERE slug = 'veterinari'), false, true, '45000000591', 'veterinario591@email.it', '071345591');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000591'), 'Sede Principale', 'Piazza del Duomo', '191', 'Macerata', 'MC', '62100', '071345591', 'veterinario591@email.it', '45000000591', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Macelleria Macerata', (SELECT id FROM business_categories WHERE slug = 'macellerie'), false, true, '45000000592', 'macelleria592@email.it', '071345592');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000592'), 'Sede Principale', 'Corso Umberto', '66', 'Macerata', 'MC', '62100', '071345592', 'macelleria592@email.it', '45000000592', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pescheria Macerata', (SELECT id FROM business_categories WHERE slug = 'pescherie'), false, true, '45000000593', 'pescheria593@email.it', '071345593');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000593'), 'Sede Principale', 'Piazza del Duomo', '99', 'Macerata', 'MC', '62100', '071345593', 'pescheria593@email.it', '45000000593', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Libreria Macerata', (SELECT id FROM business_categories WHERE slug = 'librerie'), false, true, '45000000594', 'libreria594@email.it', '071345594');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000594'), 'Sede Principale', 'Piazza Garibaldi', '115', 'Macerata', 'MC', '62100', '071345594', 'libreria594@email.it', '45000000594', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Architetto Macerata', (SELECT id FROM business_categories WHERE slug = 'architetti'), false, true, '45000000595', 'architetto595@email.it', '071345595');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000595'), 'Sede Principale', 'Corso Vittorio Emanuele', '57', 'Macerata', 'MC', '62100', '071345595', 'architetto595@email.it', '45000000595', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Ingegnere Macerata', (SELECT id FROM business_categories WHERE slug = 'ingegneri'), false, true, '45000000596', 'ingegnere596@email.it', '071345596');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '45000000596'), 'Sede Principale', 'Via Roma', '5', 'Macerata', 'MC', '62100', '071345596', 'ingegnere596@email.it', '45000000596', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Geometra Macerata', (SELECT id FROM business_categories WHERE slug = 'geometri'), false, true, '45000000597', 'geometra597@email.it', '071345597');

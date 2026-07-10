@@ -1,0 +1,11 @@
+[dotenv@17.3.1] injecting env (2) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+=== IMPORTAZIONE MASSIVA OSM ===
+237 tag OSM x 171 citta'
+
+(node:642) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Caricate 230 categorie dal DB
+[WARN] Categorie non nel DB: Prodotti Agricoli, Gallerie d Arte
+
+[1/237] amenity=restaurant -> Ristoranti: Torino(+1253) Alessandria(+144) 

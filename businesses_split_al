@@ -1,0 +1,45 @@
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001095'), 'Sede Principale', 'Piazza del Duomo', '54', 'Aosta', 'AO', '11100', '3331235095', 'falegname1095@email.it', '51000001095', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Supermercato Aosta', (SELECT id FROM business_categories WHERE slug = 'supermercati'), false, true, '51000001096', 'supermercato1096@email.it', '016346096');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001096'), 'Sede Principale', 'Corso Umberto', '13', 'Aosta', 'AO', '11100', '016346096', 'supermercato1096@email.it', '51000001096', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Ferramenta Aosta', (SELECT id FROM business_categories WHERE slug = 'ferramenta'), false, true, '51000001097', 'ferramenta1097@email.it', '016346097');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001097'), 'Sede Principale', 'Via Dante', '104', 'Aosta', 'AO', '11100', '016346097', 'ferramenta1097@email.it', '51000001097', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Palestra Aosta', (SELECT id FROM business_categories WHERE slug = 'palestre'), false, true, '51000001098', 'palestra1098@email.it', '016346098');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001098'), 'Sede Principale', 'Corso Italia', '177', 'Aosta', 'AO', '11100', '016346098', 'palestra1098@email.it', '51000001098', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Panificio Aosta', (SELECT id FROM business_categories WHERE slug = 'panifici'), false, true, '51000001099', 'panificio1099@email.it', '016346099');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001099'), 'Sede Principale', 'Via Mazzini', '138', 'Aosta', 'AO', '11100', '016346099', 'panificio1099@email.it', '51000001099', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Gelateria Aosta', (SELECT id FROM business_categories WHERE slug = 'gelaterie-pasticcerie'), false, true, '51000001100', 'gelateria1100@email.it', '016346100');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001100'), 'Sede Principale', 'Corso Vittorio Emanuele', '33', 'Aosta', 'AO', '11100', '016346100', 'gelateria1100@email.it', '51000001100', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Veterinario Aosta', (SELECT id FROM business_categories WHERE slug = 'veterinari'), false, true, '51000001101', 'veterinario1101@email.it', '016346101');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001101'), 'Sede Principale', 'Via Mazzini', '121', 'Aosta', 'AO', '11100', '016346101', 'veterinario1101@email.it', '51000001101', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Macelleria Aosta', (SELECT id FROM business_categories WHERE slug = 'macellerie'), false, true, '51000001102', 'macelleria1102@email.it', '016346102');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001102'), 'Sede Principale', 'Via Mazzini', '112', 'Aosta', 'AO', '11100', '016346102', 'macelleria1102@email.it', '51000001102', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Pescheria Aosta', (SELECT id FROM business_categories WHERE slug = 'pescherie'), false, true, '51000001103', 'pescheria1103@email.it', '016346103');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001103'), 'Sede Principale', 'Piazza del Duomo', '53', 'Aosta', 'AO', '11100', '016346103', 'pescheria1103@email.it', '51000001103', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Libreria Aosta', (SELECT id FROM business_categories WHERE slug = 'librerie'), false, true, '51000001104', 'libreria1104@email.it', '016346104');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001104'), 'Sede Principale', 'Via Verdi', '161', 'Aosta', 'AO', '11100', '016346104', 'libreria1104@email.it', '51000001104', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Studio Architetti Aosta', (SELECT id FROM business_categories WHERE slug = 'architetti'), false, true, '51000001105', 'studioarchitetti1105@email.it', '016346105');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001105'), 'Sede Principale', 'Via Cavour', '189', 'Aosta', 'AO', '11100', '016346105', 'studioarchitetti1105@email.it', '51000001105', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Ingegnere Aosta', (SELECT id FROM business_categories WHERE slug = 'ingegneri'), false, true, '51000001106', 'ingegnere1106@email.it', '016346106');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001106'), 'Sede Principale', 'Piazza del Duomo', '99', 'Aosta', 'AO', '11100', '016346106', 'ingegnere1106@email.it', '51000001106', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Geometra Aosta', (SELECT id FROM business_categories WHERE slug = 'geometri'), false, true, '51000001107', 'geometra1107@email.it', '016346107');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001107'), 'Sede Principale', 'Via Roma', '101', 'Aosta', 'AO', '11100', '016346107', 'geometra1107@email.it', '51000001107', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Officina Auto Aosta', (SELECT id FROM business_categories WHERE slug = 'officine-auto'), false, true, '51000001108', 'officinaauto1108@email.it', '016346108');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001108'), 'Sede Principale', 'Via Roma', '18', 'Aosta', 'AO', '11100', '016346108', 'officinaauto1108@email.it', '51000001108', true);
+
+INSERT INTO businesses (name, category_id, is_claimed, verified, vat_number, email, phone) VALUES ('Gommista Aosta', (SELECT id FROM business_categories WHERE slug = 'gommisti'), false, true, '51000001109', 'gommista1109@email.it', '016346109');
+INSERT INTO business_locations (business_id, name, address, street_number, city, province, postal_code, phone, email, vat_number, is_primary) VALUES ((SELECT id FROM businesses WHERE vat_number = '51000001109'), 'Sede Principale', 'Corso Umberto', '86', 'Aosta', 'AO', '11100', '016346109', 'gommista1109@email.it', '51000001109', true);
+
+-- Total businesses generated: 1110

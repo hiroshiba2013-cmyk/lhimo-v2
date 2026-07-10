@@ -1,0 +1,19 @@
+[dotenv@17.3.1] injecting env (2) from .env -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+
+=== IMPORT PER COMUNE v2 (bbox geocodificata) ===
+
+(node:811) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Caricate 230 categorie
+Comuni caricati: 7827
+
+[1/7827] Altino (CH) +18 | Totale: 18 | 0.0% | 0.3min
+[2/7827] Archi (CH) +30 | Totale: 48 | 0.0% | 0.5min
+[3/7827] Ari (CH) +602 | Totale: 650 | 0.0% | 0.8min
+[4/7827] Arielli (CH) +602 | Totale: 1,252 | 0.1% | 1.1min
+[5/7827] Atessa (CH) +18 | Totale: 1,270 | 0.1% | 1.4min
+[6/7827] Bomba (CH) +24 | Totale: 1,294 | 0.1% | 1.9min
+[7/7827] Borrello (CH) +35 | Totale: 1,329 | 0.1% | 2.1min
+[8/7827] Bucchianico (CH) +410 | Totale: 1,739 | 0.1% | 2.5min
+[9/7827] Canosa Sannita (CH) +146 | Totale: 1,885 | 0.1% | 2.7min
+[10/7827] Carpineto Sinello (CH) +6 | Totale: 1,891 | 0.1% | 2.8min

@@ -1,0 +1,146 @@
+====================================================================
+TROVAFACILE - BACKUP RESTORE GUIDE
+====================================================================
+Backup created: 2026-05-22
+Platform: Supabase (PostgreSQL) + React/TypeScript frontend
+
+CONTENTS OF THIS BACKUP
+--------------------------------------------------------------------
+01_schema_complete.sql   - All 426 migration files concatenated in
+                           chronological order. Contains the entire
+                           database schema: tables, indexes, RLS
+                           policies, triggers, functions, cron jobs.
+
+02_data.sql              - Reference/seed data INSERT statements:
+                           * subscription_plans (22 rows)
+                           * classified_categories (117 rows)
+                           * faqs (25 rows)
+                           * rules_content (20 rows)
+                           * business_categories (230 rows)
+                           NOTE: User data and OSM businesses (146k
+                           rows) are NOT included for privacy and
+                           size reasons. The platform will work
+                           correctly with just this seed data.
+
+edge_functions/          - All 10 Supabase Edge Functions:
+                           * admin-register
+                           * check-subscription-expiration
+                           * check-trial-status
+                           * cleanup-expired-ads
+                           * close-expired-auctions
+                           * fill-empty-comuni
+                           * import-businesses-google
+                           * import-businesses-osm
+                           * notify-unclaimed-businesses
+                           * send-trial-reminders
+
+
+HOW TO RESTORE ON A NEW SUPABASE PROJECT
+--------------------------------------------------------------------
+
+STEP 1 - Create a new Supabase project
+  - Go to https://supabase.com
+  - Create a new project (choose a region close to Italy)
+  - Wait for the project to finish initializing
+
+STEP 2 - Enable required extensions
+  Run this in the SQL Editor before anything else:
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "pg_cron";
+    CREATE EXTENSION IF NOT EXISTS "pg_net";
+
+STEP 3 - Apply the schema
+  Option A (Supabase Dashboard SQL Editor):
+    - Open the SQL Editor in your new project
+    - Copy and paste the contents of 01_schema_complete.sql
+    - Click "Run"
+    NOTE: The file is large (~2MB). You may need to split it or
+    use the CLI if the editor has a size limit.
+
+  Option B (psql CLI):
+    psql "postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres" \
+      -f 01_schema_complete.sql
+
+STEP 4 - Insert seed data
+  In the SQL Editor (or psql), run 02_data.sql:
+    - This populates subscription plans, categories, FAQs,
+      platform rules, and business categories.
+    - Run AFTER the schema migration (Step 3).
+
+STEP 5 - Deploy Edge Functions
+  Using the Supabase CLI:
+    cd backup/edge_functions
+    supabase functions deploy admin-register
+    supabase functions deploy check-subscription-expiration
+    supabase functions deploy check-trial-status
+    supabase functions deploy cleanup-expired-ads
+    supabase functions deploy close-expired-auctions
+    supabase functions deploy fill-empty-comuni
+    supabase functions deploy import-businesses-google
+    supabase functions deploy import-businesses-osm
+    supabase functions deploy notify-unclaimed-businesses
+    supabase functions deploy send-trial-reminders
+
+  NOTE: The following functions should have JWT verification
+  DISABLED (they are called by cron or webhooks):
+    - check-subscription-expiration
+    - cleanup-expired-ads
+    - close-expired-auctions
+    - send-trial-reminders
+
+STEP 6 - Update environment variables in the frontend
+  Edit the .env file in the project root:
+    VITE_SUPABASE_URL=https://[YOUR-NEW-PROJECT-ID].supabase.co
+    VITE_SUPABASE_ANON_KEY=[YOUR-NEW-ANON-KEY]
+
+  Both values are found in your new Supabase project under:
+  Settings > API > Project URL and Project API Keys
+
+STEP 7 - Create the first admin user
+  - Register a normal user account on the platform
+  - In the Supabase SQL Editor, run:
+      INSERT INTO admins (user_id, email, nickname)
+      VALUES ('[USER-UUID]', '[EMAIL]', '[NICKNAME]');
+  - The user can now log in via /admin/login
+
+STEP 8 - Verify cron jobs
+  In the SQL Editor, check that cron jobs are registered:
+    SELECT * FROM cron.job;
+  You should see jobs for:
+    - check-subscription-expiration (daily)
+    - cleanup-expired-ads (daily)
+    - close-expired-auctions (hourly)
+    - send-trial-reminders (daily)
+
+  If they are missing, re-run the relevant migration:
+    supabase/migrations/20260510213542_configure_cron_jobs_edge_functions.sql
+
+
+IMPORTANT NOTES
+--------------------------------------------------------------------
+- Storage buckets (avatars, review-proofs, classified-ads-images,
+  etc.) need to be created manually in the Supabase Dashboard under
+  Storage, OR they will be auto-created on first use if the
+  migration scripts ran correctly.
+
+- The OSM import (146,037 businesses in unclaimed_business_locations)
+  is NOT included in this backup. To re-import Italian businesses
+  from OpenStreetMap, use the import scripts in the project root
+  (import-*.js files) which call the Overpass API.
+
+- User accounts (profiles, subscriptions, reviews, etc.) are NOT
+  included to protect user privacy. The platform starts fresh with
+  no users.
+
+- The platform is in Italian. All category names, rules, FAQs, and
+  UI text are in Italian.
+
+
+SUPPORT
+--------------------------------------------------------------------
+For questions about the backup or restore process, refer to the
+documentation files in the project root:
+  - GUIDA_ADMIN.md         Admin guide
+  - GUIDA_IMPORTAZIONE_OSM.md  OSM import guide
+  - SISTEMA_PUNTI_UFFICIALE.md  Points system documentation
+====================================================================

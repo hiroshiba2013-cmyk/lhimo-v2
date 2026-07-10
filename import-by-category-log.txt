@@ -1,0 +1,22 @@
+
+> vite-react-typescript-starter@0.0.0 import:by-category
+> node import-by-category.js
+
+[dotenv@17.2.3] injecting env (2) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+╔════════════════════════════════════════════════════════════════════╗
+║ IMPORTAZIONE OSM PER CATEGORIA                                      ║
+║                                                                    ║
+║ Totale categorie:  30                                            ║
+║ Totale province: 107                                             ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+======================================================================
+📦 CATEGORIA [1/30]: Supermercati
+======================================================================
+   [  1/107] Aosta                     ⚪ 0
+   [  2/107] Torino                    ✅ 618
+   [  3/107] Alessandria               ✅ 147
+   [  4/107] Asti                         ⏳ Rate limit/Timeout, attendo 15s...
+   ⏳ Rate limit/Timeout, attendo 30s...

@@ -1,0 +1,29 @@
+[dotenv@17.3.1] injecting env (2) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+=== IMPORT VELOCE - 18 batch x 107 province ===
+
+(node:856) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Caricate 230 categorie
+
+[Batch 1/18] Ristoranti, Bar e Caffè, Bar e Caffè, Fast Food, Pub e Locali
+  [1.1] AO +1200 | Batch: 1200 | Totale sessione: 1200 | 0.5min
+  [1.2] AV +1797 | Batch: 2997 | Totale sessione: 2997 | 0.6min
+  [1.3] EN +385 | Batch: 3382 | Totale sessione: 3382 | 0.8min
+  [1.4] NU +907 | Batch: 4289 | Totale sessione: 4289 | 0.9min
+  [1.5] OR +1191 | Batch: 5480 | Totale sessione: 5480 | 1.0min
+[dotenv@17.3.1] injecting env (2) from .env -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+
+=== IMPORT VELOCE: 84 tag x 107 province = 8988 query ===
+
+(node:574) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Caricate 230 categorie
+
+[amenity=restaurant] AO+742   => +742 Ristoranti in AO | Totale sessione: 742 | 0.3min
+[amenity=restaurant] AV+951   => +951 Ristoranti in AV | Totale sessione: 1,693 | 0.4min
+[amenity=restaurant] EN+168   => +168 Ristoranti in EN | Totale sessione: 1,861 | 0.5min
+[amenity=restaurant] NU+500   => +500 Ristoranti in NU | Totale sessione: 2,361 | 0.8min
+[amenity=restaurant] OR+551   => +551 Ristoranti in OR | Totale sessione: 2,912 | 0.9min
+[amenity=restaurant] OT+491   => +491 Ristoranti in OT | Totale sessione: 3,403 | 1.0min
+[amenity=restaurant] 

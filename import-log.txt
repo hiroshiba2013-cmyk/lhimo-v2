@@ -1,0 +1,48 @@
+[dotenv@17.2.3] injecting env (2) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+╔════════════════════════════════════════════════════════════════════╗
+║ IMPORTAZIONE COMPLETA OSM - TUTTE LE PROVINCE ITALIANE             ║
+║                                                                    ║
+║ Totale province: 107                                               ║
+║ Totale categorie: 235                                              ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+======================================================================
+📍 PROVINCIA: Aosta (Valle d'Aosta) - [AO]
+======================================================================
+   [1/235] Supermercati                        ⚪ 0
+   [2/235] Alimentari                             ⚠️  Errore (tentativo 1/3): Server error: 504
+   ⏳ Riprovo tra 10 secondi...
+   ⚠️  Errore (tentativo 2/3): Server error: 504
+   ⏳ Riprovo tra 20 secondi...
+⚪ 0
+   [3/235] Panifici e Pasticcerie              ⚪ 0
+   [4/235] Macellerie                             ⚠️  Errore (tentativo 1/3): Server error: 504
+   ⏳ Riprovo tra 10 secondi...
+⚪ 0
+   [5/235] Frutta e Verdura                       ⚠️  Errore (tentativo 1/3): Server error: 504
+   ⏳ Riprovo tra 10 secondi...
+⚪ 0
+   [6/235] Enoteche                            ⚪ 0
+   [7/235] Negozi di Bevande                   ⚪ 0
+   [8/235] Pescherie                              ⚠️  Errore (tentativo 1/3): Server error: 504
+   ⏳ Riprovo tra 10 secondi...
+⚪ 0
+   [9/235] Formaggerie                         ⚪ 0
+   [10/235] Cioccolaterie                          ⚠️  Errore (tentativo 1/3): Server error: 504
+   ⏳ Riprovo tra 10 secondi...
+⚪ 0
+   [11/235] Torrefazioni                           ⚠️  Errore (tentativo 1/3): Server error: 504
+   ⏳ Riprovo tra 10 secondi...
+⚪ 0
+   [12/235] Pasticcerie                         ⚪ 0
+   [13/235] Gastronomie                            ⚠️  Errore (tentativo 1/3): Server error: 504
+   ⏳ Riprovo tra 10 secondi...
+   ⚠️  Errore (tentativo 2/3): Server error: 504
+   ⏳ Riprovo tra 20 secondi...
+⚪ 0
+   [14/235] Latterie                            ⚪ 0
+   [15/235] Pastifici                           ⚪ 0
+   [16/235] Spezierie                           ⚪ 0
+   [17/235] Negozi di Tè                        ⚪ 0

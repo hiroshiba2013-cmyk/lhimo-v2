@@ -1,0 +1,9 @@
+[dotenv@17.3.1] injecting env (2) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+=== IMPORTAZIONE PROVINCE VUOTE/SCARSE ===
+182 tag OSM x 199 citta' mirate
+
+(node:779) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Caricate 230 categorie dal DB
+[1/182] amenity=restaurant -> Ristoranti: Verbania(+94) Domodossola(+40) Omegna(+17) Gravellona Toce(+11) Stresa(+36) Arona(+44) Borgomanero(+16) Cannobio(+35) Pallanza(+76) Belluno(+50) 

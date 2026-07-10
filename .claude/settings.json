@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /tmp/cc-agent/60717690/project && npm run build 2>&1 | tail -3 && pgrep -f import-comuni-v2 > /dev/null || (node import-comuni-v2.js >> import-comuni-v2-log.txt 2>&1 &)",
+            "timeout": 60,
+            "statusMessage": "Build e verifica importazione OSM..."
+          }
+        ]
+      }
+    ]
+  }
+}
