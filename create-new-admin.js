@@ -29,10 +29,12 @@ async function createNewAdmin() {
   try {
     // Step 1: Sign up
     console.log('Step 1: Creating auth user...');
+    console.log('[create-new-admin] before signUp, email:', email);
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
+    console.log('[create-new-admin] after signUp, email:', email, 'data:', authData, 'error:', signUpError);
 
     if (signUpError) {
       console.error('❌ Sign up error:', signUpError.message);

@@ -54,6 +54,7 @@ INSERT INTO admins (user_id) VALUES ('${existingProfile.id}') ON CONFLICT DO NOT
 
     // Sign up
     console.log('Creating new user...');
+    console.log('[register-admin-direct] before signUp, email:', email);
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -66,6 +67,7 @@ INSERT INTO admins (user_id) VALUES ('${existingProfile.id}') ON CONFLICT DO NOT
         },
       },
     });
+    console.log('[register-admin-direct] after signUp, email:', email, 'data:', authData, 'error:', signUpError);
 
     if (signUpError) {
       console.error('Sign up error:', signUpError);

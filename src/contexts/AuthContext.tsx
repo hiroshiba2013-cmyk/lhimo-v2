@@ -352,10 +352,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUpCustomer = async (email: string, password: string, data: CustomerData) => {
+    console.log('[signUpCustomer] before signUp, email:', email);
     const { data: authData, error } = await supabase.auth.signUp({
       email,
       password,
     });
+    console.log('[signUpCustomer] after signUp, email:', email, 'data:', authData, 'error:', error);
 
     if (error) throw error;
 
@@ -397,6 +399,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUpBusiness = async (email: string, password: string, data: BusinessData) => {
+    console.log('[signUpBusiness] before signUp, email:', email);
     const { data: authData, error } = await supabase.auth.signUp({
       email,
       password,
@@ -407,6 +410,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     });
+    console.log('[signUpBusiness] after signUp, email:', email, 'data:', authData, 'error:', error);
 
     if (error) throw error;
 
