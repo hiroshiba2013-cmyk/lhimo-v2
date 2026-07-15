@@ -237,7 +237,7 @@ export function LocationCard({ location, initialIsFavorite, onFavoriteToggle }: 
 
         <div className="mb-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-sm rounded-full font-semibold">
-            {location.category_name || location.business?.category?.name || 'Categoria non disponibile'}
+            {location.category_name || location.business?.category?.name || 'Generale'}
           </span>
         </div>
 

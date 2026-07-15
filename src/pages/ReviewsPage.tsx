@@ -128,16 +128,30 @@ export function ReviewsPage() {
         let business_city = '';
         let business_category_id: string | null = null;
         try {
-          if (r.business_type === 'registered' && r.business_location_id) {
+          if (r.business_type === 'registered' && r.registered_business_location_id) {
             const { data: loc } = await supabase
               .from('registered_business_locations')
               .select('name, city, category_id')
-              .eq('id', r.business_location_id)
+              .eq('id', r.registered_business_location_id)
               .maybeSingle();
             if (loc) { business_name = loc.name; business_city = loc.city; business_category_id = loc.category_id; }
+          } else if (r.business_type === 'registered' && r.registered_business_id) {
+            const { data: biz } = await supabase
+              .from('registered_businesses')
+              .select('name, office_city, category_id')
+              .eq('id', r.registered_business_id)
+              .maybeSingle();
+            if (biz) { business_name = biz.name; business_city = biz.office_city || ''; business_category_id = biz.category_id; }
+          } else if (r.business_type === 'registered' && r.business_id) {
+            const { data: biz } = await supabase
+              .from('businesses')
+              .select('name, category_id')
+              .eq('id', r.business_id)
+              .maybeSingle();
+            if (biz) { business_name = biz.name; business_category_id = biz.category_id; }
           } else if (r.business_type === 'unclaimed' && r.unclaimed_business_location_id) {
             const { data: loc } = await supabase
-              .from('business_locations')
+              .from('unclaimed_business_locations')
               .select('name, city, category_id')
               .eq('id', r.unclaimed_business_location_id)
               .maybeSingle();
@@ -147,13 +161,28 @@ export function ReviewsPage() {
         return { ...r, business_name, business_city, business_category_id };
       }));
 
-      setReviews(enriched);
+      // Resolve category_id → category_name for ReviewCard
+      const categoryIds = [...new Set(enriched.map(r => r.business_category_id).filter(Boolean))] as string[];
+      const categoryMap: Record<string, string> = {};
+      if (categoryIds.length > 0) {
+        const { data: cats } = await supabase
+          .from('business_categories')
+          .select('id, name')
+          .in('id', categoryIds);
+        (cats || []).forEach((c: any) => { categoryMap[c.id] = c.name; });
+      }
+      const withCategoryName = enriched.map(r => ({
+        ...r,
+        category_name: r.business_category_id ? categoryMap[r.business_category_id] || null : null,
+      }));
+
+      setReviews(withCategoryName);
 
       // Stats
-      const total = enriched.length;
-      const avg = total > 0 ? enriched.reduce((s, r) => s + (r.overall_rating || r.rating || 0), 0) / total : 0;
+      const total = withCategoryName.length;
+      const avg = total > 0 ? withCategoryName.reduce((s, r) => s + (r.overall_rating || r.rating || 0), 0) / total : 0;
       const month = new Date(); month.setDate(1);
-      const thisMonth = enriched.filter(r => new Date(r.created_at) >= month).length;
+      const thisMonth = withCategoryName.filter(r => new Date(r.created_at) >= month).length;
       setStats({ total, avg: Math.round(avg * 10) / 10, thisMonth });
     } catch (err) {
       console.error('Error loading reviews:', err);
