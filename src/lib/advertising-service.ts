@@ -123,6 +123,28 @@ export async function createBanner(input: CreateBannerInput): Promise<Advertisin
   return data as AdvertisingBanner;
 }
 
+export async function updatePlan(planId: string, updates: { price?: number; duration_days?: number; is_active?: boolean; position_label?: string }): Promise<void> {
+  const { error } = await supabase
+    .from('advertising_plans')
+    .update(updates)
+    .eq('id', planId);
+  if (error) throw error;
+}
+
+export async function fetchActiveBannerCountByPosition(): Promise<Record<string, number>> {
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('advertising_banners')
+    .select('position')
+    .eq('status', 'approved')
+    .lte('start_date', now)
+    .gte('end_date', now);
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  (data || []).forEach((b: any) => { counts[b.position] = (counts[b.position] || 0) + 1; });
+  return counts;
+}
+
 export async function uploadBannerImage(file: File, userId: string): Promise<string> {
   const ext = file.name.split('.').pop() || 'png';
   const path = `banners/${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;

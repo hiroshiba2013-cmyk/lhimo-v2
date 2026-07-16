@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Image as ImageIcon, CheckCircle, XCircle, Clock, PauseCircle, PlayCircle,
-  Trash2, Eye, RefreshCw, Filter, ExternalLink, Calendar, Euro,
+  Trash2, Eye, RefreshCw, Filter, ExternalLink, Calendar, Euro, Pencil, X, Save, Layers,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../common/Toast';
 import {
   AdvertisingBanner, AdvertisingPlan, POSITION_LABELS, priceWithVat,
+  updatePlan, fetchActiveBannerCountByPosition,
 } from '../../lib/advertising-service';
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
@@ -38,6 +39,9 @@ export function AdBannersSection() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPosition, setFilterPosition] = useState<string>('all');
   const [selectedBanner, setSelectedBanner] = useState<AdvertisingBanner | null>(null);
+  const [editingPlan, setEditingPlan] = useState<AdvertisingPlan | null>(null);
+  const [savingPlan, setSavingPlan] = useState(false);
+  const [occupancy, setOccupancy] = useState<Record<string, number>>({});
 
   const loadBanners = useCallback(async () => {
     try {
@@ -67,7 +71,14 @@ export function AdBannersSection() {
     setPlans((data || []) as AdvertisingPlan[]);
   }, []);
 
-  useEffect(() => { loadBanners(); loadPlans(); }, [loadBanners, loadPlans]);
+  const loadOccupancy = useCallback(async () => {
+    try {
+      const counts = await fetchActiveBannerCountByPosition();
+      setOccupancy(counts);
+    } catch { /* silent */ }
+  }, []);
+
+  useEffect(() => { loadBanners(); loadPlans(); loadOccupancy(); }, [loadBanners, loadPlans, loadOccupancy]);
 
   const updateBannerStatus = async (id: string, status: string, notes?: string) => {
     try {
@@ -114,6 +125,25 @@ export function AdBannersSection() {
       await loadPlans();
     } catch {
       showToast('Errore nell\'aggiornamento del piano', 'error');
+    }
+  };
+
+  const savePlanEdit = async () => {
+    if (!editingPlan) return;
+    try {
+      setSavingPlan(true);
+      await updatePlan(editingPlan.id, {
+        price: editingPlan.price,
+        duration_days: editingPlan.duration_days,
+        position_label: editingPlan.position_label,
+      });
+      showToast('Piano aggiornato', 'success');
+      setEditingPlan(null);
+      await loadPlans();
+    } catch {
+      showToast('Errore nell\'aggiornamento del piano', 'error');
+    } finally {
+      setSavingPlan(false);
     }
   };
 
@@ -180,20 +210,44 @@ export function AdBannersSection() {
 
       {/* Plans overview */}
       <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
-        <h3 className="text-sm font-bold text-gray-900 mb-3">Piani Banner ({plans.length})</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2"><Layers className="w-4 h-4 text-blue-600" /> Piani Banner ({plans.length})</h3>
+          <div className="flex items-center gap-3 text-xs text-gray-500">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Disponibile</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Occupato</span>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {plans.map(plan => (
-            <div key={plan.id} className={`rounded-xl border p-3 flex items-center justify-between ${plan.is_active ? 'border-gray-200 bg-gray-50' : 'border-gray-200 opacity-60'}`}>
-              <div>
-                <p className="text-xs font-semibold text-gray-900">{plan.position_label}</p>
-                <p className="text-xs text-gray-500">{plan.duration_days} giorni · €{Number(plan.price).toFixed(2)} + IVA</p>
+          {plans.map(plan => {
+            const activeCount = occupancy[plan.position] || 0;
+            const isOccupied = activeCount > 0;
+            return (
+            <div key={plan.id} className={`rounded-xl border p-3 ${plan.is_active ? (isOccupied ? 'border-amber-300 bg-amber-50' : 'border-green-200 bg-green-50') : 'border-gray-200 opacity-60'}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-gray-900">{plan.position_label}</p>
+                  <p className="text-xs text-gray-500">{plan.duration_days} giorni · €{Number(plan.price).toFixed(2)} + IVA</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${isOccupied ? 'bg-amber-200 text-amber-800' : 'bg-green-200 text-green-800'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${isOccupied ? 'bg-amber-500' : 'bg-green-500'}`} />
+                      {isOccupied ? `${activeCount} attivo/i` : 'Libero'}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => setEditingPlan({ ...plan })}
+                    className="p-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 transition-colors" title="Modifica piano">
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => togglePlanActive(plan)}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-colors ${plan.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
+                    {plan.is_active ? 'Attivo' : 'Off'}
+                  </button>
+                </div>
               </div>
-              <button onClick={() => togglePlanActive(plan)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${plan.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
-                {plan.is_active ? 'Attivo' : 'Disattivato'}
-              </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -301,6 +355,51 @@ export function AdBannersSection() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Plan edit modal */}
+      {editingPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setEditingPlan(null)}>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2"><Pencil className="w-5 h-5 text-blue-600" /> Modifica Piano</h3>
+              <button onClick={() => setEditingPlan(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Etichetta posizione</label>
+                <input type="text" value={editingPlan.position_label} onChange={e => setEditingPlan(p => p ? { ...p, position_label: e.target.value } : p)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Durata (giorni)</label>
+                  <input type="number" value={editingPlan.duration_days} onChange={e => setEditingPlan(p => p ? { ...p, duration_days: parseInt(e.target.value) || 7 } : p)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Prezzo (€)</label>
+                  <input type="number" step="0.01" value={editingPlan.price} onChange={e => setEditingPlan(p => p ? { ...p, price: parseFloat(e.target.value) || 0 } : p)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-500">Prezzo + IVA (22%):</span>
+                  <span className="font-bold text-gray-900">€{priceWithVat(Number(editingPlan.price)).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-5">
+              <button onClick={() => setEditingPlan(null)} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm">Annulla</button>
+              <button onClick={savePlanEdit} disabled={savingPlan}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-semibold">
+                {savingPlan ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <Save className="w-4 h-4" />}
+                Salva
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
