@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase, Business, Review, FamilyMember } from '../lib/supabase';
 import { BusinessJobPostingForm } from '../components/business/BusinessJobPostingForm';
 import { EditBusinessLocationsForm } from '../components/business/EditBusinessLocationsForm';
+import { BusinessLocationPhotos } from '../components/business/BusinessLocationPhotos';
 import { EditBusinessForm } from '../components/business/EditBusinessForm';
 import { UserAddBusinessModal } from '../components/business/UserAddBusinessModal';
 import { ReviewResponseForm } from '../components/reviews/ReviewResponseForm';
@@ -817,6 +818,13 @@ function ProfileDataSection({ profile, isBiz, registeredBusiness, familyMembers 
                                     </div>
                                   );
                                 })()}
+                              </div>
+                            )}
+
+                            {/* Foto della sede */}
+                            {!isEditingThis && (
+                              <div className="mt-4 pt-4 border-t border-gray-100">
+                                <BusinessLocationPhotos locationId={loc.id} />
                               </div>
                             )}
                           </div>
