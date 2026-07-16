@@ -433,9 +433,25 @@ function AuthenticatedHomePage() {
   const [topBusinesses, setTopBusinesses] = useState<any[]>([]);
   const [featuredLocations, setFeaturedLocations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFreePlan, setIsFreePlan] = useState(false);
   const customization = usePageCustomization('home_authenticated');
 
   const isBusiness = profile?.user_type === 'business';
+
+  useEffect(() => {
+    if (!profile) return;
+    supabase
+      .from('subscriptions')
+      .select('plan:subscription_plans(price)')
+      .eq('customer_id', profile.id)
+      .in('status', ['active', 'trial'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        const sub = data?.[0] as any;
+        setIsFreePlan(sub?.plan?.price === 0);
+      });
+  }, [profile?.id]);
 
   // Determina il nome da mostrare nel benvenuto
   const displayName = activeProfile
@@ -657,6 +673,8 @@ function AuthenticatedHomePage() {
         </div>
       </section>
 
+      {!isFreePlan && (
+        <>
       <TopBusinessesBanner />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -1034,6 +1052,8 @@ function AuthenticatedHomePage() {
           </div>
         )}
       </div>
+        </>
+      )}
     </div>
   );
 }
