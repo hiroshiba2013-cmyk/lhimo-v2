@@ -8,6 +8,19 @@ import TopBusinessesBanner from '../components/business/TopBusinessesBanner';
 import AuctionCard from '../components/auctions/AuctionCard';
 import { usePageCustomization } from '../hooks/usePageCustomization';
 
+function AdBanner() {
+  return (
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full aspect-[4/1] bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl border border-dashed border-gray-300 flex items-center justify-center overflow-hidden hover:border-gray-400 transition-colors">
+        <div className="text-center">
+          <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-1">Pubblicità</p>
+          <p className="text-sm text-gray-500 font-medium">Spazio pubblicitario 1200 × 300 px</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function HomePage() {
   const { user, profile, loading } = useAuth();
 
@@ -642,6 +655,11 @@ function AuthenticatedHomePage() {
         } : undefined}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+          {isFreePlan && (
+            <div className="mb-8">
+              <AdBanner />
+            </div>
+          )}
           <div className="max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
               <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
@@ -672,6 +690,12 @@ function AuthenticatedHomePage() {
           </div>
         </div>
       </section>
+
+      {isFreePlan && (
+        <div className="py-8">
+          <AdBanner />
+        </div>
+      )}
 
       {!isFreePlan && (
         <>

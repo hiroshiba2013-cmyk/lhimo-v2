@@ -214,6 +214,7 @@ export function Header() {
                     <Home className="w-4 h-4" />
                     <span className="text-sm">{t('header.home')}</span>
                   </a>
+                  {!isFreePlan && (
                   <a
                     href="/messages"
                     className="relative flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors font-medium px-2"
@@ -231,6 +232,7 @@ export function Header() {
                       </span>
                     )}
                   </a>
+                  )}
                   <NotificationBell />
                   <a
                     href="/contact"
@@ -439,6 +441,7 @@ export function Header() {
                       <Home className="w-5 h-5" />
                       <span>{t('header.home')}</span>
                     </a>
+                    {!isFreePlan && (
                     <a
                       href="/messages"
                       className="relative flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors font-medium"
@@ -452,6 +455,7 @@ export function Header() {
                         </span>
                       )}
                     </a>
+                    )}
                     <a
                       href="/contact"
                       className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors font-medium"
