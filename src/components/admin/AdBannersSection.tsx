@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { useToast } from '../common/Toast';
 import {
   AdvertisingBanner, AdvertisingPlan, POSITION_LABELS, priceWithVat,
-  updatePlan, fetchActiveBannerCountByPosition,
+  updatePlan, fetchOccupancyByPosition, OccupancyCount,
 } from '../../lib/advertising-service';
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
@@ -41,7 +41,7 @@ export function AdBannersSection() {
   const [selectedBanner, setSelectedBanner] = useState<AdvertisingBanner | null>(null);
   const [editingPlan, setEditingPlan] = useState<AdvertisingPlan | null>(null);
   const [savingPlan, setSavingPlan] = useState(false);
-  const [occupancy, setOccupancy] = useState<Record<string, number>>({});
+  const [occupancy, setOccupancy] = useState<Record<string, OccupancyCount>>({});
 
   const loadBanners = useCallback(async () => {
     try {
@@ -73,10 +73,25 @@ export function AdBannersSection() {
 
   const loadOccupancy = useCallback(async () => {
     try {
-      const counts = await fetchActiveBannerCountByPosition();
+      const counts = await fetchOccupancyByPosition();
       setOccupancy(counts);
     } catch { /* silent */ }
   }, []);
+
+  // Realtime: auto-update banners and occupancy when any change happens
+  useEffect(() => {
+    const channel = supabase
+      .channel('advertising_banners_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'advertising_banners' }, () => {
+        loadBanners();
+        loadOccupancy();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'advertising_plans' }, () => {
+        loadPlans();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [loadBanners, loadPlans, loadOccupancy]);
 
   useEffect(() => { loadBanners(); loadPlans(); loadOccupancy(); }, [loadBanners, loadPlans, loadOccupancy]);
 
@@ -219,8 +234,15 @@ export function AdBannersSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
           {plans.map(plan => {
-            const activeCount = occupancy[plan.position] || 0;
-            const isOccupied = activeCount > 0;
+            const occ = occupancy[plan.position] || { active: 0, pending: 0, total: 0 };
+            const isOccupied = occ.total > 0;
+            const occLabel = occ.total === 0
+              ? 'Libero'
+              : occ.pending > 0 && occ.active === 0
+                ? `${occ.pending} in attesa`
+                : occ.pending > 0
+                  ? `${occ.active} attivo/i + ${occ.pending} in attesa`
+                  : `${occ.active} attivo/i`;
             return (
             <div key={plan.id} className={`rounded-xl border p-3 ${plan.is_active ? (isOccupied ? 'border-amber-300 bg-amber-50' : 'border-green-200 bg-green-50') : 'border-gray-200 opacity-60'}`}>
               <div className="flex items-start justify-between gap-2">
@@ -229,8 +251,8 @@ export function AdBannersSection() {
                   <p className="text-xs text-gray-500">{plan.duration_days} giorni · €{Number(plan.price).toFixed(2)} + IVA</p>
                   <div className="flex items-center gap-1.5 mt-1">
                     <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${isOccupied ? 'bg-amber-200 text-amber-800' : 'bg-green-200 text-green-800'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${isOccupied ? 'bg-amber-500' : 'bg-green-500'}`} />
-                      {isOccupied ? `${activeCount} attivo/i` : 'Libero'}
+                      <span className={`w-1.5 h-1.5 rounded-full ${isOccupied ? 'bg-amber-500' : 'bg-green-500'} ${occ.pending > 0 && occ.active === 0 ? 'animate-pulse' : ''}`} />
+                      {occLabel}
                     </span>
                   </div>
                 </div>

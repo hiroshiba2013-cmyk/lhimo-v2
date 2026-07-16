@@ -131,17 +131,34 @@ export async function updatePlan(planId: string, updates: { price?: number; dura
   if (error) throw error;
 }
 
-export async function fetchActiveBannerCountByPosition(): Promise<Record<string, number>> {
-  const now = new Date().toISOString();
+export interface OccupancyCount {
+  active: number;
+  pending: number;
+  total: number;
+}
+
+export async function fetchOccupancyByPosition(): Promise<Record<string, OccupancyCount>> {
   const { data, error } = await supabase
     .from('advertising_banners')
-    .select('position')
-    .eq('status', 'approved')
-    .lte('start_date', now)
-    .gte('end_date', now);
+    .select('position, status, start_date, end_date')
+    .in('status', ['pending', 'approved']);
   if (error) throw error;
-  const counts: Record<string, number> = {};
-  (data || []).forEach((b: any) => { counts[b.position] = (counts[b.position] || 0) + 1; });
+  const now = new Date();
+  const counts: Record<string, OccupancyCount> = {};
+  (data || []).forEach((b: any) => {
+    if (!counts[b.position]) counts[b.position] = { active: 0, pending: 0, total: 0 };
+    if (b.status === 'pending') {
+      counts[b.position].pending++;
+      counts[b.position].total++;
+    } else if (b.status === 'approved') {
+      const startOk = !b.start_date || new Date(b.start_date) <= now;
+      const endOk = !b.end_date || new Date(b.end_date) >= now;
+      if (startOk && endOk) {
+        counts[b.position].active++;
+        counts[b.position].total++;
+      }
+    }
+  });
   return counts;
 }
 
