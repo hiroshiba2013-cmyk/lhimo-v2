@@ -229,11 +229,11 @@ export function SearchResultsPage() {
           category: location.category_id && location.category_name ? { id: location.category_id, name: location.category_name, icon: '' } : null
         },
         added_by: location.added_by || null,
-        source: location.result_source || null,
+        source: location.source || location.result_source || null,
         location_type: location.location_type || null,
         category_name: location.category_name || null,
-        avg_rating: 0,
-        review_count: 0
+        avg_rating: location.avg_rating || 0,
+        review_count: location.review_count || 0
       }));
 
       if (allLocations.length === 0) {

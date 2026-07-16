@@ -1071,6 +1071,40 @@ export function DashboardPage() {
         await supabase.from('profiles').update({ full_name: profileForm.company_name }).eq('id', profile.id);
         // Aggiorna lo stato locale
         setBusinesses(prev => prev.map((b, i) => i === 0 ? { ...b, ...rbUpdate, name: profileForm.company_name } : b));
+      } else if (profile.user_type === 'business') {
+        // Business user senza registered_businesses: crea il record ora
+        const rbInsert = {
+          owner_id: profile.id,
+          name: profileForm.company_name,
+          vat_number: profileForm.vat_number || null,
+          unique_code: profileForm.unique_code || null,
+          ateco_code: profileForm.ateco_code || null,
+          pec_email: profileForm.pec_email || null,
+          website: profileForm.website_url || null,
+          description: profileForm.description || null,
+          category_id: profileForm.category_id || null,
+          phone: profileForm.phone || null,
+          billing_street: profileForm.billing_street || null,
+          billing_street_number: profileForm.billing_street_number || null,
+          billing_postal_code: profileForm.billing_postal_code || null,
+          billing_city: profileForm.billing_city || null,
+          billing_province: profileForm.billing_province || null,
+          office_street: profileForm.office_street || null,
+          office_street_number: profileForm.office_street_number || null,
+          office_postal_code: profileForm.office_postal_code || null,
+          office_city: profileForm.office_city || null,
+          office_province: profileForm.office_province || null,
+        };
+        const { data: insertedRb, error: insertErr } = await supabase.from('registered_businesses').insert(rbInsert).select().single();
+        if (insertErr) throw insertErr;
+        await supabase.from('profiles').update({ full_name: profileForm.company_name }).eq('id', profile.id);
+        if (insertedRb) {
+          setBusinesses([insertedRb]);
+          setIsRegisteredBusiness(true);
+          // Ricarica le sedi col nuovo business_id
+          const { data: locs } = await supabase.from('registered_business_locations').select('*').eq('business_id', insertedRb.id);
+          if (locs) setFullBusinessLocations(locs.map(l => ({ ...l, _table: 'registered_business_locations' })));
+        }
       } else {
         const customerUpdate = { ...profileForm, category_id: profileForm.category_id || null };
         const { error } = await supabase.from('profiles').update(customerUpdate).eq('id', profile.id);
@@ -1164,6 +1198,34 @@ export function DashboardPage() {
           const { data: oldData } = await supabase.from('businesses').select('*').eq('owner_id', profile.id);
           bizData = oldData;
         } else { isReg = true; }
+        // Fallback: if no business record exists at all, create a synthetic one from profile data
+        if ((!bizData || bizData.length === 0) && profile.user_type === 'business') {
+          bizData = [{
+            id: profile.id,
+            owner_id: profile.id,
+            name: profile.full_name || profile.company_name || '',
+            vat_number: (profile as any).vat_number || null,
+            unique_code: (profile as any).unique_code || null,
+            ateco_code: (profile as any).ateco_code || null,
+            pec_email: (profile as any).pec_email || null,
+            website: (profile as any).website_url || null,
+            description: (profile as any).description || null,
+            category_id: (profile as any).category_id || (profile as any).business_category_id || null,
+            phone: (profile as any).phone || null,
+            billing_street: (profile as any).billing_street || null,
+            billing_street_number: (profile as any).billing_street_number || null,
+            billing_postal_code: (profile as any).billing_postal_code || null,
+            billing_city: (profile as any).billing_city || null,
+            billing_province: (profile as any).billing_province || null,
+            office_street: (profile as any).office_street || null,
+            office_street_number: (profile as any).office_street_number || null,
+            office_postal_code: (profile as any).office_postal_code || null,
+            office_city: (profile as any).office_city || null,
+            office_province: (profile as any).office_province || null,
+            _synthetic: true,
+          }];
+          isReg = false;
+        }
         setIsRegisteredBusiness(isReg);
         if (bizData) {
           setBusinesses(bizData);

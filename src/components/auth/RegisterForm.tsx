@@ -824,9 +824,6 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             pec_email: businessForm.pecEmail,
             ateco_code: businessForm.atecoCode,
             website: businessForm.website || null,
-            instagram_url: businessForm.instagram_url || null,
-            facebook_url: businessForm.facebook_url || null,
-            tiktok_url: businessForm.tiktok_url || null,
             billing_street: businessForm.billingStreet,
             billing_street_number: businessForm.billingStreetNumber,
             billing_postal_code: businessForm.billingPostalCode,
@@ -865,6 +862,9 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             email: location.email || null,
             business_hours: location.businessHours,
             category_id: location.categoryId || null,
+            instagram_url: businessForm.instagram_url || null,
+            facebook_url: businessForm.facebook_url || null,
+            tiktok_url: businessForm.tiktok_url || null,
           }));
 
           const { error: registeredLocationsError } = await supabase
