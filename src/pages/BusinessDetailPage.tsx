@@ -60,14 +60,14 @@ export function BusinessDetailPage({ businessId }: BusinessDetailPageProps) {
         const targetId = locationId || businessId;
         const { data, error: err } = await supabase
           .from('registered_business_locations')
-          .select('*, business:registered_businesses(business_name, category:business_categories(name))')
+          .select('*, business:registered_businesses(name, category:business_categories(name))')
           .eq('id', targetId)
           .maybeSingle();
         if (err || !data) {
           // Fallback: try by business_id (get first location)
           const { data: byBusiness } = await supabase
             .from('registered_business_locations')
-            .select('*, business:registered_businesses(business_name, category:business_categories(name))')
+            .select('*, business:registered_businesses(name, category:business_categories(name))')
             .eq('business_id', businessId)
             .order('is_primary', { ascending: false })
             .limit(1)
@@ -137,7 +137,7 @@ export function BusinessDetailPage({ businessId }: BusinessDetailPageProps) {
   }
 
   const name = business.source === 'registered'
-    ? business.business?.business_name || business.location_name || 'Attività'
+    ? business.business?.name || business.location_name || business.name || 'Attività'
     : business.business?.name || business.name || 'Attività';
   const category = business.category?.name || business.business?.category?.name || '';
   const city = business.city || '';
