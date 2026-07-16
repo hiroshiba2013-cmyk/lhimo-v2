@@ -1547,7 +1547,7 @@ export function DashboardPage() {
   // Free plan: only search + limited dashboard sections
   const isFreePlan = currentSubscription?.plan?.price === 0;
   const bizAllowedKeys = isFreePlan ? new Set(['biz_dati', 'biz_reviews', 'biz_plans']) : null;
-  const custAllowedKeys = isFreePlan ? new Set(['cust_reviews', 'cust_plans']) : null;
+  const custAllowedKeys = isFreePlan ? new Set(['cust_dati', 'cust_reviews', 'cust_plans']) : null;
 
   // ── sections config ────────────────────────────────────────────────────────
   const bizBadges = [
