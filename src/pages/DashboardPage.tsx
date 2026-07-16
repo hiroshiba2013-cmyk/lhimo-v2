@@ -723,9 +723,6 @@ function ProfileDataSection({ profile, isBiz, registeredBusiness, familyMembers 
                   Sedi
                   <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full">{businessLocations.length}</span>
                   <span className="flex-1 h-px bg-gray-200 inline-block" />
-                  <button onClick={() => setShowAddLocationForm(true)} className="text-blue-600 hover:text-blue-700 text-xs font-semibold flex items-center gap-1 transition-colors">
-                    <Plus className="w-3.5 h-3.5" /> Aggiungi sede
-                  </button>
                 </h3>
                 <div className="space-y-2">
                   {businessLocations.map((loc, idx) => {
@@ -854,10 +851,7 @@ function ProfileDataSection({ profile, isBiz, registeredBusiness, familyMembers 
                 </h3>
                 <div className="bg-white rounded-xl p-6 border border-dashed border-gray-200 text-center">
                   <MapPin className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500 mb-3">Nessuna sede registrata. Aggiungi la prima sede della tua attività.</p>
-                  <button onClick={() => setShowAddLocationForm(true)} className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-                    <Plus className="w-4 h-4" /> Aggiungi sede
-                  </button>
+                  <p className="text-sm text-gray-500">Nessuna sede registrata.</p>
                 </div>
               </section>
             )}
