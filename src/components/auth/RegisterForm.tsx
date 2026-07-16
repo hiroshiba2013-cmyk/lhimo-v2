@@ -813,29 +813,45 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       if (businessLocations.length > 0) {
         console.log('📝 Creazione business e sedi...');
 
-        const { data: registeredBusiness, error: registeredError } = await supabase
-          .from('registered_businesses')
-          .insert({
-            owner_id: user.id,
-            name: businessForm.companyName,
-            description: businessForm.description || '',
-            vat_number: businessForm.vatNumber,
-            unique_code: businessForm.uniqueCode,
-            pec_email: businessForm.pecEmail,
-            ateco_code: businessForm.atecoCode,
-            website: businessForm.website || null,
-            billing_street: businessForm.billingStreet,
-            billing_street_number: businessForm.billingStreetNumber,
-            billing_postal_code: businessForm.billingPostalCode,
-            billing_city: businessForm.billingCity,
-            billing_province: businessForm.billingProvince,
-            phone: businessForm.phone || null,
-            verified: false,
-            source_type: 'direct_registration',
-            category_id: businessForm.categoryId || null,
-          })
-          .select('id')
-          .single();
+        // Ensure session is established before inserting (RLS requires auth.uid())
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          // Re-sign in to establish session
+          await supabase.auth.signInWithPassword({ email, password });
+        }
+
+        let registeredBusiness: any = null;
+        let registeredError: any = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const result = await supabase
+            .from('registered_businesses')
+            .insert({
+              owner_id: user.id,
+              name: businessForm.companyName,
+              description: businessForm.description || '',
+              vat_number: businessForm.vatNumber,
+              unique_code: businessForm.uniqueCode,
+              pec_email: businessForm.pecEmail,
+              ateco_code: businessForm.atecoCode,
+              website: businessForm.website || null,
+              billing_street: businessForm.billingStreet,
+              billing_street_number: businessForm.billingStreetNumber,
+              billing_postal_code: businessForm.billingPostalCode,
+              billing_city: businessForm.billingCity,
+              billing_province: businessForm.billingProvince,
+              phone: businessForm.phone || null,
+              verified: false,
+              source_type: 'direct_registration',
+              category_id: businessForm.categoryId || null,
+            })
+            .select('id')
+            .single();
+          registeredBusiness = result.data;
+          registeredError = result.error;
+          if (!registeredError) break;
+          console.warn(`⚠️ Tentativo ${attempt + 1} fallito:`, registeredError.message);
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        }
 
         if (registeredError) {
           console.error('❌ Errore inserimento business:', registeredError);

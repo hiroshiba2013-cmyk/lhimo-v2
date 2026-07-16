@@ -30,6 +30,8 @@ import { JobSeekerCard } from '../components/jobs/JobSeekerCard';
 import { ProfessionalProfileForm } from '../components/profile/ProfessionalProfileForm';
 import { AvatarUpload } from '../components/profile/AvatarUpload';
 import { useToast } from '../components/common/Toast';
+import { CategoryHierarchySelect } from '../components/common/CategoryHierarchySelect';
+import { ItalianCityProvinceSelect } from '../components/common/ItalianCityProvinceSelect';
 import { useNavigate } from '../components/Router';
 import { usePageCustomization } from '../hooks/usePageCustomization';
 
@@ -228,6 +230,9 @@ function ProfileDataSection({ profile, isBiz, registeredBusiness, familyMembers 
   const [memberSaving, setMemberSaving] = useState<string | null>(null);
   const [memberMsg, setMemberMsg] = useState<Record<string, string>>({});
   const [editingLocationId, setEditingLocationId] = useState<string | null>(null);
+  const [showAddLocationForm, setShowAddLocationForm] = useState(false);
+  const [newLocationForm, setNewLocationForm] = useState<Record<string, string>>({});
+  const [addingLocation, setAddingLocation] = useState(false);
   const [locationForms, setLocationForms] = useState<Record<string, Record<string, string>>>({});
   const [locationSaving, setLocationSaving] = useState<string | null>(null);
   const [locationMsg, setLocationMsg] = useState<Record<string, string>>({});
@@ -718,6 +723,9 @@ function ProfileDataSection({ profile, isBiz, registeredBusiness, familyMembers 
                   Sedi
                   <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full">{businessLocations.length}</span>
                   <span className="flex-1 h-px bg-gray-200 inline-block" />
+                  <button onClick={() => setShowAddLocationForm(true)} className="text-blue-600 hover:text-blue-700 text-xs font-semibold flex items-center gap-1 transition-colors">
+                    <Plus className="w-3.5 h-3.5" /> Aggiungi sede
+                  </button>
                 </h3>
                 <div className="space-y-2">
                   {businessLocations.map((loc, idx) => {
@@ -835,6 +843,145 @@ function ProfileDataSection({ profile, isBiz, registeredBusiness, familyMembers 
                 </div>
               </section>
             )}
+
+            {/* Empty state: business con 0 sedi */}
+            {isBiz && businessLocations.length === 0 && !showAddLocationForm && (
+              <section>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <span className="w-5 h-px bg-gray-200 inline-block" />
+                  Sedi
+                  <span className="flex-1 h-px bg-gray-200 inline-block" />
+                </h3>
+                <div className="bg-white rounded-xl p-6 border border-dashed border-gray-200 text-center">
+                  <MapPin className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 mb-3">Nessuna sede registrata. Aggiungi la prima sede della tua attività.</p>
+                  <button onClick={() => setShowAddLocationForm(true)} className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                    <Plus className="w-4 h-4" /> Aggiungi sede
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {/* Form aggiungi sede */}
+            {isBiz && showAddLocationForm && (() => {
+              const table = isRegisteredBusiness ? 'registered_business_locations' : 'business_locations';
+              return (
+                <section>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span className="w-5 h-px bg-gray-200 inline-block" />
+                    Nuova Sede
+                    <span className="flex-1 h-px bg-gray-200 inline-block" />
+                    <button onClick={() => { setShowAddLocationForm(false); setNewLocationForm({}); }} className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+                      <X className="w-3.5 h-3.5 text-gray-500" />
+                    </button>
+                  </h3>
+                  <div className="bg-white rounded-xl p-4 border border-gray-200 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Nome sede</label>
+                        <input type="text" value={newLocationForm.name || ''} onChange={(e) => setNewLocationForm({ ...newLocationForm, name: e.target.value })} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Es. Sede principale" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Categoria</label>
+                        <CategoryHierarchySelect value={newLocationForm.category_id || ''} onChange={(v) => setNewLocationForm({ ...newLocationForm, category_id: v })} />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Via</label>
+                        <input type="text" value={newLocationForm.street || ''} onChange={(e) => setNewLocationForm({ ...newLocationForm, street: e.target.value })} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Via" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">N. civico</label>
+                        <input type="text" value={newLocationForm.street_number || ''} onChange={(e) => setNewLocationForm({ ...newLocationForm, street_number: e.target.value })} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Città</label>
+                        <ItalianCityProvinceSelect
+                          city={newLocationForm.city || ''}
+                          province={newLocationForm.province || ''}
+                          onCityChange={(v) => setNewLocationForm({ ...newLocationForm, city: v })}
+                          onProvinceChange={(v) => setNewLocationForm({ ...newLocationForm, province: v })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">CAP</label>
+                        <input type="text" value={newLocationForm.postal_code || ''} onChange={(e) => setNewLocationForm({ ...newLocationForm, postal_code: e.target.value })} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Telefono</label>
+                        <input type="text" value={newLocationForm.phone || ''} onChange={(e) => setNewLocationForm({ ...newLocationForm, phone: e.target.value })} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
+                        <input type="text" value={newLocationForm.email || ''} onChange={(e) => setNewLocationForm({ ...newLocationForm, email: e.target.value })} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Sito web</label>
+                        <input type="text" value={newLocationForm.website || ''} onChange={(e) => setNewLocationForm({ ...newLocationForm, website: e.target.value })} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Descrizione</label>
+                        <textarea value={newLocationForm.description || ''} onChange={(e) => setNewLocationForm({ ...newLocationForm, description: e.target.value })} rows={2} className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Descrizione della sede..." />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button onClick={() => { setShowAddLocationForm(false); setNewLocationForm({}); }} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Annulla</button>
+                      <button
+                        onClick={async () => {
+                          if (!profile) return;
+                          setAddingLocation(true);
+                          try {
+                            // Ensure registered_businesses exists first
+                            let bizId = businesses[0]?.id;
+                            if (!bizId && profile.user_type === 'business') {
+                              // Create registered_businesses record if missing
+                              const { data: newBiz, error: bizErr } = await supabase.from('registered_businesses').insert({
+                                owner_id: profile.id,
+                                name: (profile as any).full_name || (profile as any).company_name || 'Attività',
+                                category_id: (profile as any).category_id || null,
+                              }).select('id').single();
+                              if (bizErr) throw bizErr;
+                              bizId = newBiz.id;
+                              setIsRegisteredBusiness(true);
+                              setBusinesses([newBiz]);
+                            }
+                            if (!bizId) throw new Error('Nessuna attività trovata');
+                            const insertData: Record<string, any> = {
+                              business_id: bizId,
+                              name: newLocationForm.name || 'Sede principale',
+                              street: newLocationForm.street || null,
+                              street_number: newLocationForm.street_number || null,
+                              city: newLocationForm.city || null,
+                              province: newLocationForm.province || null,
+                              postal_code: newLocationForm.postal_code || null,
+                              phone: newLocationForm.phone || null,
+                              email: newLocationForm.email || null,
+                              website: newLocationForm.website || null,
+                              description: newLocationForm.description || null,
+                              category_id: newLocationForm.category_id || null,
+                              is_primary: fullBusinessLocations.length === 0,
+                            };
+                            const { error: locErr } = await supabase.from('registered_business_locations').insert(insertData);
+                            if (locErr) throw locErr;
+                            setShowAddLocationForm(false);
+                            setNewLocationForm({});
+                            showToast?.('Sede aggiunta con successo!', 'success');
+                            loadData();
+                          } catch (err: any) {
+                            showToast?.(err.message || 'Errore durante l\'aggiunta della sede', 'error');
+                          } finally {
+                            setAddingLocation(false);
+                          }
+                        }}
+                        disabled={addingLocation}
+                        className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition-colors"
+                      >
+                        {addingLocation ? 'Salvataggio...' : 'Salva sede'}
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              );
+            })()}
           </div>
         ) : (
           /* ── EDIT MODE ── */

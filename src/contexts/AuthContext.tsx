@@ -415,15 +415,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
 
     if (authData.user) {
+      // Wait briefly for the handle_new_user trigger to create the profile
+      await new Promise(r => setTimeout(r, 500));
+
+      // Save all business data to profile as fallback
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
           full_name: data.companyName,
           user_type: 'business',
+          company_name: data.companyName,
+          vat_number: data.vatNumber || null,
+          unique_code: data.uniqueCode || null,
+          ateco_code: data.atecoCode || null,
+          pec_email: data.pecEmail || null,
+          website_url: data.website || null,
+          phone: data.phone || null,
+          description: data.description || null,
+          category_id: data.categoryId || null,
+          billing_street: data.billingStreet || null,
+          billing_street_number: data.billingStreetNumber || null,
+          billing_postal_code: data.billingPostalCode || null,
+          billing_city: data.billingCity || null,
+          billing_province: data.billingProvince || null,
+          office_street: data.officeStreet || null,
+          office_street_number: data.officeStreetNumber || null,
+          office_postal_code: data.officePostalCode || null,
+          office_city: data.officeCity || null,
+          office_province: data.officeProvince || null,
         })
         .eq('id', authData.user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('[signUpBusiness] profile update error:', profileError);
+        // Retry once after another delay (trigger might not have run yet)
+        await new Promise(r => setTimeout(r, 1000));
+        const { error: retryError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: data.companyName,
+            user_type: 'business',
+            company_name: data.companyName,
+          })
+          .eq('id', authData.user.id);
+        if (retryError) throw retryError;
+      }
     }
   };
 

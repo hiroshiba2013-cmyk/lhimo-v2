@@ -372,6 +372,11 @@ export default function UsersManagementSection() {
       } catch (error) {
         console.error('[UsersManagement] Error loading business data:', error);
       }
+
+      // Fallback: if no registered_businesses, use profile full_name as company_name
+      if (!enrichedUser.company_name) {
+        enrichedUser.company_name = enrichedUser.full_name || '—';
+      }
     }
 
     setViewingUser(enrichedUser);
