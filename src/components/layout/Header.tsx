@@ -19,6 +19,7 @@ export function Header() {
   const [adminData, setAdminData] = useState<{ avatar_url: string | null; nickname: string | null } | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [pendingReviews, setPendingReviews] = useState(0);
+  const [isFreePlan, setIsFreePlan] = useState(false);
 
   const selectedLocation = selectedBusinessLocationId
     ? businessLocations.find(loc => loc.id === selectedBusinessLocationId)
@@ -58,7 +59,24 @@ export function Header() {
   useEffect(() => {
     if (!user || !profile || profile.user_type === 'admin') return;
     loadPendingReviews();
+    loadSubscriptionStatus();
   }, [user, profile]);
+
+  const loadSubscriptionStatus = async () => {
+    if (!user?.id || !profile || profile.user_type === 'admin') return;
+    try {
+      const { data } = await supabase
+        .from('subscriptions')
+        .select('plan:subscription_plans(price)')
+        .eq('customer_id', user.id)
+        .in('status', ['active', 'trial'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const price = (data?.plan as any)?.price;
+      setIsFreePlan(Number(price) === 0);
+    } catch { /* silent */ }
+  };
 
   const closeMenu = useCallback(() => setShowMobileMenu(false), []);
 
@@ -550,7 +568,7 @@ export function Header() {
         </div>
       </header>
 
-      {user && profile && profile.user_type !== 'admin' && (
+      {user && profile && profile.user_type !== 'admin' && !isFreePlan && (
         <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200 shadow-sm sticky top-16 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav className="flex items-center justify-center gap-2 py-3">

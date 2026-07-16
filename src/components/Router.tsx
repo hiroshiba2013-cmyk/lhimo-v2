@@ -1,5 +1,6 @@
 import { useEffect, useState, createContext, useContext, lazy, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 const HomePage = lazy(() => import('../pages/HomePage').then(m => ({ default: m.HomePage })));
 const DashboardPage = lazy(() => import('../pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
@@ -62,7 +63,45 @@ function PageLoader() {
 export function Router() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [params, setParams] = useState<Record<string, string>>({});
+  const [isFreePlan, setIsFreePlan] = useState(false);
+  const [subChecked, setSubChecked] = useState(false);
   const { needsProfileSelection, loading, user, profile } = useAuth();
+
+  useEffect(() => {
+    if (!user?.id || !profile || profile.user_type === 'admin') {
+      setIsFreePlan(false);
+      setSubChecked(true);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('subscriptions')
+          .select('plan:subscription_plans(price)')
+          .eq('customer_id', user.id)
+          .in('status', ['active', 'trial'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const price = (data?.plan as any)?.price;
+        if (!cancelled) setIsFreePlan(Number(price) === 0);
+      } catch { /* silent */ }
+      if (!cancelled) setSubChecked(true);
+    })();
+    return () => { cancelled = true; };
+  }, [user, profile]);
+
+  // Redirect free-plan users away from premium pages
+  useEffect(() => {
+    if (loading || !subChecked || !user || !profile || profile.user_type === 'admin' || !isFreePlan) return;
+    const premiumPaths = ['/jobs', '/classified', '/classified-ads', '/auctions', '/solidarity', '/leaderboard', '/messages', '/notifications'];
+    const isPremium = premiumPaths.some(p => currentPath === p || currentPath.startsWith(p + '/'));
+    if (isPremium && currentPath !== '/dashboard' && currentPath !== '/subscription') {
+      window.history.pushState({}, '', '/dashboard');
+      setCurrentPath('/dashboard');
+    }
+  }, [loading, subChecked, user, profile, isFreePlan, currentPath]);
 
   useEffect(() => {
     if (!window.location.hash) {

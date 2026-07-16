@@ -1544,6 +1544,11 @@ export function DashboardPage() {
   // Single-location businesses don't need the location switch and always see all sections
   const isSingleLocation = isBiz && fullBusinessLocations.length <= 1;
 
+  // Free plan: only search + limited dashboard sections
+  const isFreePlan = currentSubscription?.plan?.price === 0;
+  const bizAllowedKeys = isFreePlan ? new Set(['biz_dati', 'biz_reviews', 'biz_plans']) : null;
+  const custAllowedKeys = isFreePlan ? new Set(['cust_reviews', 'cust_plans']) : null;
+
   // ── sections config ────────────────────────────────────────────────────────
   const bizBadges = [
     ...(isSingleLocation || !selectedBusinessLocationId ? [{ key: 'biz_dati', label: 'I Tuoi Dati', icon: User, color: 'slate', badge: null }] : []),
@@ -1553,7 +1558,7 @@ export function DashboardPage() {
     { key: 'biz_auctions',  label: 'Le Mie Aste',           icon: Gavel,    color: 'orange',  badge: null },
     { key: 'biz_favorites', label: 'Preferiti',             icon: Heart,    color: 'red',     badge: null },
     ...(currentSubscription && availablePlans.length > 0 && (isSingleLocation || !selectedBusinessLocationId) ? [{ key: 'biz_plans', label: 'Cambia Piano', icon: Shield, color: 'slate', badge: currentSubscription.plan.name }] : []),
-  ];
+  ].filter(b => !bizAllowedKeys || bizAllowedKeys.has(b.key));
 
   const isOwnerProfile = !activeProfile || activeProfile.isOwner === true;
 
@@ -1569,7 +1574,7 @@ export function DashboardPage() {
     { key: 'cust_fav_ads',     label: 'Annunci Preferiti',       icon: Heart,    color: 'red',    badge: null },
     { key: 'cust_fav_biz',     label: 'Attivita Preferite',      icon: Building, color: 'rose',   badge: favBusinessesCount > 0 ? String(favBusinessesCount) : null },
     ...(isOwnerProfile && currentSubscription && availablePlans.length > 0 ? [{ key: 'cust_plans', label: 'Cambia Piano', icon: Shield, color: 'slate', badge: currentSubscription.plan.name }] : []),
-  ];
+  ].filter(b => !custAllowedKeys || custAllowedKeys.has(b.key));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1814,6 +1819,27 @@ export function DashboardPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isBiz && <TrialStatusBanner onUpgradeClick={() => navigate('/subscription')} />}
+
+        {isFreePlan && (
+          <div className="mb-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Lock className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-amber-900">Piano Gratuito</p>
+                <p className="text-xs text-amber-700">
+                  {isBiz
+                    ? 'Puoi cercare attività, leggere recensioni e modificare la tua scheda. Passa a un piano a pagamento per annunci, offerte di lavoro, aste e altro.'
+                    : 'Puoi cercare attività e leggere/scrivere recensioni. Passa a un piano a pagamento per annunci, aste, classifica e altro.'}
+                </p>
+              </div>
+            </div>
+            <button onClick={() => navigate('/subscription')} className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+              Upgrade
+            </button>
+          </div>
+        )}
 
         {loading ? (
           <div className="animate-pulse space-y-4 py-4" aria-busy="true" aria-label="Caricamento dashboard">
