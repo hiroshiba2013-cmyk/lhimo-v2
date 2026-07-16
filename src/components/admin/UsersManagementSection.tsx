@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Trash2, Eye, X as CloseIcon, FilterX, Save, FileEdit as Edit, CircleUser as UserCircle, MapPin, UserPlus, CreditCard, CheckCircle, Clock, AlertCircle, ChevronDown, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../common/Toast';
+import { BusinessLocationPhotos } from '../business/BusinessLocationPhotos';
 
 interface User {
   id: string;
@@ -2070,6 +2071,11 @@ export default function UsersManagementSection() {
                                     </button>
                                   )}
                                 </div>
+                              </div>
+
+                              {/* Foto caricate dalla sede */}
+                              <div className="mt-4 pt-4 border-t border-gray-100">
+                                <BusinessLocationPhotos locationId={location.id} readOnly />
                               </div>
                             </div>
                           );
