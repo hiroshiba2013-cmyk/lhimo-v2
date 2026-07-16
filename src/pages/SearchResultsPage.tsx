@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Fragment } from 'react';
 import { ArrowLeft, CheckCircle, Search, ArrowUpDown, MapPin, SlidersHorizontal } from 'lucide-react';
 import { supabase, BusinessCategory } from '../lib/supabase';
 import { LocationCard } from '../components/business/LocationCard';
 import { AdvancedSearch, SearchFilters } from '../components/search/AdvancedSearch';
+import { AdBanner } from '../components/common/AdBanner';
 import { PROVINCE_TO_CODE } from '../lib/cities';
 import { useAuth } from '../contexts/AuthContext';
 import { usePageCustomization } from '../hooks/usePageCustomization';
@@ -67,13 +68,14 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 export function SearchResultsPage() {
   const customization = usePageCustomization('search');
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [locations, setLocations] = useState<BusinessLocation[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [initialFilters, setInitialFilters] = useState<SearchFilters | null>(null);
   const [currentSearch, setCurrentSearch] = useState(window.location.search);
   const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [isFreePlan, setIsFreePlan] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => {
     // Restore from sessionStorage on mount so favorites survive navigation
     if (!user) return new Set();
@@ -115,6 +117,21 @@ export function SearchResultsPage() {
       persistFavoriteIds(favSet);
     }
   };
+
+  useEffect(() => {
+    if (!profile) return;
+    supabase
+      .from('subscriptions')
+      .select('plan:subscription_plans(price)')
+      .eq('customer_id', profile.id)
+      .in('status', ['active', 'trial'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        const sub = data?.[0] as any;
+        setIsFreePlan(sub?.plan?.price === 0);
+      });
+  }, [profile?.id]);
 
   // Reload when user authenticates after locations already loaded
   useEffect(() => {
@@ -434,6 +451,12 @@ export function SearchResultsPage() {
         </div>
       </section>
 
+      {isFreePlan && (
+        <div className="py-8">
+          <AdBanner />
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-6 bg-gradient-to-r from-blue-50 to-green-50 border-l-4 border-blue-600 rounded-lg p-4">
           <p className="text-sm text-gray-700">
@@ -547,21 +570,31 @@ export function SearchResultsPage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedLocations.map((location) => (
-              <LocationCard
-                key={location.id}
-                location={location}
-                initialIsFavorite={favoriteIds.has(location.id)}
-                onFavoriteToggle={(id, isFav) => {
-                  setFavoriteIds(prev => {
-                    const next = new Set(prev);
-                    if (isFav) next.add(id); else next.delete(id);
-                    try { sessionStorage.setItem('searchFavoriteIds', JSON.stringify([...next])); } catch {}
-                    return next;
-                  });
-                }}
-              />
+            {sortedLocations.map((location, idx) => (
+              <Fragment key={location.id}>
+                {isFreePlan && idx > 0 && idx % 30 === 0 && (
+                  <div className="md:col-span-2 lg:col-span-3 py-4"><AdBanner /></div>
+                )}
+                <LocationCard
+                  location={location}
+                  initialIsFavorite={favoriteIds.has(location.id)}
+                  onFavoriteToggle={(id, isFav) => {
+                    setFavoriteIds(prev => {
+                      const next = new Set(prev);
+                      if (isFav) next.add(id); else next.delete(id);
+                      try { sessionStorage.setItem('searchFavoriteIds', JSON.stringify([...next])); } catch {}
+                      return next;
+                    });
+                  }}
+                />
+              </Fragment>
             ))}
+          </div>
+        )}
+
+        {isFreePlan && hasSearched && locations.length > 0 && (
+          <div className="mt-8">
+            <AdBanner />
           </div>
         )}
 

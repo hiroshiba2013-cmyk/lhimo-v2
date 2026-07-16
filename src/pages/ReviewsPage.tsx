@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Star, Search, Filter, ChevronDown, MapPin, Calendar, ThumbsUp, ThumbsDown, Clock, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ReviewCard } from '../components/reviews/ReviewCard';
 import { CategoryHierarchySelect } from '../components/common/CategoryHierarchySelect';
+import { AdBanner } from '../components/common/AdBanner';
 
 type SortOption = 'newest' | 'oldest' | 'highest' | 'lowest';
 type FilterType = 'all' | 'service_used' | 'booking_not_completed' | 'quote_request' | 'customer_service' | 'problem_before_service';
@@ -81,6 +82,22 @@ export function ReviewsPage() {
   const [stats, setStats] = useState({ total: 0, avg: 0, thisMonth: 0 });
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState<{ id: string; name: string; parent_id: string | null }[]>([]);
+  const [isFreePlan, setIsFreePlan] = useState(false);
+
+  useEffect(() => {
+    if (!profile) return;
+    supabase
+      .from('subscriptions')
+      .select('plan:subscription_plans(price)')
+      .eq('customer_id', profile.id)
+      .in('status', ['active', 'trial'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        const sub = data?.[0] as any;
+        setIsFreePlan(sub?.plan?.price === 0);
+      });
+  }, [profile?.id]);
 
   useEffect(() => {
     supabase.from('business_categories').select('id, name, parent_id').order('name')
@@ -240,6 +257,12 @@ export function ReviewsPage() {
         </div>
       </div>
 
+      {isFreePlan && (
+        <div className="py-8">
+          <AdBanner />
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -311,8 +334,12 @@ export function ReviewsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filtered.map(review => (
-              <div key={review.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            {filtered.map((review, idx) => (
+              <Fragment key={review.id}>
+              {isFreePlan && idx > 0 && idx % 30 === 0 && (
+                <div className="py-4"><AdBanner /></div>
+              )}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 {/* Business header */}
                 {review.business_name && (
                   <div className="flex items-center gap-2 px-5 py-3 bg-gray-50 border-b border-gray-100">
@@ -355,7 +382,14 @@ export function ReviewsPage() {
                   )}
                 </div>
               </div>
+              </Fragment>
             ))}
+          </div>
+        )}
+
+        {isFreePlan && filtered.length > 0 && (
+          <div className="mt-8">
+            <AdBanner />
           </div>
         )}
       </div>
