@@ -1065,6 +1065,51 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         </button>
       </div>
 
+      {/* Plan tier selector: Free vs Paid */}
+      <div className="mb-6 bg-gray-50 border-2 border-gray-200 rounded-xl p-4">
+        <label className="block text-sm font-bold text-gray-900 mb-3">Tipo di Piano</label>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setPlanTier('free')}
+            className={`py-3 px-4 rounded-lg border-2 transition-all text-left ${
+              planTier === 'free'
+                ? 'border-amber-500 bg-amber-50'
+                : 'border-gray-300 bg-white hover:border-amber-400'
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg font-bold text-gray-900">Gratuito</span>
+              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">0€</span>
+            </div>
+            <p className="text-xs text-gray-600">
+              {userType === 'business'
+                ? 'Scheda attività, recensioni. Niente annunci, aste o offerte di lavoro.'
+                : 'Cerca attività, scrivi recensioni. Niente annunci, aste o classifica.'}
+            </p>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPlanTier('paid')}
+            className={`py-3 px-4 rounded-lg border-2 transition-all text-left ${
+              planTier === 'paid'
+                ? 'border-blue-600 bg-blue-50'
+                : 'border-gray-300 bg-white hover:border-blue-400'
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg font-bold text-gray-900">Premium</span>
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">A pagamento</span>
+            </div>
+            <p className="text-xs text-gray-600">
+              {userType === 'business'
+                ? 'Annunci, aste, offerte di lavoro, preferiti e tutte le funzionalità.'
+                : 'Annunci, aste, classifica, preferiti, profilo professionale e tutto.'}
+            </p>
+          </button>
+        </div>
+      </div>
+
       {userType === 'customer' ? (
         <form onSubmit={handleCustomerSubmit} className="space-y-4 max-h-96 overflow-y-auto pr-2">
           {planTier === 'paid' ? (
