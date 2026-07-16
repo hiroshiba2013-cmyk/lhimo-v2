@@ -68,7 +68,7 @@ function parsePlanFeatures(raw: any): string[] {
 }
 
 export function PlansSection() {
-  const { addToast } = useToast();
+  const { showToast: addToast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
