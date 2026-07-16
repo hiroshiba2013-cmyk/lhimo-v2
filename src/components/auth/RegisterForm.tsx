@@ -96,6 +96,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [acceptCookies, setAcceptCookies] = useState(false);
   const [acceptMarketing, setAcceptMarketing] = useState(false);
 
+  const [planTier, setPlanTier] = useState<'free' | 'paid'>('paid');
   const [numberOfPeople, setNumberOfPeople] = useState('1');
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
@@ -271,6 +272,12 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       if (error || !plan) {
         console.error('Error loading plan:', error);
         return;
+      }
+
+      if (Number(plan.price) === 0) {
+        setPlanTier('free');
+      } else {
+        setPlanTier('paid');
       }
 
       const isBusinessPlan = plan.name.includes('Business');
@@ -600,13 +607,26 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       }
 
       if (user) {
-        const { data: plan } = await supabase
-          .from('subscription_plans')
-          .select('id, name, price, billing_period, max_persons')
-          .eq('max_persons', parseInt(numberOfPeople))
-          .eq('billing_period', billingPeriod)
-          .not('name', 'like', '%Business%')
-          .single();
+        let plan: any = null;
+
+        if (planTier === 'free') {
+          const { data: freePlan } = await supabase
+            .from('subscription_plans')
+            .select('id, name, price, billing_period, max_persons')
+            .eq('name', 'Piano Gratuito')
+            .maybeSingle();
+          plan = freePlan;
+        } else {
+          const { data: paidPlan } = await supabase
+            .from('subscription_plans')
+            .select('id, name, price, billing_period, max_persons')
+            .eq('max_persons', parseInt(numberOfPeople))
+            .eq('billing_period', billingPeriod)
+            .not('name', 'like', '%Business%')
+            .not('name', 'like', '%Gratuito%')
+            .maybeSingle();
+          plan = paidPlan;
+        }
 
         if (plan) {
           const startDate = new Date();
@@ -744,36 +764,44 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       console.log('✅ Utente creato:', user.id);
 
       // 1. Prima crea la subscription con il piano corretto
-      let maxPersonsValue = parseInt(numberOfLocations);
-      if (numberOfLocations === '6-10') {
-        maxPersonsValue = 10;
-      } else if (numberOfLocations === '10+') {
-        maxPersonsValue = 999;
-      }
+      let plan: any = null;
 
-      console.log('🔍 Ricerca piano business:', { maxPersonsValue, businessBillingPeriod });
+      if (planTier === 'free') {
+        const { data: freePlan, error: freePlanError } = await supabase
+          .from('subscription_plans')
+          .select('id, name, price, billing_period, max_persons')
+          .eq('name', 'Piano Business Gratuito')
+          .maybeSingle();
 
-      const { data: plan, error: planError } = await supabase
-        .from('subscription_plans')
-        .select('id, name, price, billing_period, max_persons')
-        .eq('max_persons', maxPersonsValue)
-        .eq('billing_period', businessBillingPeriod)
-        .like('name', 'Piano Business%')
-        .maybeSingle();
+        if (freePlanError) throw freePlanError;
+        plan = freePlan;
+      } else {
+        let maxPersonsValue = parseInt(numberOfLocations);
+        if (numberOfLocations === '6-10') {
+          maxPersonsValue = 10;
+        } else if (numberOfLocations === '10+') {
+          maxPersonsValue = 999;
+        }
 
-      if (planError) {
-        console.error('❌ Errore ricerca piano:', planError);
-        throw planError;
+        const { data: paidPlan, error: planError } = await supabase
+          .from('subscription_plans')
+          .select('id, name, price, billing_period, max_persons')
+          .eq('max_persons', maxPersonsValue)
+          .eq('billing_period', businessBillingPeriod)
+          .like('name', 'Piano Business%')
+          .not('name', 'like', '%Gratuito%')
+          .maybeSingle();
+
+        if (planError) throw planError;
+        plan = paidPlan;
       }
 
       if (!plan) {
-        console.error('❌ Piano business non trovato per:', { numberOfLocations, maxPersonsValue, businessBillingPeriod });
         throw new Error('Piano di abbonamento non trovato. Contatta il supporto.');
       }
 
-      console.log('✅ Piano trovato:', plan.name);
-
       const startDate = new Date();
+      const isFreeBiz = Number(plan.price) === 0;
       const trialEndDate = new Date();
       trialEndDate.setMonth(trialEndDate.getMonth() + 1);
 
@@ -794,10 +822,10 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
           .insert({
             customer_id: user.id,
             plan_id: plan.id,
-            status: 'trial',
+            status: isFreeBiz ? 'active' : 'trial',
             start_date: startDate.toISOString(),
-            end_date: trialEndDate.toISOString(),
-            trial_end_date: trialEndDate.toISOString(),
+            end_date: isFreeBiz ? null : trialEndDate.toISOString(),
+            trial_end_date: isFreeBiz ? null : trialEndDate.toISOString(),
             payment_method_added: false,
             reminder_sent: false,
           });
@@ -1039,6 +1067,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
       {userType === 'customer' ? (
         <form onSubmit={handleCustomerSubmit} className="space-y-4 max-h-96 overflow-y-auto pr-2">
+          {planTier === 'paid' ? (
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Per quante persone vuoi aprire l'account?
@@ -1129,6 +1158,48 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
               </p>
             </div>
           </div>
+          ) : (
+          <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-amber-900">Piano Gratuito</p>
+                <p className="text-xs text-amber-700">0€ per sempre, senza carta di credito</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-3 border border-amber-300">
+              <p className="text-xs font-semibold text-gray-700 mb-2">Cosa puoi fare:</p>
+              <ul className="text-xs text-gray-600 space-y-1">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  Cercare e trovare attività commerciali
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  Leggere e scrivere recensioni
+                </li>
+              </ul>
+              <p className="text-xs font-semibold text-gray-700 mb-1 mt-3">Cosa non puoi fare:</p>
+              <ul className="text-xs text-gray-500 space-y-1">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-400 font-bold">✗</span>
+                  Pubblicare annunci, aste o candidature
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-400 font-bold">✗</span>
+                  Accedere alla classifica o ai preferiti
+                </li>
+              </ul>
+              <p className="text-xs text-amber-700 mt-3 font-medium">
+                Puoi passare a Premium in qualsiasi momento dalla tua dashboard.
+              </p>
+            </div>
+          </div>
+          )}
 
           <div className="bg-gray-50 p-4 rounded-lg mb-4">
             <h3 className="text-sm font-bold text-gray-900 mb-3">Dati Titolare Account (Persona 1)</h3>
@@ -1233,7 +1304,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             </div>
           </div>
 
-          {familyMembers.map((member, index) => (
+          {planTier === 'paid' && familyMembers.map((member, index) => (
             <div key={index} className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-gray-900">Dati Persona {index + 2}</h3>
@@ -1336,7 +1407,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             </div>
           ))}
 
-          {parseInt(numberOfPeople) > 1 && familyMembers.length < (parseInt(numberOfPeople) - 1) && (
+          {planTier === 'paid' && parseInt(numberOfPeople) > 1 && familyMembers.length < (parseInt(numberOfPeople) - 1) && (
             <button
               type="button"
               onClick={addFamilyMember}
@@ -1612,6 +1683,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         </form>
       ) : (
         <form onSubmit={handleBusinessSubmit} className="space-y-4 max-h-96 overflow-y-auto pr-2">
+          {planTier === 'paid' ? (
           <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-300 mb-4">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Quante sedi/punti vendita hai?
@@ -1731,6 +1803,48 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
               </p>
             </div>
           </div>
+          ) : (
+          <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-amber-900">Piano Business Gratuito</p>
+                <p className="text-xs text-amber-700">0€ per sempre, senza carta di credito</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-3 border border-amber-300">
+              <p className="text-xs font-semibold text-gray-700 mb-2">Cosa puoi fare:</p>
+              <ul className="text-xs text-gray-600 space-y-1">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  Creare la scheda della tua attività
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  Ricevere e leggere le recensioni
+                </li>
+              </ul>
+              <p className="text-xs font-semibold text-gray-700 mb-1 mt-3">Cosa non puoi fare:</p>
+              <ul className="text-xs text-gray-500 space-y-1">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-400 font-bold">✗</span>
+                  Pubblicare annunci, aste o offerte di lavoro
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-400 font-bold">✗</span>
+                  Gestire preferiti o messaggi
+                </li>
+              </ul>
+              <p className="text-xs text-amber-700 mt-3 font-medium">
+                Puoi passare a Premium in qualsiasi momento dalla tua dashboard.
+              </p>
+            </div>
+          </div>
+          )}
 
           <div className="bg-gray-50 p-4 rounded-lg border-2 border-blue-300">
             <h3 className="text-lg font-bold text-gray-900 mb-2">Dati Legali e Fiscali Azienda</h3>
@@ -2034,7 +2148,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             </p>
           </div>
 
-          {businessLocations.map((location, index) => (
+          {planTier === 'paid' && businessLocations.map((location, index) => (
             <div key={index} className="bg-emerald-50 p-4 rounded-lg border-2 border-emerald-300 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-gray-900">
@@ -2261,7 +2375,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             </div>
           ))}
 
-          {(numberOfLocations === '6-10' || numberOfLocations === '10+') && businessLocations.length < 10 && (
+          {planTier === 'paid' && (numberOfLocations === '6-10' || numberOfLocations === '10+') && businessLocations.length < 10 && (
             <button
               type="button"
               onClick={addBusinessLocation}
