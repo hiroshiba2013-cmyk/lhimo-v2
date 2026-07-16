@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Users, FileText, ShoppingBag, Activity, CheckCircle, XCircle, Clock, Eye, Trash2, LogOut, Building2, AlertTriangle, Briefcase, MapPin, UserCheck, Heart, Award, TrendingUp, MessageSquare, Mail, CreditCard, BookOpen, Gavel, Layers } from 'lucide-react';
+import { Shield, Users, FileText, ShoppingBag, Activity, CheckCircle, XCircle, Clock, Eye, Trash2, LogOut, Building2, AlertTriangle, Briefcase, MapPin, UserCheck, Heart, Award, TrendingUp, MessageSquare, Mail, CreditCard, BookOpen, Gavel, Layers, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { AdminStats } from '../components/admin/AdminStats';
@@ -22,6 +22,7 @@ import { RulesSection } from '../components/admin/RulesSection';
 import { PageCustomizationSection } from '../components/admin/PageCustomizationSection';
 import AuctionsSection from '../components/admin/AuctionsSection';
 import { ProfessionalProfilesSection } from '../components/admin/ProfessionalProfilesSection';
+import { AdBannersSection } from '../components/admin/AdBannersSection';
 import { useToast } from '../components/common/Toast';
 
 interface DashboardStats {
@@ -1320,6 +1321,17 @@ export function AdminDashboardPage() {
                 )}
               </button>
               <button
+                onClick={() => handleTabChange('ad_banners')}
+                className={`px-5 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all duration-200 flex items-center gap-2 ${
+                  activeTab === 'ad_banners'
+                    ? 'bg-gradient-to-r from-violet-500 to-violet-600 text-white shadow-md'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                <ImageIcon className="w-4 h-4" />
+                Banner Pubblicitari
+              </button>
+              <button
                 onClick={() => handleTabChange('plans')}
                 className={`px-5 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all duration-200 flex items-center gap-2 ${
                   activeTab === 'plans'
@@ -1842,6 +1854,8 @@ export function AdminDashboardPage() {
             {activeTab === 'contact' && <ContactSection adminId={profile!.id} />}
 
             {activeTab === 'platform_messages' && <PlatformMessagesSection adminId={profile!.id} />}
+
+            {activeTab === 'ad_banners' && <AdBannersSection />}
 
             {activeTab === 'plans' && <PlansSection adminId={profile!.id} />}
 

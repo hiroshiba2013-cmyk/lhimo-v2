@@ -4,7 +4,7 @@ import {
   Heart, Gift, Users as UsersIcon, Briefcase, Users,
   DollarSign, Trophy, Activity, Tag, ChevronDown, ChevronUp,
   User, Mail, Phone, MapPin, FileText, Globe, Pencil, Save, X, CreditCard, Hash, Building2,
-  Lock, Gavel, LogOut
+  Lock, Gavel, LogOut, Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Business, Review, FamilyMember } from '../lib/supabase';
@@ -34,6 +34,7 @@ import { CategoryHierarchySelect } from '../components/common/CategoryHierarchyS
 import { ItalianCityProvinceSelect } from '../components/common/ItalianCityProvinceSelect';
 import { useNavigate } from '../components/Router';
 import { usePageCustomization } from '../hooks/usePageCustomization';
+import { BannerPurchaseModal } from '../components/business/BannerPurchaseModal';
 
 interface SubscriptionPlan {
   id: string;
@@ -1096,6 +1097,7 @@ export function DashboardPage() {
   const [availablePlans, setAvailablePlans] = useState<SubscriptionPlan[]>([]);
   const [upgradeMessage, setUpgradeMessage] = useState('');
   const [userRank, setUserRank] = useState<{ points: number; rank: number; reviews_count: number } | null>(null);
+  const [showBannerModal, setShowBannerModal] = useState(false);
 
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const toggle = (key: string) => setOpen(prev => ({ ...prev, [key]: !prev[key] }));
@@ -1833,6 +1835,32 @@ export function DashboardPage() {
               Upgrade
             </button>
           </div>
+        )}
+
+        {isBiz && (
+          <div className="mb-4 bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-2xl p-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <ImageIcon className="w-5 h-5 text-violet-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-violet-900">Banner Pubblicitari</p>
+                <p className="text-xs text-violet-700">Promuovi la tua attività con banner in home e ricerca</p>
+              </div>
+            </div>
+            <button onClick={() => setShowBannerModal(true)} className="bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+              Pubblica
+            </button>
+          </div>
+        )}
+
+        {isBiz && (
+          <BannerPurchaseModal
+            open={showBannerModal}
+            onClose={() => setShowBannerModal(false)}
+            userId={user!.id}
+            businessLocationId={selectedBusinessLocationId}
+          />
         )}
 
         {loading ? (

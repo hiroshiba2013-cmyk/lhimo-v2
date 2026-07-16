@@ -453,7 +453,7 @@ export function SearchResultsPage() {
 
       {isFreePlan && (
         <div className="py-8">
-          <AdBanner />
+          <AdBanner position="search_top" />
         </div>
       )}
 
@@ -573,7 +573,7 @@ export function SearchResultsPage() {
             {sortedLocations.map((location, idx) => (
               <Fragment key={location.id}>
                 {isFreePlan && idx > 0 && idx % 30 === 0 && (
-                  <div className="md:col-span-2 lg:col-span-3 py-4"><AdBanner /></div>
+                  <div className="md:col-span-2 lg:col-span-3 py-4"><AdBanner position={idx <= 30 ? 'search_results_1_30' : 'search_results_31_60'} /></div>
                 )}
                 <LocationCard
                   location={location}
@@ -594,7 +594,7 @@ export function SearchResultsPage() {
 
         {isFreePlan && hasSearched && locations.length > 0 && (
           <div className="mt-8">
-            <AdBanner />
+            <AdBanner position="search_results_31_60" />
           </div>
         )}
 
