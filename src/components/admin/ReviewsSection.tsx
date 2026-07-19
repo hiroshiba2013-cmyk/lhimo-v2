@@ -344,17 +344,19 @@ export function ReviewsSection({ reviews, onReload, adminId }: ReviewsSectionPro
       const review = reviews.find(r => r.id === reviewId);
       if (!review) return;
 
-      await supabase
-        .from('reviews')
-        .update({ proof_image_url: null, proof_documents: null })
-        .eq('id', reviewId);
-
+      // First approve via RPC (awards points, sends notification)
       const { error } = await supabase.rpc('approve_review', {
         review_id_param: reviewId,
         staff_id_param: adminId,
       });
 
       if (error) throw error;
+
+      // Only clear proof AFTER successful approval
+      await supabase
+        .from('reviews')
+        .update({ proof_image_url: null, proof_documents: null })
+        .eq('id', reviewId);
 
       showToast('Recensione approvata con 25 punti (prova rifiutata).', 'success');
       onReload();

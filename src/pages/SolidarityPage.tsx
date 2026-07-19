@@ -560,7 +560,7 @@ function DocumentCard({ document }: { document: SolidarityDocument }) {
           </div>
 
           <div className="text-xs text-gray-500 mt-3">
-            Caricato da {document.profiles.full_name} il{' '}
+            Caricato da {(document.profiles as any)?.full_name || 'Utente'} il{' '}
             {new Date(document.created_at).toLocaleDateString('it-IT')}
           </div>
         </div>

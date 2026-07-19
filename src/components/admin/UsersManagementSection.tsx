@@ -1323,7 +1323,7 @@ export default function UsersManagementSection() {
                                         />
                                       ) : (
                                         <p className="text-sm text-gray-700">
-                                          {new Date(displayMember.date_of_birth).toLocaleDateString('it-IT')}
+                                          {displayMember.date_of_birth ? new Date(displayMember.date_of_birth).toLocaleDateString('it-IT') : '—'}
                                         </p>
                                       )}
                                     </div>

@@ -121,6 +121,8 @@ export function ClassifiedAdForm({ adId, businessLocationId, isRegisteredBusines
   const removeImage = (index: number) => {
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
     setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    // In edit mode, also remove from formData.images (existing remote URLs)
+    setFormData((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
   const uploadImages = async (): Promise<string[]> => {
@@ -128,8 +130,8 @@ export function ClassifiedAdForm({ adId, businessLocationId, isRegisteredBusines
 
     for (const file of imageFiles) {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}-${Date.now()}-${Math.random()}.${fileExt}`;
-      const filePath = `classified-ads/${fileName}`;
+      const fileName = `${user?.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+      const filePath = fileName;
 
       const { error: uploadError, data } = await supabase.storage
         .from('classified-ads')
@@ -211,7 +213,7 @@ export function ClassifiedAdForm({ adId, businessLocationId, isRegisteredBusines
       if (adId) {
         const { error } = await supabase
           .from('classified_ads')
-          .update(adData)
+          .update({ ...adData, approval_status: 'pending', status: 'pending' })
           .eq('id', adId);
 
         if (error) throw error;
@@ -228,7 +230,7 @@ export function ClassifiedAdForm({ adId, businessLocationId, isRegisteredBusines
     } catch (error: any) {
       console.error('Error saving ad:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
-      showToast('Errore nel salvataggio: ' + (error?.message || error?.details || JSON.stringify(error, 'error')));
+      showToast('Errore nel salvataggio: ' + (error?.message || error?.details || JSON.stringify(error)));
     } finally {
       setLoading(false);
     }

@@ -128,8 +128,8 @@ export function BusinessJobForm({ onSuccess }: BusinessJobFormProps) {
       return;
     }
 
-    if (!formData.location.trim()) {
-      setError('Inserisci la città/location');
+    if (!formData.location.trim() && !formData.city && !formData.region) {
+      setError('Inserisci la città o la regione');
       return;
     }
 
@@ -162,6 +162,9 @@ export function BusinessJobForm({ onSuccess }: BusinessJobFormProps) {
           salary_max: formData.salaryMax ? parseFloat(formData.salaryMax) : null,
           salary_currency: formData.salaryCurrency,
           location: locationString,
+          region: formData.region || null,
+          province: formData.province || null,
+          city: formData.city || null,
           required_skills: skillsArray,
           experience_level: formData.experienceLevel,
           expires_at: new Date(formData.expiresAt).toISOString(),

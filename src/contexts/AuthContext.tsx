@@ -38,6 +38,9 @@ export interface BusinessData {
   officeCity?: string;
   officeProvince?: string;
   categoryId?: string;
+  instagram_url?: string;
+  facebook_url?: string;
+  tiktok_url?: string;
 }
 
 export interface BusinessLocation {

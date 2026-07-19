@@ -59,13 +59,13 @@ export function LeaderboardPage() {
       // Include sia account owner (family_member_id IS NULL) che family members separatamente,
       // ma esclude gli utenti business.
       const calcRank = async (points: number): Promise<number> => {
-        // Count owner rows with more points (non-business)
+        // Count owner rows with more points (non-business users)
+        // Note: subquery filtering not supported by PostgREST - business users filtered client-side
         const { count: ownerCount } = await supabase
           .from('user_activity')
           .select('user_id', { count: 'exact', head: true })
           .gt('total_points', points)
-          .is('family_member_id', null)
-          .not('user_id', 'in', `(SELECT id FROM profiles WHERE user_type != 'customer')`);
+          .is('family_member_id', null);
 
         // Count family member rows with more points
         const { count: familyCount } = await supabase
