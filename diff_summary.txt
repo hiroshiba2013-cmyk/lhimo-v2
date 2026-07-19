@@ -1,0 +1,383 @@
+TABLES ONLY IN STAGING: ['_migration_sql']
+TABLES ONLY IN PROD: ['messages', 'conversations', 'business_location_photos', 'content_moderation_logs']
+
+COLUMN DIFFS:
+  advertising_banners:
+    MISS_IN_PROD: ['business_id', 'clicks', 'description', 'impressions', 'is_active', 'page', 'registered_business_id', 'title']
+    EXTRA_IN_PROD: ['admin_notes', 'alt_text', 'business_location_id', 'plan_id', 'price_paid', 'status', 'user_id']
+  advertising_plans:
+    MISS_IN_PROD: ['description', 'display_order', 'features', 'name']
+    EXTRA_IN_PROD: ['position', 'position_label', 'sort_order']
+  auction_completions:
+    EXTRA_IN_PROD: ['attempt_number', 'winner_family_member_id', 'winner_family_member_id_completion', 'winner_user_id']
+  auction_deposits:
+    EXTRA_IN_PROD: ['forfeited', 'forfeited_at']
+  auctions:
+    EXTRA_IN_PROD: ['ai_moderation_at', 'ai_moderation_flags', 'ai_moderation_reason', 'ai_moderation_status', 'approval_notes', 'approved_at', 'approved_by', 'current_bidder_nickname', 'current_completion_deadline', 'registered_business_location_id', 'winner_index']
+  business_locations:
+    EXTRA_IN_PROD: ['avatar_url', 'business_hours', 'email', 'notes', 'street_number']
+  businesses:
+    EXTRA_IN_PROD: ['search_vector']
+  classified_ads:
+    MISS_IN_PROD: ['approval_status']
+    EXTRA_IN_PROD: ['ai_moderation_at', 'ai_moderation_flags', 'ai_moderation_reason', 'ai_moderation_status', 'business_location_id', 'registered_business_location_id']
+  classified_categories:
+    MISS_IN_PROD: ['parent_id']
+  comuni_italiani:
+    MISS_IN_PROD: ['codice_istat', 'created_at', 'lat', 'lng', 'nome', 'nome_provincia', 'provincia_sigla', 'sigla_provincia']
+    EXTRA_IN_PROD: ['comune', 'provincia', 'sigla']
+    TYPE_DIFF: ['id: staging=uuid prod=int4']
+  customer_family_members:
+    MISS_IN_PROD: ['tax_code']
+    EXTRA_IN_PROD: ['fiscal_code']
+  discounts:
+    EXTRA_IN_PROD: ['business_location_id']
+  imported_businesses:
+    EXTRA_IN_PROD: ['added_by', 'vat_number']
+  job_postings:
+    EXTRA_IN_PROD: ['ai_moderation_at', 'ai_moderation_flags', 'ai_moderation_reason', 'ai_moderation_status', 'approval_notes', 'approved_at', 'approved_by', 'benefits', 'business_location_id', 'company_name', 'gross_annual_salary', 'remote_work', 'required_languages']
+  job_requests:
+    EXTRA_IN_PROD: ['family_member_id']
+  job_seekers:
+    EXTRA_IN_PROD: ['ai_moderation_at', 'ai_moderation_flags', 'ai_moderation_reason', 'ai_moderation_status', 'approval_notes', 'approved_at', 'approved_by', 'category_id', 'email', 'phone']
+  page_customizations:
+    MISS_IN_PROD: ['banner_image_url', 'is_active', 'subtitle', 'title']
+    EXTRA_IN_PROD: ['announcement_active', 'announcement_text', 'hero_image_url', 'hero_subtitle', 'hero_title', 'page_name']
+  products:
+    EXTRA_IN_PROD: ['barcode', 'owner_id', 'sku', 'slug']
+  professional_profiles:
+    MISS_IN_PROD: ['approval_status']
+    EXTRA_IN_PROD: ['ai_moderation_at', 'ai_moderation_flags', 'ai_moderation_reason', 'ai_moderation_status']
+  profiles:
+    MISS_IN_PROD: ['billing_city', 'billing_postal_code', 'billing_province', 'billing_street', 'billing_street_number', 'tax_code']
+  registered_businesses:
+    MISS_IN_PROD: ['approval_status']
+    EXTRA_IN_PROD: ['office_address', 'office_city', 'office_postal_code', 'office_province', 'office_street', 'office_street_number']
+  reviews:
+    MISS_IN_PROD: ['proof_document_url', 'rejection_reason']
+    EXTRA_IN_PROD: ['ai_moderation_at', 'ai_moderation_flags', 'ai_moderation_reason', 'ai_moderation_status', 'approved_at', 'approved_by', 'booking_affidabilita', 'booking_comunicazione', 'booking_gestione_prenotazione', 'booking_management_rating', 'booking_organizzazione', 'cs_competenza', 'cs_cortesia', 'cs_rapidita', 'cs_risoluzione_problema', 'experience_rating', 'family_member_id', 'organization_rating', 'price_rating', 'problem_affidabilita', 'problem_comunicazione', 'problem_gestione_problema', 'problem_organizzazione', 'proof_documents', 'quality_rating', 'quote_chiarezza', 'quote_disponibilita', 'quote_tempistiche_risposta', 'quote_trasparenza', 'reliability_rating', 'review_type', 'service_rating']
+    TYPE_DIFF: ['points_awarded: staging=bool prod=int4']
+  subscription_plans:
+    EXTRA_IN_PROD: ['features']
+  subscriptions:
+    EXTRA_IN_PROD: ['payment_method_added', 'reminder_sent', 'trial_end_date']
+  user_activity:
+    MISS_IN_PROD: ['badges']
+    EXTRA_IN_PROD: ['ads_count', 'auctions_count', 'family_member_id', 'job_postings_count', 'referrals_count']
+  user_added_businesses:
+    MISS_IN_PROD: ['added_by_family_member', 'approval_status', 'points_awarded']
+
+FUNS_ONLY_STAGING(0): []
+FUNS_ONLY_PROD(168): ['admin_delete_user_account', 'advance_to_next_winner', 'approve_auction', 'approve_classified_ad', 'approve_job_posting', 'approve_job_seeker', 'approve_review', 'award_points', 'award_points_for_business_location', 'award_points_for_classified_ad', 'award_points_for_product', 'award_points_for_unclaimed_business', 'award_points_for_unclaimed_business_on_approval', 'businesses_search_vector_update', 'calculate_overall_rating_for_service_used', 'can_change_subscription_plan', 'check_auction_completion_deadlines', 'check_family_member_trial_eligibility', 'check_fiscal_code_trial_eligibility', 'check_review_allowed_this_year', 'check_subscription_expiration', 'check_trial_eligibility', 'check_trial_expiration', 'cleanup_non_admin_users', 'confirm_auction_deal', 'confirm_referral_reward', 'create_discount_redemption', 'create_notification', 'create_trial_for_business', 'create_trial_for_business_profile', 'create_trial_for_customer', 'decrement_unclaimed_business_count', 'delete_admin_account', 'delete_expired_classified_ads', 'delete_user_account', 'exec_sql', 'expire_auctions', 'fn_block_business_points', 'fn_enforce_business_trial_on_insert', 'fn_on_profile_become_business', 'fn_set_owner_as_business', 'generate_redemption_code', 'generate_slug', 'get_all_province', 'get_business_details', 'get_business_ratings', 'get_business_ratings_by_type', 'get_cities_by_province', 'get_comuni_by_provincia', 'get_correct_plan_for_business', 'get_correct_plan_for_customer', 'get_featured_classified_ads', 'get_location_ratings', 'get_my_review_this_year', 'get_or_create_conversation', 'get_province_by_region', 'get_province_by_regione', 'get_province_list', 'get_subscription_stats', 'get_top_business_locations', 'get_top_businesses_by_positive_reviews', 'get_total_revenue', 'get_trial_statistics', 'get_trial_status', 'get_unread_messages_count', 'get_unread_notification_count', 'get_user_activity_summary', 'get_user_trial_details', 'gin_extract_query_trgm', 'gin_extract_value_trgm', 'gin_trgm_consistent', 'gin_trgm_triconsistent', 'gtrgm_compress', 'gtrgm_consistent', 'gtrgm_decompress', 'gtrgm_distance', 'gtrgm_in', 'gtrgm_options', 'gtrgm_out', 'gtrgm_penalty', 'gtrgm_picksplit', 'gtrgm_same', 'gtrgm_union', 'handle_new_user', 'increment_ad_views', 'increment_ads_posted_count', 'increment_unclaimed_business_count', 'increment_user_added_business_count', 'insert_business_trial_subscription', 'is_admin', 'log_ad_creation', 'log_ad_view_milestone', 'log_admin_logout', 'log_referral_reward', 'log_review_approval', 'log_review_submission', 'log_subscription_start', 'log_user_activity', 'mark_notification_read', 'notify_ad_favorited', 'notify_admins_new_unclaimed_business', 'notify_business_on_review', 'notify_favorite_created', 'notify_job_seeker_favorited', 'notify_report_submitted', 'notify_trial_expiring_soon', 'populate_user_activity', 'prevent_trial_abuse', 'prevent_trial_plan_changes', 'process_referral', 'process_referral_on_subscription', 'promote_to_admin', 'refresh_business_ratings', 'register_trial_usage', 'reject_auction', 'reject_classified_ad', 'reject_job_posting', 'reject_job_seeker', 'reject_review', 'remove_referral_points_on_delete', 'search_all_business_locations', 'search_all_businesses', 'search_business_tracking', 'search_unclaimed_businesses', 'send_notification', 'set_auction_deposit_amount', 'set_business_claimed_at', 'set_classified_ad_expiration', 'set_limit', 'show_limit', 'show_trgm', 'similarity', 'similarity_dist', 'similarity_op', 'strict_word_similarity', 'strict_word_similarity_commutator_op', 'strict_word_similarity_dist_commutator_op', 'strict_word_similarity_dist_op', 'strict_word_similarity_op', 'subtract_points_for_deleted_classified_ad', 'subtract_points_for_deleted_product', 'subtract_points_for_deleted_review', 'subtract_points_for_deleted_unclaimed_business', 'sync_admin_to_jwt', 'sync_all_subscription_plans', 'sync_business_is_claimed', 'sync_job_posting_location', 'sync_subscription_type_from_plan', 'sync_user_activity', 'update_auction_current_bidder', 'update_auction_current_price', 'update_charity_organizations_updated_at', 'update_conversation_last_message', 'update_job_offer_conversation_last_message', 'update_job_seeker_conversation_last_message', 'update_platform_settings_updated_at', 'update_professional_profile_updated_at', 'update_profile_subscription_status', 'update_registered_business_billing_address', 'update_reports_updated_at', 'update_subscription_plan_on_family_change', 'update_subscription_plan_on_location_change', 'verify_discount_redemption', 'word_similarity', 'word_similarity_commutator_op', 'word_similarity_dist_commutator_op', 'word_similarity_dist_op', 'word_similarity_op']
+FUNS_BODY_DIFF(0): []
+
+POLS_ONLY_STAGING(0):
+
+POLS_ONLY_PROD(302):
+  [activity_log] Admins can view all activity logs
+  [activity_log] System can create activity logs
+  [activity_log] Users can view own activity log
+  [ad_conversations] Buyers can create conversations
+  [ad_conversations] Users can update own conversations
+  [ad_conversations] Users can view own conversations
+  [ad_messages] Users can send messages to own conversations
+  [ad_messages] Users can update messages in own conversations
+  [ad_messages] Users can view messages from own conversations
+  [admin_login_logs] Admins can view own login logs
+  [admin_login_logs] Service can insert login logs
+  [admin_tab_seen] Admin can insert own tab seen
+  [admin_tab_seen] Admin can read own tab seen
+  [admin_tab_seen] Admin can update own tab seen
+  [admins] Admins can update own profile
+  [admins] Anyone can read admins table
+  [admins] Authenticated users can check admin status
+  [admins] Users can insert themselves as admin
+  [advertising_banners] admin_delete_advertising_banners
+  [advertising_banners] admin_read_advertising_banners
+  [advertising_banners] admin_update_advertising_banners
+  [advertising_banners] owner_delete_advertising_banners
+  [advertising_banners] owner_insert_advertising_banners
+  [advertising_banners] owner_read_advertising_banners
+  [advertising_banners] owner_update_advertising_banners
+  [advertising_banners] public_read_active_advertising_banners
+  [advertising_plans] admin_delete_advertising_plans
+  [advertising_plans] admin_insert_advertising_plans
+  [advertising_plans] admin_update_advertising_plans
+  [advertising_plans] public_read_advertising_plans
+  [auction_bids] Admins have full access to bids
+  [auction_bids] Anyone can view bids on active auctions
+  [auction_bids] Users can place bids after paying deposit
+  [auction_completions] Admins can create completions
+  [auction_completions] Admins have full access to completions
+  [auction_completions] Auction participants can view completions
+  [auction_completions] Participants can confirm completion
+  [auction_deposits] Admins have full access to deposits
+  [auction_deposits] Auction owners can view deposits
+  [auction_deposits] Users can create deposits
+  [auction_deposits] Users can view own deposits
+  [auctions] Admins have full access to auctions
+  [auctions] Anyone can view active auctions
+  [auctions] Authenticated users can create auctions
+  [auctions] Users can delete own auctions without bids
+  [auctions] Users can update own auctions
+  [auctions] Users can view own auctions
+  [business_categories] Anyone can view categories
+  [business_categories] Public can view all categories
+  [business_location_photos] delete_business_location_photos
+  [business_location_photos] insert_business_location_photos
+  [business_location_photos] select_business_location_photos
+  [business_location_photos] update_business_location_photos
+  [business_locations] Anyone can view business locations
+  [business_locations] Anyone can view locations of unclaimed businesses
+  [business_locations] Business owners can delete own locations
+  [business_locations] Business owners can insert own locations
+  [business_locations] Business owners can update own locations
+  [business_locations] Business owners can view own locations
+  [businesses] Anyone can view verified businesses
+  [businesses] Authenticated users can view verified, claimed or own businesse
+  [businesses] Business owners can claim unclaimed businesses
+  [businesses] Business owners can delete own business
+  [businesses] Business owners can delete own businesses
+  [businesses] Business owners can insert own business
+  [businesses] Business owners can insert own businesses
+  [businesses] Business owners can update own business
+  [businesses] Business owners can view own and unclaimed businesses
+  [businesses] Public can view verified or claimed businesses
+  [charity_organizations] Admins can delete charity organizations
+  [charity_organizations] Admins can insert charity organizations
+  [charity_organizations] Admins can update charity organizations
+  [charity_organizations] Public can view active charity organizations
+  [classified_ad_views] Anyone can create ad views
+  [classified_ad_views] Users can view their own ad views
+  [classified_ads] Admins can delete any classified ad
+  [classified_ads] Admins can update any classified ad
+  [classified_ads] Admins can view all classified ads
+  [classified_ads] Anyone can view active ads
+  [classified_ads] Users can create classified ads
+  [classified_ads] Users can create their own ads
+  [classified_ads] Users can delete own classified ads
+  [classified_ads] Users can delete their own ads
+  [classified_ads] Users can update own classified ads
+  [classified_ads] Users can update their own ads
+  [classified_ads] Users can view active classified ads
+  [classified_ads] Users can view own classified ads regardless of status
+  [classified_ads] Users can view their favorited ads
+  [classified_categories] Anyone can view categories
+  [content_moderation_logs] admins_read_moderation_logs
+  [content_moderation_logs] service_insert_moderation_logs
+  [conversations] Admins can view all conversations
+  [conversations] Users can create conversations
+  [conversations] Users can update own conversations
+  [conversations] Users can update their own conversations
+  [conversations] Users can view own conversations
+  [conversations] Users can view their own conversations
+  [customer_family_members] Admins can update any family member
+  [customer_family_members] Admins can view all family members
+  [customer_family_members] Authenticated users can view family members for leaderboard
+  [customer_family_members] Users can delete own family members
+  [customer_family_members] Users can insert own family members
+  [customer_family_members] Users can update own family members
+  [customer_family_members] Users can view own family members
+  [discount_redemptions] Business owners can verify discount redemptions
+  [discount_redemptions] Users can create own discount redemptions
+  [discount_redemptions] Users can view own discount redemptions
+  [discounts] Admins can delete any discount
+  [discounts] Admins can update any discount
+  [discounts] Admins can view all discounts
+  [discounts] Anyone can view active discounts
+  [discounts] Business owners can create discounts
+  [discounts] Business owners can delete own discounts
+  [discounts] Business owners can update own discounts
+  [faqs] Admins can delete FAQs
+  [faqs] Admins can insert FAQs
+  [faqs] Admins can update FAQs
+  [faqs] Admins can view all FAQs
+  [faqs] Anyone can view active FAQs
+  [favorite_businesses] Users can add their own favorite businesses
+  [favorite_businesses] Users can remove their own favorite businesses
+  [favorite_businesses] Users can view their own favorite businesses
+  [favorite_classified_ads] Users can add their own favorite ads
+  [favorite_classified_ads] Users can remove their own favorite ads
+  [favorite_classified_ads] Users can view their own favorite ads
+  [favorite_job_postings] Users can add their own favorite jobs
+  [favorite_job_postings] Users can remove their own favorite jobs
+  [favorite_job_postings] Users can view their own favorite jobs
+  [imported_businesses] Admins can manage imported businesses
+  [imported_businesses] Anyone can view imported businesses
+  [job_applications] Admins can view all job applications
+  [job_applications] Authenticated users can apply to jobs
+  [job_applications] Businesses can view applications to their postings
+  [job_applications] Users can update their own applications
+  [job_applications] Users can view applications they submitted
+  [job_offer_conversations] Applicants can create job offer conversations
+  [job_offer_conversations] Users can update own job offer conversations
+  [job_offer_conversations] Users can view own job offer conversations
+  [job_offer_messages] Users can send job offer messages to own conversations
+  [job_offer_messages] Users can update job offer messages in own conversations
+  [job_offer_messages] Users can view job offer messages from own conversations
+  [job_postings] Admins can delete any job posting
+  [job_postings] Admins can update any job posting
+  [job_postings] Admins can view all job postings
+  [job_postings] Anyone can view active job postings
+  [job_postings] Businesses can create job postings
+  [job_postings] Businesses can delete their own postings
+  [job_postings] Businesses can update their own postings
+  [job_postings] Businesses can view their own postings
+  [job_requests] Anyone can view active job requests
+  [job_requests] Customers can create job requests
+  [job_requests] Users can delete own job requests
+  [job_requests] Users can update own job requests
+  [job_requests] Users can view own job requests
+  [job_seeker_conversations] Employers can create job seeker conversations
+  [job_seeker_conversations] Users can update own job seeker conversations
+  [job_seeker_conversations] Users can view own job seeker conversations
+  [job_seeker_messages] Users can send job seeker messages to own conversations
+  [job_seeker_messages] Users can update job seeker messages in own conversations
+  [job_seeker_messages] Users can view job seeker messages from own conversations
+  [job_seekers] Admins can update any job seeker
+  [job_seekers] Admins can view all job seekers
+  [job_seekers] Anyone can view active job seeker ads
+  [job_seekers] Authenticated users can create job seeker ads
+  [job_seekers] Public can view active job seeker ads
+  [job_seekers] Users can create job seeker ads
+  [job_seekers] Users can delete own job seeker ads
+  [job_seekers] Users can update own job seeker ads
+  [job_seekers] Users can view own job seeker ads
+  [job_views] Users can create their own job views
+  [job_views] Users can view their own job views
+  [messages] Admins can view all messages
+  [messages] Users can create messages in their conversations
+  [messages] Users can update their own messages
+  [messages] Users can view messages in their conversations
+  [notifications] Admins can view all notifications
+  [notifications] Service role can insert notifications
+  [notifications] System can create notifications
+  [notifications] Users can delete own notifications
+  [notifications] Users can insert own notifications
+  [notifications] Users can update own notifications
+  [notifications] Users can view own notifications
+  [page_customizations] admin_delete_page_customizations
+  [page_customizations] admin_insert_page_customizations
+  [page_customizations] admin_select_page_customizations
+  [page_customizations] admin_update_page_customizations
+  [page_customizations] authenticated_select_page_customizations
+  [page_customizations] public_select_page_customizations
+  [platform_messages] Admins can read all platform messages
+  [platform_messages] Admins can update platform messages
+  [platform_messages] Anyone can send a platform message
+  [platform_settings] Anyone can view platform settings
+  [platform_settings] Only admins can delete platform settings
+  [platform_settings] Only admins can insert platform settings
+  [platform_settings] Only admins can update platform settings
+  [product_brands] Anyone can view product brands
+  [product_categories] Anyone can view product categories
+  [products] Admins can delete any product
+  [products] Admins can update any product
+  [products] Admins can view all products
+  [products] Anyone can view available products
+  [products] Authenticated users can view all products
+  [products] Owner can delete own products
+  [products] Owner can insert products
+  [products] Owner can update own products
+  [professional_profiles] Admins can delete any professional profile
+  [professional_profiles] Admins can update any professional profile
+  [professional_profiles] Admins can view all professional profiles
+  [professional_profiles] Owner can delete own professional profile
+  [professional_profiles] Owner can delete professional profile
+  [professional_profiles] Owner can insert own professional profile
+  [professional_profiles] Owner can insert professional profile
+  [professional_profiles] Owner can update own professional profile
+  [professional_profiles] Owner can update professional profile
+  [professional_profiles] Owner can view own professional profile
+  [professional_profiles] Owner or business can view professional profiles
+  [profiles] Admins can read own profile
+  [profiles] Admins can view all profiles
+  [profiles] Allow public to check nickname existence
+  [profiles] Authenticated users can view all profiles
+  [profiles] Public can view basic profile info
+  [profiles] Users can insert own profile
+  [profiles] Users can insert their own profile
+  [profiles] Users can update own profile
+  [registered_business_locations] Admins can update any registered business location
+  [registered_business_locations] Admins can view all registered business locations
+  [registered_businesses] Admins can delete any business
+  [registered_businesses] Admins can update any business
+  [registered_businesses] Business owners can delete their businesses
+  [registered_businesses] Business owners can insert their businesses
+  [registered_businesses] Business owners can update their businesses
+  [reports] Admins can update any report
+  [reports] Admins can view all reports
+  [reports] Authenticated users can create reports
+  [reports] Reviewers can update reports
+  [reports] Users can view own reports
+  [review_responses] Anyone can view review responses
+  [review_responses] Business owners can respond to reviews
+  [reviews] Admins can update any review
+  [reviews] Admins can view all reviews
+  [reviews] Anonymous users can view approved reviews
+  [reviews] Anyone can view reviews
+  [reviews] Approved reviews are viewable by everyone
+  [reviews] Customers can create reviews
+  [reviews] Customers can create reviews for all types
+  [reviews] Customers can delete own reviews
+  [reviews] Customers can update own reviews
+  [reviews] Public can view approved reviews
+  [reviews] Staff can view all reviews
+  [rewards] Anyone can view active rewards
+  [rules_content] Admins can delete rules content
+  [rules_content] Admins can insert rules content
+  [rules_content] Admins can update rules content
+  [rules_content] Admins can view all rules content
+  [rules_content] Anyone can view active rules content
+  [rules_sections] Admins can delete rules sections
+  [rules_sections] Admins can insert rules sections
+  [rules_sections] Admins can update rules sections
+  [rules_sections] Admins can view all rules sections
+  [rules_sections] Anyone can view active rules sections
+  [solidarity_documents] Anyone can view solidarity documents
+  [solidarity_documents] Authenticated users can insert solidarity documents
+  [solidarity_documents] Users can delete own solidarity documents
+  [solidarity_documents] Users can update own solidarity documents
+  [subscription_plans] Anyone can view subscription plans
+  [subscription_plans] Public can view subscription plans
+  [subscriptions] Admin can delete subscriptions
+  [subscriptions] Admin can view all subscriptions
+  [subscriptions] Admins can update any subscription
+  [subscriptions] Admins can view all subscriptions
+  [subscriptions] Admins delete any subscription
+  [subscriptions] Admins insert any subscription
+  [subscriptions] Admins update any subscription
+  [subscriptions] Admins view all subscriptions
+  [subscriptions] Users can create own subscriptions
+  [subscriptions] Users can update own subscriptions
+  [subscriptions] Users can view own subscriptions
+  [subscriptions] Users delete own subscriptions
+  [subscriptions] Users insert own subscriptions
+  [subscriptions] Users update own subscriptions
+  [subscriptions] Users view own subscriptions
+  [tasks] Users can delete own tasks
+  [tasks] Users can insert own tasks
+  [tasks] Users can update own tasks
+  [tasks] Users can view own tasks
+  [trial_usage_history] Only admins can view trial history
+  [unclaimed_business_locations] Anyone can view unclaimed businesses
+  [unclaimed_business_locations] Users can add unclaimed businesses
+  [unclaimed_business_locations] Users can delete own unclaimed businesses
+  [unclaimed_business_locations] Users can update own unclaimed businesses
+  [user_activity] Admins can update all user activity
+  [user_activity] Admins can update any activity
+  [user_activity] Admins can view all user activity
+  [user_activity] All authenticated users can view leaderboard
+  [user_activity] Public can view family member activity
+  [user_activity] Users can insert their own activity
+  [user_activity] Users can update own activity
+  [user_added_businesses] Admins can approve user added businesses
+  [user_added_businesses] Admins can view all user added businesses
+  [user_added_businesses] Users can update own businesses
+  [user_rewards] Users can claim rewards
+  [user_rewards] Users can view their own claimed rewards
+
+POLS_BODY_DIFF(0):
+
+IDXS_ONLY_STAGING(5): ['_migration_sql_pkey', 'comuni_italiani_codice_istat_key', 'professional_profiles_user_id_unique', 'profiles_tax_code_key', 'user_activity_pkey']
+IDXS_ONLY_PROD: 229
