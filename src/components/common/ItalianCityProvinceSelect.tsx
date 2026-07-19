@@ -103,6 +103,20 @@ export function ItalianCityProvinceSelect({
           </span>
         </label>
         <div className="relative">
+          {/* Fallback text input when no comuni are in DB for this province */}
+          {province && !loadingCities && cities.length === 0 ? (
+            <input
+              type="text"
+              value={city}
+              onChange={e => onCityChange(e.target.value)}
+              disabled={disabled}
+              required={required}
+              placeholder="Scrivi il nome del comune..."
+              className={`w-full px-3 py-2.5 border rounded-lg text-sm bg-white transition-all focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 ${
+                disabled ? 'bg-gray-50 cursor-not-allowed opacity-60 border-gray-300' : 'border-gray-300 hover:border-blue-400'
+              } ${city ? 'text-gray-900' : 'text-gray-400'}`}
+            />
+          ) : (
           <select
             value={city}
             disabled={disabled || !province || loadingCities}
@@ -119,10 +133,11 @@ export function ItalianCityProvinceSelect({
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
+          )}
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
             {loadingCities
               ? <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-              : <ChevronDown className="w-4 h-4 text-gray-400" />
+              : cities.length > 0 ? <ChevronDown className="w-4 h-4 text-gray-400" /> : null
             }
           </div>
         </div>
