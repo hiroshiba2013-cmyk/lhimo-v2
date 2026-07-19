@@ -91,6 +91,14 @@ Deno.serve(async (req: Request) => {
 
     console.log('Auth user created successfully with ID:', authData.user.id);
 
+    // Set app_metadata.is_admin = true so is_admin() JWT check works
+    const { error: metaError } = await supabaseAdmin.auth.admin.updateUserById(authData.user.id, {
+      app_metadata: { is_admin: true },
+    });
+    if (metaError) {
+      console.error('Failed to set app_metadata:', metaError);
+    }
+
     // Split full name into first and last name
     const nameParts = fullName.trim().split(' ');
     const firstName = nameParts[0] || '';

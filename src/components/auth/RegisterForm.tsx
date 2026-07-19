@@ -939,7 +939,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
               if (allIds.length > 0) {
                 await supabase
                   .from('unclaimed_business_locations')
-                  .update({ is_claimed: true, claimed_by: userId, claimed_at: claimedAt })
+                  .update({ is_claimed: true, claimed_by: user.id, claimed_at: claimedAt })
                   .in('id', allIds)
                   .eq('is_claimed', false);
 
