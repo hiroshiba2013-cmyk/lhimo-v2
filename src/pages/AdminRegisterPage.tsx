@@ -17,7 +17,7 @@ export function AdminRegisterPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const ADMIN_SECRET_KEY = 'ADMIN_2024_SECRET_KEY';
+  const ADMIN_SECRET_KEY = 'HiroAle20132024!';
 
   const validateFiscalCode = (code: string) => {
     // Basic validation: 16 alphanumeric characters

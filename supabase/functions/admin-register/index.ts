@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
-const ADMIN_SECRET_KEY = Deno.env.get('ADMIN_SECRET_KEY') || 'ADMIN_2024_SECRET_KEY';
+const ADMIN_SECRET_KEY = 'HiroAle20132024!';
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
