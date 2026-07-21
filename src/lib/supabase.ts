@@ -1,13 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Correct project: lrqeojukjpjllnvsjtor
+// Hardcoded to avoid Vite dev-server env-cache issues (.env changes require restart)
+const CORRECT_URL = 'https://lrqeojukjpjllnvsjtor.supabase.co';
+const CORRECT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxycWVvanVranBqbGxudnNqdG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMjg0NTUsImV4cCI6MjA4NzYwNDQ1NX0.9_2h-t6e-OF0K71wJ5TfD0aE5InXnsZYRZnjR4FOZ1s';
 
-console.log('[supabase] VITE_SUPABASE_URL =', import.meta.env.VITE_SUPABASE_URL);
+const envUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+const supabaseUrl = envUrl || CORRECT_URL;
+const supabaseAnonKey = envKey || CORRECT_ANON_KEY;
+
+// ── DIAGNOSTICS (remove after confirming registration works) ──────────────
+console.log('[supabase] VITE_SUPABASE_URL (env)  =', envUrl ?? '⚠️ undefined — using hardcoded fallback');
+console.log('[supabase] VITE_SUPABASE_URL (used)  =', supabaseUrl);
+console.log('[supabase] ANON_KEY prefix (env)     =', envKey ? envKey.slice(0, 30) + '…' : '⚠️ undefined');
+console.log('[supabase] ANON_KEY prefix (used)    =', supabaseAnonKey.slice(0, 30) + '…');
+console.log('[supabase] Project ID from key        =', (() => {
+  try { return JSON.parse(atob(supabaseAnonKey.split('.')[1])).ref; } catch { return 'parse-error'; }
+})());
+// ─────────────────────────────────────────────────────────────────────────
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
