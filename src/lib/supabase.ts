@@ -1,16 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Always use the correct project regardless of env vars (Vite caches .env at startup)
-const supabaseUrl = 'https://lrqeojukjpjllnvsjtor.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxycWVvanVranBqbGxudnNqdG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMjg0NTUsImV4cCI6MjA4NzYwNDQ1NX0.9_2h-t6e-OF0K71wJ5TfD0aE5InXnsZYRZnjR4FOZ1s';
-
-// ── DIAGNOSTICS ───────────────────────────────────────────────────────────
-console.log('[supabase] env VITE_SUPABASE_URL =', import.meta.env.VITE_SUPABASE_URL);
-console.log('[supabase] using URL             =', supabaseUrl);
-console.log('[supabase] project ref from key  =', (() => {
-  try { return JSON.parse(atob(supabaseAnonKey.split('.')[1])).ref; } catch { return 'parse-error'; }
-})());
-// ─────────────────────────────────────────────────────────────────────────
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
