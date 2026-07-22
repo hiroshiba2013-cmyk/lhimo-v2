@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
-import { Download, RefreshCw, CheckCircle, XCircle, Play, Square, Plus, Trash2, MapPin } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Download, RefreshCw, CheckCircle, XCircle, Play, Square, Plus, Trash2, MapPin, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../common/Toast';
+import { PROVINCE_TO_CODE, ITALIAN_PROVINCES, PROVINCES_BY_REGION } from '../../lib/cities';
 
 const PROVINCES: { code: string; region: string; label: string }[] = [
   { code:"AQ", region:"Abruzzo", label:"AQ - L'Aquila" },
@@ -282,6 +283,18 @@ export function OsmImportSection() {
   const [provinceInput, setProvinceInput] = useState('');
   const [comuni, setComuni] = useState<ComuneEntry[]>([]);
 
+  // City dropdown state
+  const [cityList, setCityList] = useState<string[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
+
+  const loadCities = useCallback(async (provCode: string) => {
+    if (!provCode) { setCityList([]); return; }
+    setLoadingCities(true);
+    const { data } = await supabase.rpc('get_comuni_by_provincia', { p_provincia: provCode });
+    setCityList(data ? data.map((r: { comune: string }) => r.comune) : []);
+    setLoadingCities(false);
+  }, []);
+
   // Selected tags
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set(OSM_TAGS.map(t => t.tag)));
 
@@ -302,6 +315,13 @@ export function OsmImportSection() {
     if (comuni.some(c => c.city.toLowerCase() === city.toLowerCase() && c.province === prov.code)) return;
     setComuni(prev => [...prev, { city, province: prov.code, region: prov.region }]);
     setComuneInput('');
+  };
+
+  const onProvinceChange = (code: string) => {
+    setProvinceInput(code);
+    setComuneInput('');
+    setCityList([]);
+    if (code) loadCities(code);
   };
 
   const removeComune = (i: number) => setComuni(prev => prev.filter((_, idx) => idx !== i));
@@ -411,18 +431,30 @@ export function OsmImportSection() {
 
         {/* Add comune row */}
         <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={comuneInput}
-            onChange={e => setComuneInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addComune()}
-            placeholder="Nome comune (es. Busto Arsizio)"
-            disabled={running}
-            className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:opacity-50"
-          />
+          <div className="relative flex-1">
+            <select
+              value={comuneInput}
+              onChange={e => setComuneInput(e.target.value)}
+              disabled={running || !provinceInput || loadingCities}
+              className="w-full appearance-none px-3 py-2.5 pr-9 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white disabled:opacity-50 cursor-pointer"
+            >
+              <option value="" disabled>
+                {loadingCities ? 'Caricamento...' : provinceInput ? 'Seleziona comune...' : 'Prima scegli la provincia'}
+              </option>
+              {cityList.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              {loadingCities
+                ? <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                : cityList.length > 0 ? <ChevronDown className="w-4 h-4 text-gray-400" /> : null
+              }
+            </div>
+          </div>
           <select
             value={provinceInput}
-            onChange={e => setProvinceInput(e.target.value)}
+            onChange={e => onProvinceChange(e.target.value)}
             disabled={running}
             className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white disabled:opacity-50 min-w-[200px]"
           >
@@ -442,6 +474,9 @@ export function OsmImportSection() {
             Aggiungi
           </button>
         </div>
+        {provinceInput && !loadingCities && cityList.length > 0 && (
+          <p className="-mt-2 mb-3 text-xs text-gray-400">{cityList.length} comuni disponibili</p>
+        )}
 
         {/* Comuni chips */}
         {comuni.length > 0 && (
