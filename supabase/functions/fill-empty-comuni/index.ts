@@ -1,5 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.97.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,7 +71,7 @@ const OSM_KEY: Record<string, string> = {
   school:"amenity",funeral_directors:"amenity",sauna:"amenity",fuel:"amenity",
   bicycle_rental:"amenity",music_school:"amenity",dancing_school:"amenity",
   language_school:"amenity",veterinary:"amenity",charging_station:"amenity",
-  vending_machine:"amenity",parking:"amenity",bicycle_rental:"amenity",
+  vending_machine:"amenity",parking:"amenity",
   supermarket:"shop",convenience:"shop",greengrocer:"shop",butcher:"shop",fishmonger:"shop",
   deli:"shop",dairy:"shop",bakery:"shop",pastry:"shop",confectionery:"shop",chocolate:"shop",
   cheese:"shop",wine:"shop",beverages:"shop",pasta:"shop",pizza:"shop",clothes:"shop",
@@ -188,18 +187,17 @@ Deno.serve(async (req: Request) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Missing authorization header");
 
-    const userClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } },
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
     const { data: { user }, error: userError } = await userClient.auth.getUser();
     if (userError || !user) throw new Error("Unauthorized");
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    );
+    const supabase = createClient(supabaseUrl, serviceKey);
     const { data: adminRow } = await supabase
       .from("admins").select("user_id").eq("user_id", user.id).maybeSingle();
     if (!adminRow) throw new Error("Not an admin");
@@ -219,7 +217,6 @@ Deno.serve(async (req: Request) => {
     if (!catRow) throw new Error(`Category not found: ${catName}`);
     const catId = catRow.id;
 
-    // Query Overpass server-side (no CORS issues, no browser timeouts)
     const osmKey = OSM_KEY[osm_tag] ?? "amenity";
     const elements = await queryOverpassServer(city, osmKey, osm_tag, lat ?? null, lng ?? null);
     const businesses = parseElements(elements, city);
@@ -231,7 +228,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Deduplicate by osm_id for this city+category
     const { data: existingRows } = await supabase
       .from("unclaimed_business_locations")
       .select("osm_id")
