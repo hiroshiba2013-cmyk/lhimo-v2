@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Download, RefreshCw, CheckCircle, XCircle, Play, Square, Plus, Trash2, MapPin, ChevronDown } from 'lucide-react';
+import { Download, RefreshCw, CheckCircle, XCircle, Play, Square, Plus, Trash2, MapPin, ChevronDown, Layers } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../common/Toast';
 import { PROVINCE_TO_CODE, ITALIAN_PROVINCES, PROVINCES_BY_REGION } from '../../lib/cities';
@@ -232,9 +232,10 @@ interface StepResult {
 }
 
 async function queryOverpass(city: string, region: string, osmKey: string, osmTag: string): Promise<any[]> {
-  // Use area-based query by city+country name — works well for named municipalities
+  // First find Italy as a country area, then find the city administrative boundary within it
   const query = `[out:json][timeout:120];
-area["name"="${city}"]["boundary"="administrative"](if: is_in_country("IT"))->.city;
+area["ISO3166-1"="IT"]->.country;
+area["name"="${city}"]["boundary"="administrative"](area.country)->.city;
 (
   node["name"]["${osmKey}"="${osmTag}"](area.city);
   way["name"]["${osmKey}"="${osmTag}"](area.city);
@@ -322,6 +323,19 @@ export function OsmImportSection() {
     setComuneInput('');
     setCityList([]);
     if (code) loadCities(code);
+  };
+
+  const addAllComuniInProvince = () => {
+    if (!provinceInput || cityList.length === 0) return;
+    const prov = PROVINCES.find(p => p.code === provinceInput);
+    if (!prov) return;
+    setComuni(prev => {
+      const existing = new Set(prev.map(c => c.city.toLowerCase()));
+      const additions = cityList
+        .filter(c => !existing.has(c.toLowerCase()))
+        .map(c => ({ city: c, province: prov.code, region: prov.region }));
+      return [...prev, ...additions];
+    });
   };
 
   const removeComune = (i: number) => setComuni(prev => prev.filter((_, idx) => idx !== i));
@@ -472,6 +486,14 @@ export function OsmImportSection() {
           >
             <Plus className="w-4 h-4" />
             Aggiungi
+          </button>
+          <button
+            onClick={addAllComuniInProvince}
+            disabled={running || !provinceInput || cityList.length === 0}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-40 transition-colors whitespace-nowrap"
+          >
+            <Layers className="w-4 h-4" />
+            Tutti i comuni
           </button>
         </div>
         {provinceInput && !loadingCities && cityList.length > 0 && (

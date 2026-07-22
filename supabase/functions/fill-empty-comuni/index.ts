@@ -136,25 +136,32 @@ Deno.serve(async (req: Request) => {
 
     const toInsert = businesses
       .filter(b => !existingIds.has(b.osm_id))
-      .map(b => ({
-        name: b.name,
-        category_id: catId,
-        city: b.city || city,
-        province,
-        region,
-        street: b.street || null,
-        postal_code: b.postal_code || null,
-        phone: b.phone || null,
-        website: b.website || null,
-        email: b.email || null,
-        business_hours: b.business_hours || null,
-        latitude: b.latitude || null,
-        longitude: b.longitude || null,
-        osm_id: b.osm_id,
-        is_claimed: false,
-        added_by: null,
-        approval_status: "approved",
-      }));
+      .map(b => {
+        let parsedHours = null;
+        if (b.business_hours) {
+          try { parsedHours = JSON.parse(b.business_hours); }
+          catch { parsedHours = { raw: b.business_hours }; }
+        }
+        return {
+          name: b.name,
+          category_id: catId,
+          city: b.city || city,
+          province,
+          region,
+          street: b.street || null,
+          postal_code: b.postal_code || null,
+          phone: b.phone || null,
+          website: b.website || null,
+          email: b.email || null,
+          business_hours: parsedHours,
+          latitude: b.latitude || null,
+          longitude: b.longitude || null,
+          osm_id: b.osm_id,
+          is_claimed: false,
+          added_by: null,
+          approval_status: "approved",
+        };
+      });
 
     let imported = 0;
     for (let i = 0; i < toInsert.length; i += 300) {
