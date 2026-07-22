@@ -231,9 +231,24 @@ interface StepResult {
   found?: number; imported?: number; skipped?: number; error?: string;
 }
 
-async function queryOverpass(city: string, region: string, osmKey: string, osmTag: string): Promise<any[]> {
-  // First find Italy as a country area, then find the city administrative boundary within it
-  const query = `[out:json][timeout:120];
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.osm.ch/api/interpreter',
+];
+
+async function queryOverpass(city: string, region: string, osmKey: string, osmTag: string, lat?: number, lng?: number): Promise<any[]> {
+  // Use around-query with coordinates if available (much faster than area lookup)
+  let query: string;
+  if (lat != null && lng != null) {
+    query = `[out:json][timeout:60];
+(
+  node["name"]["${osmKey}"="${osmTag}"](around:5000,${lat},${lng});
+  way["name"]["${osmKey}"="${osmTag}"](around:5000,${lat},${lng});
+);
+out center tags;`;
+  } else {
+    query = `[out:json][timeout:90];
 area["ISO3166-1"="IT"]->.country;
 area["name"="${city}"]["boundary"="administrative"](area.country)->.city;
 (
@@ -241,18 +256,29 @@ area["name"="${city}"]["boundary"="administrative"](area.country)->.city;
   way["name"]["${osmKey}"="${osmTag}"](area.city);
 );
 out center tags;`;
-
-  const res = await fetch('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `data=${encodeURIComponent(query)}`,
-  });
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Overpass ${res.status}: ${txt.slice(0, 120)}`);
   }
-  const data = await res.json();
-  return data.elements ?? [];
+
+  let lastErr = '';
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `data=${encodeURIComponent(query)}`,
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        lastErr = `Overpass ${res.status}: ${txt.slice(0, 120)}`;
+        continue;
+      }
+      const data = await res.json();
+      return data.elements ?? [];
+    } catch (e: any) {
+      lastErr = e.message;
+      continue;
+    }
+  }
+  throw new Error(lastErr || 'Tutti i server Overpass non rispondono');
 }
 
 function parseElements(elements: any[], fallbackCity: string): any[] {
@@ -346,6 +372,19 @@ export function OsmImportSection() {
     setSteps(initial);
     setCurrentComune(comune);
 
+    // Fetch coordinates for this comune from DB (enables faster around-query)
+    let lat: number | undefined;
+    let lng: number | undefined;
+    try {
+      const { data: coordRow } = await supabase
+        .from('comuni_italiani')
+        .select('lat, lng')
+        .eq('nome', comune.city)
+        .eq('sigla_provincia', comune.province)
+        .maybeSingle();
+      if (coordRow) { lat = coordRow.lat; lng = coordRow.lng; }
+    } catch { /* fall back to area-based query */ }
+
     for (let i = 0; i < tagList.length; i++) {
       if (abortRef.current) break;
       const { tag, label } = tagList[i];
@@ -354,7 +393,7 @@ export function OsmImportSection() {
       updateStep(i, { status: 'fetching' });
       let elements: any[] = [];
       try {
-        elements = await queryOverpass(comune.city, comune.region, osmKey, tag);
+        elements = await queryOverpass(comune.city, comune.region, osmKey, tag, lat, lng);
       } catch (e: any) {
         updateStep(i, { status: 'error', error: e.message });
         await new Promise(r => setTimeout(r, 500));
