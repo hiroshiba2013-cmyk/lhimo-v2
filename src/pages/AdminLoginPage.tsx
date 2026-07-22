@@ -27,12 +27,46 @@ export function AdminLoginPage() {
 
       console.log('User logged in:', authData.user.id);
 
-      const { data: isAdmin, error: adminError } = await supabase
-        .rpc('check_admin_status', { p_user_id: authData.user.id });
+      let isAdmin = false;
 
-      console.log('Admin check:', { isAdmin, adminError, appMetadata: authData.user.app_metadata });
+      // Try RPC first
+      try {
+        const { data: rpcResult, error: adminError } = await supabase
+          .rpc('check_admin_status', { p_user_id: authData.user.id });
+        console.log('Admin check RPC:', { rpcResult, adminError });
+        if (!adminError && rpcResult === true) {
+          isAdmin = true;
+        }
+      } catch (rpcErr) {
+        console.warn('RPC check failed:', rpcErr);
+      }
 
-      if (adminError || !isAdmin) {
+      // Fallback: check JWT app_metadata
+      if (!isAdmin) {
+        const session = await supabase.auth.getSession();
+        const appMeta = session.data.session?.user?.app_metadata;
+        console.log('JWT app_metadata:', appMeta);
+        if (appMeta?.is_admin === true || appMeta?.user_type === 'admin') {
+          isAdmin = true;
+        }
+      }
+
+      // Fallback: direct query on admins table
+      if (!isAdmin) {
+        const { data: adminRow, error: adminErr } = await supabase
+          .from('admins')
+          .select('user_id')
+          .eq('user_id', authData.user.id)
+          .maybeSingle();
+        console.log('Admin table check:', { adminRow, adminErr });
+        if (!adminErr && adminRow) {
+          isAdmin = true;
+        }
+      }
+
+      console.log('Final isAdmin:', isAdmin);
+
+      if (!isAdmin) {
         console.log('Not an admin, signing out');
         await supabase.auth.signOut();
         throw new Error('Non hai i permessi di amministratore');
