@@ -27,17 +27,12 @@ export function AdminLoginPage() {
 
       console.log('User logged in:', authData.user.id);
 
-      const isAdminFromJwt = authData.user.app_metadata?.is_admin === true;
+      const { data: isAdmin, error: adminError } = await supabase
+        .rpc('check_admin_status', { p_user_id: authData.user.id });
 
-      const { data: adminCheck, error: adminError } = await supabase
-        .from('admins')
-        .select('user_id')
-        .eq('user_id', authData.user.id)
-        .maybeSingle();
+      console.log('Admin check:', { isAdmin, adminError, appMetadata: authData.user.app_metadata });
 
-      console.log('Admin check:', { adminCheck, adminError, isAdminFromJwt, appMetadata: authData.user.app_metadata });
-
-      if (!adminCheck && !isAdminFromJwt) {
+      if (adminError || !isAdmin) {
         console.log('Not an admin, signing out');
         await supabase.auth.signOut();
         throw new Error('Non hai i permessi di amministratore');
@@ -46,10 +41,14 @@ export function AdminLoginPage() {
       console.log('Admin verified, logging access');
 
       // Log the admin login
-      await supabase.from('admin_login_logs').insert({
-        admin_id: authData.user.id,
-        login_time: new Date().toISOString(),
-      });
+      try {
+        await supabase.from('admin_login_logs').insert({
+          admin_id: authData.user.id,
+          login_time: new Date().toISOString(),
+        });
+      } catch (logErr) {
+        console.warn('Failed to log admin login:', logErr);
+      }
 
       window.location.href = '/admin';
     } catch (err: any) {
