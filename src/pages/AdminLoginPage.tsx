@@ -27,20 +27,17 @@ export function AdminLoginPage() {
 
       console.log('User logged in:', authData.user.id);
 
+      const isAdminFromJwt = authData.user.app_metadata?.is_admin === true;
+
       const { data: adminCheck, error: adminError } = await supabase
         .from('admins')
         .select('user_id')
         .eq('user_id', authData.user.id)
         .maybeSingle();
 
-      console.log('Admin check:', { adminCheck, adminError });
+      console.log('Admin check:', { adminCheck, adminError, isAdminFromJwt, appMetadata: authData.user.app_metadata });
 
-      if (adminError) {
-        console.error('Admin check error:', adminError);
-        throw adminError;
-      }
-
-      if (!adminCheck) {
+      if (!adminCheck && !isAdminFromJwt) {
         console.log('Not an admin, signing out');
         await supabase.auth.signOut();
         throw new Error('Non hai i permessi di amministratore');
