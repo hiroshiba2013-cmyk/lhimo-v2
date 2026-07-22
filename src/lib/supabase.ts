@@ -1,7 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const FALLBACK_URL = 'https://lrqeojukjpjllnvsjtor.supabase.co';
+const FALLBACK_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxycWVvanVranBqbGxudnNqdG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMjg0NTUsImV4cCI6MjA4NzYwNDQ1NX0.9_2h-t6e-OF0K71wJ5TfD0aE5InXnsZYRZnjR4FOZ1s';
+
+const envUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+
+const isOldProject = (url: string | undefined): boolean =>
+  !!url && url.includes('zlzupeuwfpcpgxymdvpi');
+
+const supabaseUrl = !envUrl || isOldProject(envUrl) ? FALLBACK_URL : envUrl;
+const supabaseAnonKey = !envKey || isOldProject(envUrl) ? FALLBACK_KEY : envKey;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
