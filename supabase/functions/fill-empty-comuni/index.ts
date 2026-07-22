@@ -63,18 +63,120 @@ const OSM_CATEGORY_MAP: Record<string, string> = {
   variety_store:"Bazar",general:"Alimentari",
 };
 
-interface BusinessRecord {
-  name: string;
-  osm_id: string;
-  city: string | null;
-  street: string | null;
-  postal_code: string | null;
-  phone: string | null;
-  website: string | null;
-  email: string | null;
-  business_hours: string | null;
-  latitude: number | null;
-  longitude: number | null;
+const OSM_KEY: Record<string, string> = {
+  restaurant:"amenity",fast_food:"amenity",cafe:"amenity",bar:"amenity",pub:"amenity",
+  biergarten:"amenity",food_court:"amenity",ice_cream:"amenity",pharmacy:"amenity",
+  doctors:"amenity",dentist:"amenity",hospital:"amenity",clinic:"amenity",gym:"amenity",
+  bank:"amenity",atm:"amenity",post_office:"amenity",library:"amenity",nightclub:"amenity",
+  taxi:"amenity",driving_school:"amenity",kindergarten:"amenity",university:"amenity",
+  school:"amenity",funeral_directors:"amenity",sauna:"amenity",fuel:"amenity",
+  bicycle_rental:"amenity",music_school:"amenity",dancing_school:"amenity",
+  language_school:"amenity",veterinary:"amenity",charging_station:"amenity",
+  vending_machine:"amenity",parking:"amenity",bicycle_rental:"amenity",
+  supermarket:"shop",convenience:"shop",greengrocer:"shop",butcher:"shop",fishmonger:"shop",
+  deli:"shop",dairy:"shop",bakery:"shop",pastry:"shop",confectionery:"shop",chocolate:"shop",
+  cheese:"shop",wine:"shop",beverages:"shop",pasta:"shop",pizza:"shop",clothes:"shop",
+  shoes:"shop",boutique:"shop",fashion:"shop",leather:"shop",electronics:"shop",
+  computer:"shop",mobile_phone:"shop",hifi:"shop",camera:"shop",video_games:"shop",
+  furniture:"shop",kitchen:"shop",bed:"shop",flooring:"shop",tiles:"shop",
+  bathroom_furnishing:"shop",curtain:"shop",carpet:"shop",lighting:"shop",glaziery:"shop",
+  books:"shop",newsagent:"shop",stationery:"shop",florist:"shop",jewelry:"shop",
+  watches:"shop",toys:"shop",baby_goods:"shop",sports:"shop",outdoor:"shop",bicycle:"shop",
+  motorcycle:"shop",music:"shop",musical_instrument:"shop",gift:"shop",antiques:"shop",
+  second_hand:"shop",model:"shop",hobby:"shop",art:"shop",photo:"shop",tobacco:"shop",
+  e_cigarette:"shop",erotic:"shop",weapons:"shop",hardware:"shop",doityourself:"shop",
+  paint:"shop",building_materials:"shop",car_repair:"shop",car_wash:"shop",car_rental:"shop",
+  car_parts:"shop",car_dealer:"shop",tyres:"shop",vehicle_inspection:"shop",pet:"shop",
+  pet_grooming:"shop",coffee:"shop",spices:"shop",tea:"shop",department_store:"shop",
+  mall:"shop",variety_store:"shop",general:"shop",hairdresser:"shop",
+  hairdresser_supply:"shop",optician:"shop",hearing_aids:"shop",travel_agency:"shop",
+  copyshop:"shop",laundry:"shop",dry_cleaning:"shop",swimming_pool:"shop",golf_course:"shop",
+  beauty:"shop",massage:"shop",tattoo:"shop",
+  lawyer:"office",notary:"office",accountant:"office",financial_advisor:"office",
+  tax_advisor:"office",architect:"office",engineer:"office",surveyor:"office",
+  estate_agent:"office",employment_agency:"office",advertising:"office",consultant:"office",
+  insurance:"office",telecommunication:"office",
+  blacksmith:"craft",carpenter:"craft",plumber:"craft",electrician:"craft",painter:"craft",
+  shoemaker:"craft",key_cutter:"craft",roofing:"craft",stonemason:"craft",beekeeper:"craft",
+  winery:"craft",distillery:"craft",tailor:"craft",
+  hotel:"tourism",motel:"tourism",hostel:"tourism",guest_house:"tourism",
+  camp_site:"tourism",caravan_site:"tourism",chalet:"tourism",
+};
+
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.osm.ch/api/interpreter",
+];
+
+async function queryOverpassServer(
+  city: string,
+  osmKey: string,
+  osmTag: string,
+  lat: number | null,
+  lng: number | null,
+): Promise<any[]> {
+  let query: string;
+  if (lat != null && lng != null) {
+    query = `[out:json][timeout:60];
+(
+  node["name"]["${osmKey}"="${osmTag}"](around:5000,${lat},${lng});
+  way["name"]["${osmKey}"="${osmTag}"](around:5000,${lat},${lng});
+);
+out center tags;`;
+  } else {
+    query = `[out:json][timeout:90];
+area["ISO3166-1"="IT"]->.country;
+area["name"="${city}"]["boundary"="administrative"](area.country)->.city;
+(
+  node["name"]["${osmKey}"="${osmTag}"](area.city);
+  way["name"]["${osmKey}"="${osmTag}"](area.city);
+);
+out center tags;`;
+  }
+
+  let lastErr = "";
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `data=${encodeURIComponent(query)}`,
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        lastErr = `Overpass ${res.status}: ${txt.slice(0, 120)}`;
+        continue;
+      }
+      const data = await res.json();
+      return data.elements ?? [];
+    } catch (e: any) {
+      lastErr = e.message;
+      continue;
+    }
+  }
+  throw new Error(lastErr || "Tutti i server Overpass non rispondono");
+}
+
+function parseElements(elements: any[], fallbackCity: string) {
+  return elements
+    .filter((el: any) => el.tags?.name)
+    .map((el: any) => {
+      const tags = el.tags;
+      return {
+        name: tags.name,
+        osm_id: `${el.type}/${el.id}`,
+        city: tags["addr:city"] || tags["addr:municipality"] || fallbackCity,
+        street: tags["addr:street"] || null,
+        postal_code: tags["addr:postcode"] || null,
+        phone: tags.phone || tags["contact:phone"] || null,
+        website: tags.website || tags["contact:website"] || null,
+        email: tags.email || tags["contact:email"] || null,
+        business_hours: tags.opening_hours || null,
+        latitude: el.lat ?? el.center?.lat ?? null,
+        longitude: el.lon ?? el.center?.lon ?? null,
+      };
+    });
 }
 
 Deno.serve(async (req: Request) => {
@@ -89,7 +191,7 @@ Deno.serve(async (req: Request) => {
     const userClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } }
+      { global: { headers: { Authorization: authHeader } } },
     );
     const { data: { user }, error: userError } = await userClient.auth.getUser();
     if (userError || !user) throw new Error("Unauthorized");
@@ -102,12 +204,11 @@ Deno.serve(async (req: Request) => {
       .from("admins").select("user_id").eq("user_id", user.id).maybeSingle();
     if (!adminRow) throw new Error("Not an admin");
 
-    // body: { city, province, region, osm_tag, businesses: BusinessRecord[] }
     const body = await req.json();
-    const { city, province, region, osm_tag, businesses } = body;
+    const { city, province, region, osm_tag, lat, lng } = body;
 
-    if (!city || !province || !region || !osm_tag || !Array.isArray(businesses)) {
-      throw new Error("city, province, region, osm_tag and businesses[] are required");
+    if (!city || !province || !region || !osm_tag) {
+      throw new Error("city, province, region and osm_tag are required");
     }
 
     const catName = OSM_CATEGORY_MAP[osm_tag];
@@ -118,10 +219,15 @@ Deno.serve(async (req: Request) => {
     if (!catRow) throw new Error(`Category not found: ${catName}`);
     const catId = catRow.id;
 
+    // Query Overpass server-side (no CORS issues, no browser timeouts)
+    const osmKey = OSM_KEY[osm_tag] ?? "amenity";
+    const elements = await queryOverpassServer(city, osmKey, osm_tag, lat ?? null, lng ?? null);
+    const businesses = parseElements(elements, city);
+
     if (businesses.length === 0) {
       return new Response(
-        JSON.stringify({ imported: 0, skipped: 0, category: catName }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ imported: 0, skipped: 0, found: 0, category: catName }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -132,11 +238,11 @@ Deno.serve(async (req: Request) => {
       .eq("city", city)
       .eq("category_id", catId)
       .not("osm_id", "is", null);
-    const existingIds = new Set(existingRows?.map(r => r.osm_id) ?? []);
+    const existingIds = new Set(existingRows?.map((r: any) => r.osm_id) ?? []);
 
     const toInsert = businesses
-      .filter(b => !existingIds.has(b.osm_id))
-      .map(b => {
+      .filter((b: any) => !existingIds.has(b.osm_id))
+      .map((b: any) => {
         let parsedHours = null;
         if (b.business_hours) {
           try { parsedHours = JSON.parse(b.business_hours); }
@@ -172,13 +278,18 @@ Deno.serve(async (req: Request) => {
     }
 
     return new Response(
-      JSON.stringify({ imported, skipped: businesses.length - toInsert.length, category: catName }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        imported,
+        skipped: businesses.length - toInsert.length,
+        found: businesses.length,
+        category: catName,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err: any) {
     return new Response(
       JSON.stringify({ error: err.message }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });

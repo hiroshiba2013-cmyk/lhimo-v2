@@ -114,45 +114,6 @@ const PROVINCES: { code: string; region: string; label: string }[] = [
   { code:"VR", region:"Veneto", label:"VR - Verona" },
 ];
 
-const OSM_KEY: Record<string, string> = {
-  restaurant:"amenity",fast_food:"amenity",cafe:"amenity",bar:"amenity",pub:"amenity",
-  biergarten:"amenity",food_court:"amenity",ice_cream:"amenity",pharmacy:"amenity",
-  doctors:"amenity",dentist:"amenity",hospital:"amenity",clinic:"amenity",gym:"amenity",
-  bank:"amenity",atm:"amenity",post_office:"amenity",library:"amenity",nightclub:"amenity",
-  taxi:"amenity",driving_school:"amenity",kindergarten:"amenity",university:"amenity",
-  school:"amenity",funeral_directors:"amenity",sauna:"amenity",fuel:"amenity",
-  bicycle_rental:"amenity",music_school:"amenity",dancing_school:"amenity",
-  language_school:"amenity",veterinary:"amenity",
-  supermarket:"shop",convenience:"shop",greengrocer:"shop",butcher:"shop",fishmonger:"shop",
-  deli:"shop",dairy:"shop",bakery:"shop",pastry:"shop",confectionery:"shop",chocolate:"shop",
-  cheese:"shop",wine:"shop",beverages:"shop",pasta:"shop",pizza:"shop",clothes:"shop",
-  shoes:"shop",boutique:"shop",fashion:"shop",leather:"shop",electronics:"shop",
-  computer:"shop",mobile_phone:"shop",hifi:"shop",camera:"shop",video_games:"shop",
-  furniture:"shop",kitchen:"shop",bed:"shop",flooring:"shop",tiles:"shop",
-  bathroom_furnishing:"shop",curtain:"shop",carpet:"shop",lighting:"shop",glaziery:"shop",
-  books:"shop",newsagent:"shop",stationery:"shop",florist:"shop",jewelry:"shop",
-  watches:"shop",toys:"shop",baby_goods:"shop",sports:"shop",outdoor:"shop",bicycle:"shop",
-  motorcycle:"shop",music:"shop",musical_instrument:"shop",gift:"shop",antiques:"shop",
-  second_hand:"shop",model:"shop",hobby:"shop",art:"shop",photo:"shop",tobacco:"shop",
-  e_cigarette:"shop",erotic:"shop",weapons:"shop",hardware:"shop",doityourself:"shop",
-  paint:"shop",building_materials:"shop",car_repair:"shop",car_wash:"shop",car_rental:"shop",
-  car_parts:"shop",car_dealer:"shop",tyres:"shop",vehicle_inspection:"shop",pet:"shop",
-  pet_grooming:"shop",coffee:"shop",spices:"shop",tea:"shop",department_store:"shop",
-  mall:"shop",variety_store:"shop",general:"shop",hairdresser:"shop",
-  hairdresser_supply:"shop",optician:"shop",hearing_aids:"shop",travel_agency:"shop",
-  copyshop:"shop",laundry:"shop",dry_cleaning:"shop",swimming_pool:"shop",golf_course:"shop",
-  beauty:"shop",massage:"shop",tattoo:"shop",
-  lawyer:"office",notary:"office",accountant:"office",financial_advisor:"office",
-  tax_advisor:"office",architect:"office",engineer:"office",surveyor:"office",
-  estate_agent:"office",employment_agency:"office",advertising:"office",consultant:"office",
-  insurance:"office",telecommunication:"office",
-  blacksmith:"craft",carpenter:"craft",plumber:"craft",electrician:"craft",painter:"craft",
-  shoemaker:"craft",key_cutter:"craft",roofing:"craft",stonemason:"craft",beekeeper:"craft",
-  winery:"craft",distillery:"craft",tailor:"craft",
-  hotel:"tourism",motel:"tourism",hostel:"tourism",guest_house:"tourism",
-  camp_site:"tourism",caravan_site:"tourism",chalet:"tourism",
-};
-
 const OSM_TAGS: { tag: string; label: string }[] = [
   { tag:"restaurant", label:"Ristoranti" },
   { tag:"fast_food", label:"Fast Food" },
@@ -229,77 +190,6 @@ interface StepResult {
   tag: string; label: string;
   status: 'pending' | 'fetching' | 'inserting' | 'done' | 'error';
   found?: number; imported?: number; skipped?: number; error?: string;
-}
-
-const OVERPASS_ENDPOINTS = [
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.osm.ch/api/interpreter',
-];
-
-async function queryOverpass(city: string, region: string, osmKey: string, osmTag: string, lat?: number, lng?: number): Promise<any[]> {
-  // Use around-query with coordinates if available (much faster than area lookup)
-  let query: string;
-  if (lat != null && lng != null) {
-    query = `[out:json][timeout:60];
-(
-  node["name"]["${osmKey}"="${osmTag}"](around:5000,${lat},${lng});
-  way["name"]["${osmKey}"="${osmTag}"](around:5000,${lat},${lng});
-);
-out center tags;`;
-  } else {
-    query = `[out:json][timeout:90];
-area["ISO3166-1"="IT"]->.country;
-area["name"="${city}"]["boundary"="administrative"](area.country)->.city;
-(
-  node["name"]["${osmKey}"="${osmTag}"](area.city);
-  way["name"]["${osmKey}"="${osmTag}"](area.city);
-);
-out center tags;`;
-  }
-
-  let lastErr = '';
-  for (const endpoint of OVERPASS_ENDPOINTS) {
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `data=${encodeURIComponent(query)}`,
-      });
-      if (!res.ok) {
-        const txt = await res.text();
-        lastErr = `Overpass ${res.status}: ${txt.slice(0, 120)}`;
-        continue;
-      }
-      const data = await res.json();
-      return data.elements ?? [];
-    } catch (e: any) {
-      lastErr = e.message;
-      continue;
-    }
-  }
-  throw new Error(lastErr || 'Tutti i server Overpass non rispondono');
-}
-
-function parseElements(elements: any[], fallbackCity: string): any[] {
-  return elements
-    .filter(el => el.tags?.name)
-    .map(el => {
-      const tags = el.tags;
-      return {
-        name: tags.name,
-        osm_id: `${el.type}/${el.id}`,
-        city: tags['addr:city'] || tags['addr:municipality'] || fallbackCity,
-        street: tags['addr:street'] || null,
-        postal_code: tags['addr:postcode'] || null,
-        phone: tags.phone || tags['contact:phone'] || null,
-        website: tags.website || tags['contact:website'] || null,
-        email: tags.email || tags['contact:email'] || null,
-        business_hours: tags.opening_hours || null,
-        latitude: el.lat ?? el.center?.lat ?? null,
-        longitude: el.lon ?? el.center?.lon ?? null,
-      };
-    });
 }
 
 export function OsmImportSection() {
@@ -388,42 +278,31 @@ export function OsmImportSection() {
     for (let i = 0; i < tagList.length; i++) {
       if (abortRef.current) break;
       const { tag, label } = tagList[i];
-      const osmKey = OSM_KEY[tag] ?? 'amenity';
 
       updateStep(i, { status: 'fetching' });
-      let elements: any[] = [];
       try {
-        elements = await queryOverpass(comune.city, comune.region, osmKey, tag, lat, lng);
+        const { data, error } = await supabase.functions.invoke('fill-empty-comuni', {
+          body: {
+            city: comune.city,
+            province: comune.province,
+            region: comune.region,
+            osm_tag: tag,
+            lat: lat ?? null,
+            lng: lng ?? null,
+          },
+        });
+        if (error) throw new Error(error.message || 'Errore edge function');
+        if (data?.error) throw new Error(data.error);
+        updateStep(i, {
+          status: 'done',
+          found: data.found ?? 0,
+          imported: data.imported ?? 0,
+          skipped: data.skipped ?? 0,
+        });
       } catch (e: any) {
         updateStep(i, { status: 'error', error: e.message });
         await new Promise(r => setTimeout(r, 500));
         continue;
-      }
-
-      if (abortRef.current) break;
-
-      const businesses = parseElements(elements, comune.city);
-
-      if (businesses.length === 0) {
-        updateStep(i, { status: 'done', found: 0, imported: 0, skipped: 0 });
-        continue;
-      }
-
-      updateStep(i, { status: 'inserting', found: businesses.length });
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fill-empty-comuni`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-            body: JSON.stringify({ city: comune.city, province: comune.province, region: comune.region, osm_tag: tag, businesses }),
-          }
-        );
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || 'Errore insert');
-        updateStep(i, { status: 'done', found: businesses.length, imported: json.imported, skipped: json.skipped });
-      } catch (e: any) {
-        updateStep(i, { status: 'error', found: businesses.length, error: e.message });
       }
 
       if (i < tagList.length - 1 && !abortRef.current) {
