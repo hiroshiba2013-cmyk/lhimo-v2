@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { ITALIAN_REGIONS, PROVINCES_BY_REGION, ITALIAN_PROVINCES, PROVINCE_TO_CODE } from '../../lib/cities';
+import { useItalianLocations, useComuniByProvince } from '../../hooks/useItalianLocations';
 
 interface LocationFiltersProps {
   selectedRegion?: string;
@@ -30,26 +30,18 @@ export function LocationFilters({
   showAllOption = true,
   label = 'Filtri Geografici'
 }: LocationFiltersProps) {
-  const [cities, setCities] = useState<string[]>([]);
-  const [loadingCities, setLoadingCities] = useState(false);
+  const { regions, allProvinces, loading: loadingLocations, getProvincesByRegion, getProvinceCode } = useItalianLocations();
 
   const currentRegion = selectedRegion ?? region ?? '';
   const currentProvince = selectedProvince ?? province ?? '';
   const currentCity = selectedCity ?? city ?? '';
 
   const availableProvinces = currentRegion
-    ? (PROVINCES_BY_REGION[currentRegion] ?? ITALIAN_PROVINCES)
-    : ITALIAN_PROVINCES;
+    ? getProvincesByRegion(currentRegion)
+    : allProvinces;
 
-  useEffect(() => {
-    if (!currentProvince) { setCities([]); return; }
-    const sigla = PROVINCE_TO_CODE[currentProvince] || currentProvince;
-    setLoadingCities(true);
-    supabase.rpc('get_comuni_by_provincia', { p_provincia: sigla }).then(({ data }) => {
-      setCities(data ? data.map((r: { comune: string }) => r.comune) : []);
-      setLoadingCities(false);
-    });
-  }, [currentProvince]);
+  const provinceCode = currentProvince ? getProvinceCode(currentProvince) : '';
+  const { cities, loading: loadingCities } = useComuniByProvince(provinceCode);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -63,12 +55,13 @@ export function LocationFilters({
           <label className="block text-sm font-medium text-gray-700 mb-2">Regione</label>
           <select
             value={currentRegion}
+            disabled={loadingLocations}
             onChange={e => { onRegionChange(e.target.value); onProvinceChange(''); onCityChange(''); }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
             {showAllOption && <option value="">Tutte le regioni</option>}
-            {!showAllOption && <option value="">Seleziona regione</option>}
-            {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+            {!showAllOption && <option value="">{loadingLocations ? 'Caricamento...' : 'Seleziona regione'}</option>}
+            {regions.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
 
@@ -76,12 +69,13 @@ export function LocationFilters({
           <label className="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
           <select
             value={currentProvince}
+            disabled={loadingLocations}
             onChange={e => { onProvinceChange(e.target.value); onCityChange(''); }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
             {showAllOption && <option value="">Tutte le province</option>}
-            {!showAllOption && <option value="">Seleziona provincia</option>}
-            {availableProvinces.map(p => <option key={p} value={p}>{p}</option>)}
+            {!showAllOption && <option value="">{loadingLocations ? 'Caricamento...' : 'Seleziona provincia'}</option>}
+            {availableProvinces.map(p => <option key={p.sigla} value={p.nome}>{p.nome} ({p.sigla})</option>)}
           </select>
         </div>
 

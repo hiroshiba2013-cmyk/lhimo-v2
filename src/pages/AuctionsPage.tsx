@@ -3,7 +3,7 @@ import { Plus, Search, Filter } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { ITALIAN_REGIONS } from '../lib/cities';
+import { useItalianLocations } from '../hooks/useItalianLocations';
 import AuctionCard from '../components/auctions/AuctionCard';
 import AuctionForm from '../components/auctions/AuctionForm';
 import { ItalianCityProvinceSelect } from '../components/common/ItalianCityProvinceSelect';
@@ -25,6 +25,7 @@ const categories = [
 ];
 
 export default function AuctionsPage() {
+  const { regions } = useItalianLocations();
   const { user } = useAuth();
   const { t } = useLanguage();
   const [auctions, setAuctions] = useState<any[]>([]);
@@ -181,7 +182,7 @@ export default function AuctionsPage() {
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm bg-white"
                 >
                   <option value="">Tutte le regioni</option>
-                  {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                  {regions.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               <ItalianCityProvinceSelect

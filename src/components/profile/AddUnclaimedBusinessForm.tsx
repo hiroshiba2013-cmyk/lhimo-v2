@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, X, Award, MapPin, Phone, Mail, Globe, User, FileEdit as Edit2, Trash2, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { supabase, BusinessCategory } from '../../lib/supabase';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
-import { ITALIAN_REGIONS } from '../../lib/cities';
+import { useItalianLocations } from '../../hooks/useItalianLocations';
 import { useToast } from '../common/Toast';
 
 const PROVINCE_NAMES: Record<string, string> = {
@@ -68,6 +68,8 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
   const [loadingBusinesses, setLoadingBusinesses] = useState(true);
   const [editingBusinessId, setEditingBusinessId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const { regions } = useItalianLocations();
+
   const [formData, setFormData] = useState({
     name: '',
     category_id: '',
@@ -559,7 +561,7 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Seleziona regione</option>
-                {ITALIAN_REGIONS.map(r => (
+                {regions.map(r => (
                   <option key={r} value={r}>{r}</option>
                 ))}
               </select>

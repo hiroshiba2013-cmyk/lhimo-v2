@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { Download, RefreshCw, CheckCircle, XCircle, Play, Square, Plus, Trash2, MapPin, ChevronDown, Layers } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../common/Toast';
-import { PROVINCE_TO_CODE, ITALIAN_PROVINCES, PROVINCES_BY_REGION } from '../../lib/cities';
+
 
 const PROVINCES: { code: string; region: string; label: string }[] = [
   { code:"AQ", region:"Abruzzo", label:"AQ - L'Aquila" },

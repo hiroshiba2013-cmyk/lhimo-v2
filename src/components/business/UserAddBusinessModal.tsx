@@ -3,7 +3,7 @@ import { X, Building, MapPin, Phone, Mail, Globe, Award, Clock } from 'lucide-re
 import { supabase } from '../../lib/supabase';
 import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
-import { ITALIAN_REGIONS } from '../../lib/cities';
+import { useItalianLocations } from '../../hooks/useItalianLocations';
 import { useToast } from '../common/Toast';
 
 interface UserAddBusinessModalProps {
@@ -23,6 +23,8 @@ export function UserAddBusinessModal({ userId, familyMemberId, onSuccess, onCanc
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const { regions } = useItalianLocations();
+
   const [form, setForm] = useState({
     name: '',
     category_id: '',
@@ -192,7 +194,7 @@ export function UserAddBusinessModal({ userId, familyMemberId, onSuccess, onCanc
               className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="">Seleziona regione</option>
-              {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+              {regions.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
 

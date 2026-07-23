@@ -3,7 +3,7 @@ import { X, Upload } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
-import { ITALIAN_REGIONS } from '../../lib/cities';
+import { useItalianLocations } from '../../hooks/useItalianLocations';
 import { useToast } from '../common/Toast';
 
 interface Category {
@@ -24,6 +24,8 @@ export function ClassifiedAdForm({ adId, businessLocationId, isRegisteredBusines
   const { user, activeProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+
+  const { regions } = useItalianLocations();
 
   const [formData, setFormData] = useState({
     ad_type: 'sell' as 'sell' | 'buy' | 'gift',
@@ -371,7 +373,7 @@ export function ClassifiedAdForm({ adId, businessLocationId, isRegisteredBusines
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
           >
             <option value="">Seleziona regione...</option>
-            {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+            {regions.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
         <ItalianCityProvinceSelect

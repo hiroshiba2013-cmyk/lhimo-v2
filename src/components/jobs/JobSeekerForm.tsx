@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
-import { ITALIAN_REGIONS } from '../../lib/cities';
+import { useItalianLocations } from '../../hooks/useItalianLocations';
 import { X } from 'lucide-react';
 import { useToast } from '../common/Toast';
 
@@ -23,6 +23,8 @@ export function JobSeekerForm({ onSuccess, onCancel }: JobSeekerFormProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const { regions } = useItalianLocations();
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -188,7 +190,7 @@ export function JobSeekerForm({ onSuccess, onCancel }: JobSeekerFormProps) {
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm bg-white"
             >
               <option value="">Seleziona regione...</option>
-              {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+              {regions.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
           <ItalianCityProvinceSelect

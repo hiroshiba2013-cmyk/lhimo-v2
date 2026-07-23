@@ -4,7 +4,7 @@ import { supabase, BusinessCategory } from '../lib/supabase';
 import { LocationCard } from '../components/business/LocationCard';
 import { AdvancedSearch, SearchFilters } from '../components/search/AdvancedSearch';
 import { AdBanner } from '../components/common/AdBanner';
-import { PROVINCE_TO_CODE } from '../lib/cities';
+import { useItalianLocations } from '../hooks/useItalianLocations';
 import { useAuth } from '../contexts/AuthContext';
 import { usePageCustomization } from '../hooks/usePageCustomization';
 
@@ -67,6 +67,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ];
 
 export function SearchResultsPage() {
+  const { getProvinceCode } = useItalianLocations();
   const customization = usePageCustomization('search');
   const { user, profile } = useAuth();
   const [locations, setLocations] = useState<BusinessLocation[]>([]);
@@ -204,7 +205,7 @@ export function SearchResultsPage() {
     try {
       const QUERY_LIMIT = 2000;
 
-      const provinceCode = filters.province ? PROVINCE_TO_CODE[filters.province] : null;
+      const provinceCode = filters.province ? getProvinceCode(filters.province) : null;
       const { data: businessesData, error: businessesError } = await supabase
         .rpc('search_all_businesses', {
           search_query: filters.businessName || '',

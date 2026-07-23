@@ -5,7 +5,7 @@ import { SearchableSelect } from '../common/SearchableSelect';
 import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import BusinessAutocomplete from './BusinessAutocomplete';
-import { ITALIAN_REGIONS } from '../../lib/cities';
+import { useItalianLocations } from '../../hooks/useItalianLocations';
 
 export interface SearchFilters {
   category: string;
@@ -39,6 +39,7 @@ const RATING_OPTIONS = [
 ];
 
 export function AdvancedSearch({ onSearch, isLoading = false, navigateToSearchPage = false, initialFilters }: AdvancedSearchProps) {
+  const { regions } = useItalianLocations();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showRatingFilters, setShowRatingFilters] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string; parent_id: string | null }[]>([]);
@@ -193,7 +194,7 @@ export function AdvancedSearch({ onSearch, isLoading = false, navigateToSearchPa
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm bg-white"
               >
                 <option value="">Tutte le regioni</option>
-                {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                {regions.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
 

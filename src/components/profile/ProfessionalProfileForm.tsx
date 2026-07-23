@@ -3,7 +3,7 @@ import { X, Save, Briefcase, MapPin, Star, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/Toast';
-import { ITALIAN_REGIONS } from '../../lib/cities';
+import { useItalianLocations } from '../../hooks/useItalianLocations';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 
 interface ProfessionalProfile {
@@ -31,6 +31,8 @@ export function ProfessionalProfileForm({ onSaved, onCancel, existingProfile, fa
   const { user } = useAuth();
   const { showToast } = useToast();
   const [saving, setSaving] = useState(false);
+
+  const { regions } = useItalianLocations();
 
   const [form, setForm] = useState({
     profession: existingProfile?.profession || '',
@@ -181,7 +183,7 @@ export function ProfessionalProfileForm({ onSaved, onCancel, existingProfile, fa
             className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
           >
             <option value="">Seleziona regione</option>
-            {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+            {regions.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
           <ItalianCityProvinceSelect
             province={form.province}

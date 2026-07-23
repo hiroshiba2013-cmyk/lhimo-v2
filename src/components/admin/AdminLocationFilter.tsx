@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ITALIAN_REGIONS } from '../../lib/cities';
+import { useItalianLocations, useComuniByProvince } from '../../hooks/useItalianLocations';
 
 export interface LocationFilterState {
   region: string;
@@ -16,34 +16,13 @@ interface Props {
 }
 
 export function AdminLocationFilter({ value, onChange, accentColor = 'blue' }: Props) {
-  const [provinces, setProvinces] = useState<{ provincia: string; sigla: string }[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
-  const [loadingProvinces, setLoadingProvinces] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
+  const { regions, allProvinces, loading: loadingLocations, getProvincesByRegion } = useItalianLocations();
 
-  // Load provinces on mount (all) and when region changes
-  useEffect(() => {
-    setLoadingProvinces(true);
-    setProvinces([]);
-    const fn = value.region
-      ? supabase.rpc('get_province_by_regione', { p_regione: value.region })
-      : supabase.rpc('get_all_province');
-    fn.then(({ data, error }) => {
-      if (!error) setProvinces(data || []);
-      setLoadingProvinces(false);
-    });
-  }, [value.region]);
+  const availableProvinces = value.region
+    ? getProvincesByRegion(value.region)
+    : allProvinces;
 
-  // Load cities when province code changes
-  useEffect(() => {
-    if (!value.provinceCode) { setCities([]); return; }
-    setLoadingCities(true);
-    setCities([]);
-    supabase.rpc('get_comuni_by_provincia', { p_provincia: value.provinceCode }).then(({ data, error }) => {
-      if (!error) setCities((data || []).map((r: { comune: string }) => r.comune));
-      setLoadingCities(false);
-    });
-  }, [value.provinceCode]);
+  const { cities, loading: loadingCities } = useComuniByProvince(value.provinceCode);
 
   const cls = `w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-${accentColor}-500 focus:border-transparent`;
 
@@ -53,11 +32,12 @@ export function AdminLocationFilter({ value, onChange, accentColor = 'blue' }: P
         <label className="block text-xs font-medium text-gray-600 mb-1">Regione</label>
         <select
           value={value.region}
+          disabled={loadingLocations}
           onChange={e => onChange({ region: e.target.value, province: '', provinceCode: '', city: '' })}
-          className={cls}
+          className={`${cls} disabled:bg-gray-100 disabled:cursor-not-allowed`}
         >
-          <option value="">Tutte le regioni</option>
-          {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+          <option value="">{loadingLocations ? 'Caricamento...' : 'Tutte le regioni'}</option>
+          {regions.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
       </div>
 
@@ -67,15 +47,15 @@ export function AdminLocationFilter({ value, onChange, accentColor = 'blue' }: P
           value={value.provinceCode}
           onChange={e => {
             const sigla = e.target.value;
-            const found = provinces.find(p => p.sigla === sigla);
-            onChange({ ...value, province: found?.provincia || '', provinceCode: sigla, city: '' });
+            const found = availableProvinces.find(p => p.sigla === sigla);
+            onChange({ ...value, province: found?.nome || '', provinceCode: sigla, city: '' });
           }}
-          disabled={loadingProvinces}
+          disabled={loadingLocations}
           className={`${cls} disabled:bg-gray-100 disabled:cursor-not-allowed`}
         >
-          <option value="">{loadingProvinces ? 'Caricamento...' : 'Tutte le province'}</option>
-          {provinces.map(p => (
-            <option key={p.sigla} value={p.sigla}>{p.provincia} ({p.sigla})</option>
+          <option value="">{loadingLocations ? 'Caricamento...' : 'Tutte le province'}</option>
+          {availableProvinces.map(p => (
+            <option key={p.sigla} value={p.sigla}>{p.nome} ({p.sigla})</option>
           ))}
         </select>
       </div>

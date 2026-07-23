@@ -3,7 +3,7 @@ import { Upload, X, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { ITALIAN_REGIONS } from '../../lib/cities';
+import { useItalianLocations } from '../../hooks/useItalianLocations';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { useToast } from '../common/Toast';
 
@@ -54,6 +54,8 @@ export default function AuctionForm({ onSuccess, onCancel, businessLocationId, i
   const [error, setError] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  const { regions } = useItalianLocations();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -294,7 +296,7 @@ export default function AuctionForm({ onSuccess, onCancel, businessLocationId, i
           className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm bg-white"
         >
           <option value="">Seleziona regione...</option>
-          {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+          {regions.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
       </div>
 

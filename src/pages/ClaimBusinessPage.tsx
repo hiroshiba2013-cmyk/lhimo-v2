@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Building2, MapPin, CheckCircle, XCircle, ArrowRight, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { ITALIAN_REGIONS, PROVINCES_BY_REGION, ITALIAN_PROVINCES, PROVINCE_TO_CODE } from '../lib/cities';
+import { useItalianLocations } from '../hooks/useItalianLocations';
 import { useToast } from '../components/common/Toast';
 
 interface LocationResult {
@@ -25,6 +25,7 @@ const PAGE_SIZE = 50;
 
 export function ClaimBusinessPage() {
   const { showToast } = useToast();
+  const { regions, allProvinces, loading: loadingLocations, getProvincesByRegion, getProvinceCode } = useItalianLocations();
   const [businessName, setBusinessName] = useState('');
   const [address, setAddress] = useState('');
   const [region, setRegion] = useState('');
@@ -34,7 +35,7 @@ export function ClaimBusinessPage() {
   const [cities, setCities] = useState<string[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
 
-  const availableProvinces = region ? (PROVINCES_BY_REGION[region] ?? ITALIAN_PROVINCES) : ITALIAN_PROVINCES;
+  const availableProvinces = region ? getProvincesByRegion(region) : allProvinces;
 
   const [results, setResults] = useState<LocationResult[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -163,7 +164,7 @@ export function ClaimBusinessPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                 >
                   <option value="">Tutte le regioni</option>
-                  {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                  {regions.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
 
@@ -175,13 +176,13 @@ export function ClaimBusinessPage() {
                   onChange={e => {
                     const val = e.target.value;
                     setProvince(val);
-                    setProvinceCode(val ? (PROVINCE_TO_CODE[val] || '') : '');
+                    setProvinceCode(val ? getProvinceCode(val) : '');
                   }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
                 >
                   <option value="">Tutte le province</option>
                   {availableProvinces.map(p => (
-                    <option key={p} value={p}>{p} ({PROVINCE_TO_CODE[p] || ''})</option>
+                    <option key={p.sigla} value={p.nome}>{p.nome} ({p.sigla})</option>
                   ))}
                 </select>
               </div>

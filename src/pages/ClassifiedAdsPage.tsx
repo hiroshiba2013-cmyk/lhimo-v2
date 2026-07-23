@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { ClassifiedAdCard } from '../components/classifieds/ClassifiedAdCard';
 import { ClassifiedAdForm } from '../components/classifieds/ClassifiedAdForm';
 import { ItalianCityProvinceSelect } from '../components/common/ItalianCityProvinceSelect';
-import { ITALIAN_REGIONS } from '../lib/cities';
+import { useItalianLocations } from '../hooks/useItalianLocations';
 
 interface Category {
   id: string;
@@ -46,6 +46,7 @@ interface ClassifiedAd {
 }
 
 export function ClassifiedAdsPage() {
+  const { regions } = useItalianLocations();
   const { user, profile } = useAuth();
   const [ads, setAds] = useState<ClassifiedAd[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -353,7 +354,7 @@ export function ClassifiedAdsPage() {
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm bg-white"
               >
                 <option value="">Tutte le regioni</option>
-                {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                {regions.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
             <ItalianCityProvinceSelect

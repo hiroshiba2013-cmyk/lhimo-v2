@@ -8,7 +8,7 @@ import { JobSeekerForm } from '../components/jobs/JobSeekerForm';
 import { JobSeekerCard } from '../components/jobs/JobSeekerCard';
 import { FavoriteButton } from '../components/favorites/FavoriteButton';
 import { ItalianCityProvinceSelect } from '../components/common/ItalianCityProvinceSelect';
-import { ITALIAN_REGIONS } from '../lib/cities';
+import { useItalianLocations } from '../hooks/useItalianLocations';
 import { useToast } from '../components/common/Toast';
 import { usePageCustomization } from '../hooks/usePageCustomization';
 
@@ -84,6 +84,7 @@ interface SearchFilters {
 }
 
 export function JobsPage() {
+  const { regions } = useItalianLocations();
   const customization = usePageCustomization('jobs');
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'offers' | 'seekers'>('offers');
@@ -706,7 +707,7 @@ export function JobsPage() {
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm bg-white"
                 >
                   <option value="">Tutte le regioni</option>
-                  {ITALIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                  {regions.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               <ItalianCityProvinceSelect

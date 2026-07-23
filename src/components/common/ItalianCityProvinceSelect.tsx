@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronDown, Search, X, MapPin, Building2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { ITALIAN_PROVINCES, PROVINCES_BY_REGION, PROVINCE_TO_CODE } from '../../lib/cities';
+import { useItalianLocations, useComuniByProvince } from '../../hooks/useItalianLocations';
 
 interface Props {
   province: string;
@@ -22,8 +22,7 @@ export function ItalianCityProvinceSelect({
   disabled = false,
   region = '',
 }: Props) {
-  const [cities, setCities] = useState<string[]>([]);
-  const [loadingCities, setLoadingCities] = useState(false);
+  const { regions, allProvinces, loading: loadingLocations, getProvincesByRegion, getProvinceCode } = useItalianLocations();
 
   const [provinceOpen, setProvinceOpen] = useState(false);
   const [provinceSearch, setProvinceSearch] = useState('');
@@ -31,33 +30,21 @@ export function ItalianCityProvinceSelect({
   const provinceRef = useRef<HTMLDivElement>(null);
   const provinceInputRef = useRef<HTMLInputElement>(null);
 
-  // Derive province list synchronously from local data — no async needed
-  const provinces: string[] = region
-    ? (PROVINCES_BY_REGION[region] ?? ITALIAN_PROVINCES)
-    : ITALIAN_PROVINCES;
+  const provinces = region
+    ? getProvincesByRegion(region)
+    : allProvinces;
 
-  // When region changes, clear province if no longer valid (parent clears city via onProvinceChange)
   useEffect(() => {
     if (!region) return;
-    const list = PROVINCES_BY_REGION[region] ?? [];
-    if (province && list.length > 0 && !list.includes(province)) {
+    const list = getProvincesByRegion(region);
+    if (province && list.length > 0 && !list.some(p => p.nome === province)) {
       onProvinceChange('', '');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [region]);
 
-  const loadCities = useCallback(async (prov: string) => {
-    if (!prov) { setCities([]); return; }
-    setLoadingCities(true);
-    const sigla = PROVINCE_TO_CODE[prov] || prov;
-    const { data } = await supabase.rpc('get_comuni_by_provincia', { p_provincia: sigla });
-    setCities(data ? data.map((r: { comune: string }) => r.comune) : []);
-    setLoadingCities(false);
-  }, []);
-
-  useEffect(() => {
-    loadCities(province);
-  }, [province, loadCities]);
+  const provinceCode = province ? getProvinceCode(province) : '';
+  const { cities, loading: loadingCities } = useComuniByProvince(provinceCode);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -75,20 +62,19 @@ export function ItalianCityProvinceSelect({
   }, [provinceOpen]);
 
   const filteredProvinces = provinces.filter(p =>
-    p.toLowerCase().includes(provinceSearch.toLowerCase())
+    p.nome.toLowerCase().includes(provinceSearch.toLowerCase()) ||
+    p.sigla.toLowerCase().includes(provinceSearch.toLowerCase())
   );
 
-  function selectProvince(p: string) {
-    const code = PROVINCE_TO_CODE[p] || '';
-    onProvinceChange(p, code); // parent is responsible for clearing city in this handler
+  function selectProvince(name: string, sigla: string) {
+    onProvinceChange(name, sigla);
     setProvinceOpen(false);
     setProvinceSearch('');
   }
 
   function clearProvince(e: React.MouseEvent) {
     e.stopPropagation();
-    onProvinceChange('', ''); // parent clears city too
-    setCities([]);
+    onProvinceChange('', '');
   }
 
   return (
@@ -103,7 +89,6 @@ export function ItalianCityProvinceSelect({
           </span>
         </label>
         <div className="relative">
-          {/* Fallback text input when no comuni are in DB for this province */}
           {province && !loadingCities && cities.length === 0 ? (
             <input
               type="text"
@@ -158,15 +143,17 @@ export function ItalianCityProvinceSelect({
         <div ref={provinceRef} className="relative">
           <button
             type="button"
-            disabled={disabled}
-            onClick={() => { if (!disabled) setProvinceOpen(v => !v); }}
+            disabled={disabled || loadingLocations}
+            onClick={() => { if (!disabled && !loadingLocations) setProvinceOpen(v => !v); }}
             className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 border rounded-lg text-sm transition-all text-left bg-white ${
-              disabled ? 'bg-gray-50 cursor-not-allowed opacity-60' : 'hover:border-blue-400 cursor-pointer'
+              disabled || loadingLocations ? 'bg-gray-50 cursor-not-allowed opacity-60' : 'hover:border-blue-400 cursor-pointer'
             } ${provinceOpen ? 'border-blue-500 ring-2 ring-blue-100 shadow-sm' : 'border-gray-300'}`}
           >
             <span className={`flex-1 min-w-0 truncate ${province ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
-              {province
-                ? <>{province}{PROVINCE_TO_CODE[province] && <span className="ml-1.5 text-xs font-mono text-gray-400">({PROVINCE_TO_CODE[province]})</span>}</>
+              {loadingLocations
+                ? 'Caricamento province...'
+                : province
+                ? <>{province}{provinceCode && <span className="ml-1.5 text-xs font-mono text-gray-400">({provinceCode})</span>}</>
                 : 'Seleziona provincia...'}
             </span>
             <div className="flex items-center gap-1 flex-shrink-0">
@@ -196,7 +183,7 @@ export function ItalianCityProvinceSelect({
                     className="flex-1 bg-transparent text-sm outline-none text-gray-700 placeholder-gray-400 min-w-0"
                     onKeyDown={e => {
                       if (e.key === 'Escape') { setProvinceOpen(false); setProvinceSearch(''); }
-                      if (e.key === 'Enter' && filteredProvinces.length === 1) selectProvince(filteredProvinces[0]);
+                      if (e.key === 'Enter' && filteredProvinces.length === 1) selectProvince(filteredProvinces[0].nome, filteredProvinces[0].sigla);
                     }}
                   />
                   {provinceSearch && (
@@ -211,23 +198,20 @@ export function ItalianCityProvinceSelect({
                   <div className="px-4 py-6 text-sm text-gray-400 text-center">Nessuna provincia trovata</div>
                 ) : (
                   filteredProvinces.map(p => {
-                    const code = PROVINCE_TO_CODE[p] || '';
-                    const isSelected = p === province;
+                    const isSelected = p.nome === province;
                     return (
                       <button
-                        key={p}
+                        key={p.sigla}
                         type="button"
-                        onClick={() => selectProvince(p)}
+                        onClick={() => selectProvince(p.nome, p.sigla)}
                         className={`w-full text-left px-3.5 py-2.5 text-sm flex items-center justify-between gap-3 transition-colors ${
                           isSelected ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        <span className="font-medium flex-1 min-w-0">{p}</span>
-                        {code && (
-                          <span className={`text-xs px-1.5 py-0.5 rounded font-mono font-semibold flex-shrink-0 ${
-                            isSelected ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
-                          }`}>{code}</span>
-                        )}
+                        <span className="font-medium flex-1 min-w-0">{p.nome}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-mono font-semibold flex-shrink-0 ${
+                          isSelected ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
+                        }`}>{p.sigla}</span>
                       </button>
                     );
                   })
