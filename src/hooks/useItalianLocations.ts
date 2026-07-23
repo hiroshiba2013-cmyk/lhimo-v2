@@ -22,13 +22,28 @@ export function useItalianLocations() {
     setLoading(true);
 
     (async () => {
-      const { data, error } = await supabase.rpc('get_all_province');
+      const { data, error } = await supabase
+        .from('comuni_italiani')
+        .select('sigla_provincia, provincia_sigla, nome_provincia, regione');
       if (cancelled || error || !data) {
         setLoading(false);
         return;
       }
 
-      const provinces = data as ProvinceInfo[];
+      const provinceMap = new Map<string, ProvinceInfo>();
+      for (const row of data) {
+        const sigla = row.sigla_provincia || row.provincia_sigla;
+        if (!sigla) continue;
+        if (!provinceMap.has(sigla)) {
+          provinceMap.set(sigla, {
+            sigla,
+            nome: row.nome_provincia || sigla,
+            regione: row.regione || '',
+          });
+        }
+      }
+
+      const provinces = Array.from(provinceMap.values()).sort((a, b) => a.nome.localeCompare(b.nome));
       const uniqueRegions = [...new Set(provinces.map(p => p.regione).filter(Boolean))].sort();
 
       if (!cancelled) {
@@ -66,12 +81,17 @@ export function useComuniByProvince(provinceCode: string) {
     if (!provinceCode) { setCities([]); return; }
     let cancelled = false;
     setLoading(true);
-    supabase.rpc('get_comuni_by_provincia', { p_provincia: provinceCode }).then(({ data }) => {
-      if (!cancelled) {
-        setCities(data ? data.map((r: { comune: string }) => r.comune) : []);
-        setLoading(false);
-      }
-    });
+    supabase
+      .from('comuni_italiani')
+      .select('nome')
+      .or(`sigla_provincia.eq.${provinceCode},provincia_sigla.eq.${provinceCode}`)
+      .order('nome')
+      .then(({ data }) => {
+        if (!cancelled) {
+          setCities(data ? data.map((r: { nome: string }) => r.nome) : []);
+          setLoading(false);
+        }
+      });
     return () => { cancelled = true; };
   }, [provinceCode]);
 
