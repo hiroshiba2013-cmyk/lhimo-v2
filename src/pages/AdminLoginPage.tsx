@@ -29,50 +29,26 @@ export function AdminLoginPage() {
 
       let isAdmin = false;
 
-      // --- Step 1: RPC check_admin_status ---
-      try {
-        const rpcCall = await supabase
-          .rpc('check_admin_status', { p_user_id: authData.user.id });
-        console.log('=== RPC check_admin_status ===');
-        console.log('rpcCall.data:', JSON.stringify(rpcCall.data, null, 2));
-        console.log('rpcCall.error:', JSON.stringify(rpcCall.error, Object.getOwnPropertyNames(rpcCall.error || {}), 2));
-        if (!rpcCall.error && rpcCall.data === true) {
-          isAdmin = true;
-        }
-      } catch (rpcErr: any) {
-        console.warn('=== RPC check_admin_status EXCEPTION ===');
-        console.warn('rpcErr:', JSON.stringify(rpcErr, Object.getOwnPropertyNames(rpcErr || {}), 2));
+      // --- Step 1: JWT app_metadata ---
+      const session = await supabase.auth.getSession();
+      const appMeta = session.data.session?.user?.app_metadata;
+      if (appMeta?.is_admin === true || appMeta?.user_type === 'admin') {
+        isAdmin = true;
       }
 
-      // --- Step 2: JWT app_metadata fallback ---
-      if (!isAdmin) {
-        const session = await supabase.auth.getSession();
-        const appMeta = session.data.session?.user?.app_metadata;
-        console.log('=== JWT app_metadata ===');
-        console.log('app_metadata:', JSON.stringify(appMeta, null, 2));
-        if (appMeta?.is_admin === true || appMeta?.user_type === 'admin') {
-          isAdmin = true;
-        }
-      }
-
-      // --- Step 3: Direct query on admins table ---
+      // --- Step 2: Direct query on admins table ---
       if (!isAdmin) {
         const adminQuery = await supabase
           .from('admins')
-          .select('user_id, created_at, nickname, avatar_url')
+          .select('user_id')
           .eq('user_id', authData.user.id)
           .maybeSingle();
-        console.log('=== Admins table query ===');
-        console.log('adminQuery.data:', JSON.stringify(adminQuery.data, null, 2));
-        console.log('adminQuery.error:', JSON.stringify(adminQuery.error, Object.getOwnPropertyNames(adminQuery.error || {}), 2));
-        console.log('adminQuery.status:', adminQuery.status);
-        console.log('adminQuery.count:', adminQuery.count);
         if (!adminQuery.error && adminQuery.data) {
           isAdmin = true;
         }
       }
 
-      console.log('=== Final isAdmin:', isAdmin, '===');
+      console.log('Admin check result:', isAdmin);
 
       if (!isAdmin) {
         console.log('Not an admin, signing out');
