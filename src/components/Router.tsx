@@ -205,6 +205,7 @@ export function Router() {
     if (loading) {
       page = <PageLoader />;
     } else if (!user || !profile || profile.user_type !== 'admin') {
+      console.log('=== ROUTER /admin guard: user=', !!user, '| profile=', !!profile, '| user_type=', profile?.user_type, '| redirecting to /admin-login ===');
       window.location.href = '/admin-login';
       page = null;
     } else {
@@ -214,6 +215,7 @@ export function Router() {
     if (loading) {
       page = <PageLoader />;
     } else if (!user || !profile || profile.user_type !== 'admin') {
+      console.log('=== ROUTER /admin-profile guard: user=', !!user, '| profile=', !!profile, '| user_type=', profile?.user_type, '| redirecting to /admin-login ===');
       window.location.href = '/admin-login';
       page = null;
     } else {

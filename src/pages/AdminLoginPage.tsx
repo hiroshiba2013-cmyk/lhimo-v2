@@ -92,6 +92,7 @@ export function AdminLoginPage() {
         console.warn('Failed to log admin login:', logErr);
       }
 
+      console.log('=== REDIRECT: isAdmin=', isAdmin, '| navigating to /admin ===');
       window.location.href = '/admin';
     } catch (err: any) {
       console.error('Error:', err);
