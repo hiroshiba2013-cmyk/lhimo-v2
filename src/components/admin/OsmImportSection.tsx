@@ -85,12 +85,13 @@ interface StepResult {
 export function OsmImportSection() {
   const { showToast } = useToast();
   const { allProvinces, loading: loadingLocations } = useItalianLocations();
-  const { cities: cityList, loading: loadingCities } = useComuniByProvince(provinceInput);
 
   // Comuni list
   const [comuneInput, setComuneInput] = useState('');
   const [provinceInput, setProvinceInput] = useState('');
   const [comuni, setComuni] = useState<ComuneEntry[]>([]);
+
+  const { cities: cityList, loading: loadingCities } = useComuniByProvince(provinceInput);
 
   // Selected tags
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set(OSM_TAGS.map(t => t.tag)));
