@@ -1,118 +1,8 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Download, RefreshCw, CheckCircle, XCircle, Play, Square, Plus, Trash2, MapPin, ChevronDown, Layers } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../common/Toast';
-
-
-const PROVINCES: { code: string; region: string; label: string }[] = [
-  { code:"AQ", region:"Abruzzo", label:"AQ - L'Aquila" },
-  { code:"CH", region:"Abruzzo", label:"CH - Chieti" },
-  { code:"PE", region:"Abruzzo", label:"PE - Pescara" },
-  { code:"TE", region:"Abruzzo", label:"TE - Teramo" },
-  { code:"MT", region:"Basilicata", label:"MT - Matera" },
-  { code:"PZ", region:"Basilicata", label:"PZ - Potenza" },
-  { code:"CS", region:"Calabria", label:"CS - Cosenza" },
-  { code:"CZ", region:"Calabria", label:"CZ - Catanzaro" },
-  { code:"KR", region:"Calabria", label:"KR - Crotone" },
-  { code:"RC", region:"Calabria", label:"RC - Reggio Calabria" },
-  { code:"VV", region:"Calabria", label:"VV - Vibo Valentia" },
-  { code:"AV", region:"Campania", label:"AV - Avellino" },
-  { code:"BN", region:"Campania", label:"BN - Benevento" },
-  { code:"CE", region:"Campania", label:"CE - Caserta" },
-  { code:"NA", region:"Campania", label:"NA - Napoli" },
-  { code:"SA", region:"Campania", label:"SA - Salerno" },
-  { code:"BO", region:"Emilia-Romagna", label:"BO - Bologna" },
-  { code:"FC", region:"Emilia-Romagna", label:"FC - Forlì-Cesena" },
-  { code:"FE", region:"Emilia-Romagna", label:"FE - Ferrara" },
-  { code:"MO", region:"Emilia-Romagna", label:"MO - Modena" },
-  { code:"PC", region:"Emilia-Romagna", label:"PC - Piacenza" },
-  { code:"PR", region:"Emilia-Romagna", label:"PR - Parma" },
-  { code:"RA", region:"Emilia-Romagna", label:"RA - Ravenna" },
-  { code:"RE", region:"Emilia-Romagna", label:"RE - Reggio Emilia" },
-  { code:"RN", region:"Emilia-Romagna", label:"RN - Rimini" },
-  { code:"GO", region:"Friuli-Venezia Giulia", label:"GO - Gorizia" },
-  { code:"PN", region:"Friuli-Venezia Giulia", label:"PN - Pordenone" },
-  { code:"TS", region:"Friuli-Venezia Giulia", label:"TS - Trieste" },
-  { code:"UD", region:"Friuli-Venezia Giulia", label:"UD - Udine" },
-  { code:"FR", region:"Lazio", label:"FR - Frosinone" },
-  { code:"LT", region:"Lazio", label:"LT - Latina" },
-  { code:"RI", region:"Lazio", label:"RI - Rieti" },
-  { code:"RM", region:"Lazio", label:"RM - Roma" },
-  { code:"VT", region:"Lazio", label:"VT - Viterbo" },
-  { code:"GE", region:"Liguria", label:"GE - Genova" },
-  { code:"IM", region:"Liguria", label:"IM - Imperia" },
-  { code:"SP", region:"Liguria", label:"SP - La Spezia" },
-  { code:"SV", region:"Liguria", label:"SV - Savona" },
-  { code:"BG", region:"Lombardia", label:"BG - Bergamo" },
-  { code:"BS", region:"Lombardia", label:"BS - Brescia" },
-  { code:"CO", region:"Lombardia", label:"CO - Como" },
-  { code:"CR", region:"Lombardia", label:"CR - Cremona" },
-  { code:"LC", region:"Lombardia", label:"LC - Lecco" },
-  { code:"LO", region:"Lombardia", label:"LO - Lodi" },
-  { code:"MB", region:"Lombardia", label:"MB - Monza e Brianza" },
-  { code:"MI", region:"Lombardia", label:"MI - Milano" },
-  { code:"MN", region:"Lombardia", label:"MN - Mantova" },
-  { code:"PV", region:"Lombardia", label:"PV - Pavia" },
-  { code:"SO", region:"Lombardia", label:"SO - Sondrio" },
-  { code:"VA", region:"Lombardia", label:"VA - Varese" },
-  { code:"AN", region:"Marche", label:"AN - Ancona" },
-  { code:"AP", region:"Marche", label:"AP - Ascoli Piceno" },
-  { code:"FM", region:"Marche", label:"FM - Fermo" },
-  { code:"MC", region:"Marche", label:"MC - Macerata" },
-  { code:"PU", region:"Marche", label:"PU - Pesaro e Urbino" },
-  { code:"CB", region:"Molise", label:"CB - Campobasso" },
-  { code:"IS", region:"Molise", label:"IS - Isernia" },
-  { code:"AL", region:"Piemonte", label:"AL - Alessandria" },
-  { code:"AT", region:"Piemonte", label:"AT - Asti" },
-  { code:"BI", region:"Piemonte", label:"BI - Biella" },
-  { code:"CN", region:"Piemonte", label:"CN - Cuneo" },
-  { code:"NO", region:"Piemonte", label:"NO - Novara" },
-  { code:"TO", region:"Piemonte", label:"TO - Torino" },
-  { code:"VB", region:"Piemonte", label:"VB - Verbano-Cusio-Ossola" },
-  { code:"VC", region:"Piemonte", label:"VC - Vercelli" },
-  { code:"BA", region:"Puglia", label:"BA - Bari" },
-  { code:"BR", region:"Puglia", label:"BR - Brindisi" },
-  { code:"BT", region:"Puglia", label:"BT - Barletta-Andria-Trani" },
-  { code:"FG", region:"Puglia", label:"FG - Foggia" },
-  { code:"LE", region:"Puglia", label:"LE - Lecce" },
-  { code:"TA", region:"Puglia", label:"TA - Taranto" },
-  { code:"CA", region:"Sardegna", label:"CA - Cagliari" },
-  { code:"NU", region:"Sardegna", label:"NU - Nuoro" },
-  { code:"OR", region:"Sardegna", label:"OR - Oristano" },
-  { code:"OT", region:"Sardegna", label:"OT - Olbia-Tempio" },
-  { code:"SS", region:"Sardegna", label:"SS - Sassari" },
-  { code:"AG", region:"Sicilia", label:"AG - Agrigento" },
-  { code:"CL", region:"Sicilia", label:"CL - Caltanissetta" },
-  { code:"CT", region:"Sicilia", label:"CT - Catania" },
-  { code:"EN", region:"Sicilia", label:"EN - Enna" },
-  { code:"ME", region:"Sicilia", label:"ME - Messina" },
-  { code:"PA", region:"Sicilia", label:"PA - Palermo" },
-  { code:"RG", region:"Sicilia", label:"RG - Ragusa" },
-  { code:"SR", region:"Sicilia", label:"SR - Siracusa" },
-  { code:"TP", region:"Sicilia", label:"TP - Trapani" },
-  { code:"AR", region:"Toscana", label:"AR - Arezzo" },
-  { code:"FI", region:"Toscana", label:"FI - Firenze" },
-  { code:"GR", region:"Toscana", label:"GR - Grosseto" },
-  { code:"LI", region:"Toscana", label:"LI - Livorno" },
-  { code:"LU", region:"Toscana", label:"LU - Lucca" },
-  { code:"MS", region:"Toscana", label:"MS - Massa-Carrara" },
-  { code:"PI", region:"Toscana", label:"PI - Pisa" },
-  { code:"PO", region:"Toscana", label:"PO - Prato" },
-  { code:"PT", region:"Toscana", label:"PT - Pistoia" },
-  { code:"SI", region:"Toscana", label:"SI - Siena" },
-  { code:"BZ", region:"Trentino-Alto Adige", label:"BZ - Bolzano" },
-  { code:"TN", region:"Trentino-Alto Adige", label:"TN - Trento" },
-  { code:"PG", region:"Umbria", label:"PG - Perugia" },
-  { code:"TR", region:"Umbria", label:"TR - Terni" },
-  { code:"AO", region:"Valle d'Aosta", label:"AO - Aosta" },
-  { code:"BL", region:"Veneto", label:"BL - Belluno" },
-  { code:"PD", region:"Veneto", label:"PD - Padova" },
-  { code:"RO", region:"Veneto", label:"RO - Rovigo" },
-  { code:"TV", region:"Veneto", label:"TV - Treviso" },
-  { code:"VE", region:"Veneto", label:"VE - Venezia" },
-  { code:"VI", region:"Veneto", label:"VI - Vicenza" },
-  { code:"VR", region:"Veneto", label:"VR - Verona" },
-];
+import { useItalianLocations, useComuniByProvince } from '../../hooks/useItalianLocations';
 
 const OSM_TAGS: { tag: string; label: string }[] = [
   { tag:"restaurant", label:"Ristoranti" },
@@ -194,23 +84,13 @@ interface StepResult {
 
 export function OsmImportSection() {
   const { showToast } = useToast();
+  const { allProvinces, loading: loadingLocations } = useItalianLocations();
+  const { cities: cityList, loading: loadingCities } = useComuniByProvince(provinceInput);
 
   // Comuni list
   const [comuneInput, setComuneInput] = useState('');
   const [provinceInput, setProvinceInput] = useState('');
   const [comuni, setComuni] = useState<ComuneEntry[]>([]);
-
-  // City dropdown state
-  const [cityList, setCityList] = useState<string[]>([]);
-  const [loadingCities, setLoadingCities] = useState(false);
-
-  const loadCities = useCallback(async (provCode: string) => {
-    if (!provCode) { setCityList([]); return; }
-    setLoadingCities(true);
-    const { data } = await supabase.rpc('get_comuni_by_provincia', { p_provincia: provCode });
-    setCityList(data ? data.map((r: { comune: string }) => r.comune) : []);
-    setLoadingCities(false);
-  }, []);
 
   // Selected tags
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set(OSM_TAGS.map(t => t.tag)));
@@ -227,29 +107,27 @@ export function OsmImportSection() {
 
   const addComune = () => {
     const city = comuneInput.trim();
-    const prov = PROVINCES.find(p => p.code === provinceInput);
+    const prov = allProvinces.find(p => p.sigla === provinceInput);
     if (!city || !prov) return;
-    if (comuni.some(c => c.city.toLowerCase() === city.toLowerCase() && c.province === prov.code)) return;
-    setComuni(prev => [...prev, { city, province: prov.code, region: prov.region }]);
+    if (comuni.some(c => c.city.toLowerCase() === city.toLowerCase() && c.province === prov.sigla)) return;
+    setComuni(prev => [...prev, { city, province: prov.sigla, region: prov.regione }]);
     setComuneInput('');
   };
 
   const onProvinceChange = (code: string) => {
     setProvinceInput(code);
     setComuneInput('');
-    setCityList([]);
-    if (code) loadCities(code);
   };
 
   const addAllComuniInProvince = () => {
     if (!provinceInput || cityList.length === 0) return;
-    const prov = PROVINCES.find(p => p.code === provinceInput);
+    const prov = allProvinces.find(p => p.sigla === provinceInput);
     if (!prov) return;
     setComuni(prev => {
       const existing = new Set(prev.map(c => c.city.toLowerCase()));
       const additions = cityList
         .filter(c => !existing.has(c.toLowerCase()))
-        .map(c => ({ city: c, province: prov.code, region: prov.region }));
+        .map(c => ({ city: c, province: prov.sigla, region: prov.regione }));
       return [...prev, ...additions];
     });
   };
@@ -336,11 +214,13 @@ export function OsmImportSection() {
   const totalFound = done.reduce((s, r) => s + (r.found ?? 0), 0);
   const progress = steps.length > 0 ? (done.length + errors.length) / steps.length : 0;
 
-  const byRegion = PROVINCES.reduce<Record<string, typeof PROVINCES>>((acc, p) => {
-    if (!acc[p.region]) acc[p.region] = [];
-    acc[p.region].push(p);
-    return acc;
-  }, {});
+  const byRegion = useMemo(() => {
+    return allProvinces.reduce<Record<string, typeof allProvinces>>((acc, p) => {
+      if (!acc[p.regione]) acc[p.regione] = [];
+      acc[p.regione].push(p);
+      return acc;
+    }, {});
+  }, [allProvinces]);
 
   return (
     <div className="space-y-6">
@@ -389,7 +269,7 @@ export function OsmImportSection() {
             <option value="">Provincia...</option>
             {Object.entries(byRegion).sort(([a], [b]) => a.localeCompare(b)).map(([reg, provs]) => (
               <optgroup key={reg} label={reg}>
-                {provs.map(p => <option key={p.code} value={p.code}>{p.label}</option>)}
+                {provs.map(p => <option key={p.sigla} value={p.sigla}>{p.sigla} - {p.nome}</option>)}
               </optgroup>
             ))}
           </select>
