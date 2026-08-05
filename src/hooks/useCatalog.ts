@@ -35,11 +35,42 @@ export interface BusinessService {
   is_active: boolean;
 }
 
-// Module-level caches
+interface BusinessCategoryRow {
+  id: string;
+  name: string;
+  slug: string | null;
+  parent_id: string | null;
+}
+
+const CATALOG_MACRO_NAMES = [
+  'Ristorazione',
+  'Alloggio',
+  'Artigianato',
+  'Commercio',
+  'Servizi Professionali',
+  'Salute e Benessere',
+  'Trasporti',
+  'Istruzione',
+  'Agricoltura',
+  'Industria',
+];
+
+// Static fallback data — used when PostgREST schema cache is stale
+const STATIC_MACRO_CATEGORIES: MacroCategory[] = [
+  { id: 'c928de4e-7973-4b25-9686-68349a72cb2f', name: 'Ristorazione', slug: 'ristorazione', icon: null, sort_order: 1, is_active: true },
+  { id: '059a307d-794b-4605-b571-db1a6a40757f', name: 'Alloggio', slug: 'alloggio', icon: null, sort_order: 2, is_active: true },
+  { id: 'f06913f7-fbfa-43c2-b8f5-4465a7d1cb55', name: 'Artigianato', slug: 'artigianato', icon: null, sort_order: 3, is_active: true },
+  { id: '34dfd729-7a60-4200-ac1a-fb518a78d10e', name: 'Commercio', slug: 'commercio', icon: null, sort_order: 4, is_active: true },
+  { id: '4ac11dea-d49b-4bbb-9b73-193b7c98baea', name: 'Servizi Professionali', slug: 'servizi-professionali', icon: null, sort_order: 5, is_active: true },
+  { id: 'daa14a58-e211-48e6-9ee6-22b8c3ec80f5', name: 'Salute e Benessere', slug: 'salute-benessere', icon: null, sort_order: 6, is_active: true },
+  { id: 'd5aef280-6b09-411c-bcb1-18e723b40771', name: 'Trasporti', slug: 'trasporti', icon: null, sort_order: 7, is_active: true },
+  { id: '4bfba2eb-67c7-497c-b61d-1711843c0e82', name: 'Istruzione', slug: 'istruzione', icon: null, sort_order: 8, is_active: true },
+  { id: 'b93d4eb2-7815-41b8-ae2b-07884e5e0618', name: 'Agricoltura', slug: 'agricoltura', icon: null, sort_order: 9, is_active: true },
+  { id: 'f1489227-529c-43a0-94e1-b7407aeeb483', name: 'Industria', slug: 'industria', icon: null, sort_order: 10, is_active: true },
+];
+
+// Module-level cache
 let cachedMacroCategories: MacroCategory[] | null = null;
-let cachedMicroCategories: MicroCategory[] | null = null;
-let cachedSpecializations: Specialization[] | null = null;
-let cachedServices: BusinessService[] | null = null;
 
 export function useMacroCategories() {
   const [macroCategories, setMacroCategories] = useState<MacroCategory[]>(cachedMacroCategories ?? []);
@@ -50,15 +81,28 @@ export function useMacroCategories() {
     let cancelled = false;
     setLoading(true);
     supabase
-      .from('catalog_macro_categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order')
+      .from('business_categories')
+      .select('id, name, slug, parent_id')
+      .is('parent_id', null)
       .order('name')
       .then(({ data, error }) => {
         if (!cancelled && !error && data) {
-          cachedMacroCategories = data;
-          setMacroCategories(data);
+          const rows = data as BusinessCategoryRow[];
+          const filtered = rows.filter(row => CATALOG_MACRO_NAMES.includes(row.name));
+          if (filtered.length > 0) {
+            const mapped: MacroCategory[] = filtered.map((row, idx) => ({
+              id: row.id, name: row.name, slug: row.slug, icon: null,
+              sort_order: idx, is_active: true,
+            }));
+            cachedMacroCategories = mapped;
+            setMacroCategories(mapped);
+          } else {
+            cachedMacroCategories = STATIC_MACRO_CATEGORIES;
+            setMacroCategories(STATIC_MACRO_CATEGORIES);
+          }
+        } else if (!cancelled) {
+          cachedMacroCategories = STATIC_MACRO_CATEGORIES;
+          setMacroCategories(STATIC_MACRO_CATEGORIES);
         }
         if (!cancelled) setLoading(false);
       });
@@ -77,24 +121,22 @@ export function useMicroCategories(macroCategoryId: string | null) {
     let cancelled = false;
     setLoading(true);
 
-    // Try cache first
-    if (cachedMicroCategories) {
-      const filtered = cachedMicroCategories.filter(m => m.macro_category_id === macroCategoryId);
-      setMicroCategories(filtered);
-      setLoading(false);
-      return;
-    }
-
     supabase
-      .from('catalog_micro_categories')
-      .select('*')
-      .eq('macro_category_id', macroCategoryId)
-      .eq('is_active', true)
-      .order('sort_order')
+      .from('business_categories')
+      .select('id, name, slug, parent_id')
+      .eq('parent_id', macroCategoryId)
       .order('name')
       .then(({ data, error }) => {
         if (!cancelled && !error && data) {
-          setMicroCategories(data);
+          const mapped: MicroCategory[] = (data as BusinessCategoryRow[]).map(row => ({
+            id: row.id,
+            macro_category_id: row.parent_id ?? macroCategoryId,
+            name: row.name,
+            slug: row.slug,
+            sort_order: 0,
+            is_active: true,
+          }));
+          setMicroCategories(mapped);
         }
         if (!cancelled) setLoading(false);
       });
@@ -113,23 +155,16 @@ export function useSpecializations(macroCategoryId: string | null) {
     let cancelled = false;
     setLoading(true);
 
-    if (cachedSpecializations) {
-      const filtered = cachedSpecializations.filter(s => s.macro_category_id === macroCategoryId);
-      setSpecializations(filtered);
-      setLoading(false);
-      return;
-    }
-
     supabase
       .from('business_specializations')
-      .select('*')
+      .select('id, macro_category_id, name, sort_order, is_active')
       .eq('macro_category_id', macroCategoryId)
       .eq('is_active', true)
       .order('sort_order')
       .order('name')
       .then(({ data, error }) => {
         if (!cancelled && !error && data) {
-          setSpecializations(data);
+          setSpecializations(data as Specialization[]);
         }
         if (!cancelled) setLoading(false);
       });
@@ -148,23 +183,16 @@ export function useBusinessServices(macroCategoryId: string | null) {
     let cancelled = false;
     setLoading(true);
 
-    if (cachedServices) {
-      const filtered = cachedServices.filter(s => s.macro_category_id === macroCategoryId);
-      setServices(filtered);
-      setLoading(false);
-      return;
-    }
-
     supabase
       .from('business_services')
-      .select('*')
+      .select('id, macro_category_id, name, sort_order, is_active')
       .eq('macro_category_id', macroCategoryId)
       .eq('is_active', true)
       .order('sort_order')
       .order('name')
       .then(({ data, error }) => {
         if (!cancelled && !error && data) {
-          setServices(data);
+          setServices(data as BusinessService[]);
         }
         if (!cancelled) setLoading(false);
       });
@@ -174,37 +202,44 @@ export function useBusinessServices(macroCategoryId: string | null) {
   return { services, loading };
 }
 
-// Bulk loader for search filters — loads everything in parallel
 export function useAllCatalogData() {
-  const [macroCategories, setMacroCategories] = useState<MacroCategory[]>(cachedMacroCategories ?? []);
-  const [allMicroCategories, setAllMicroCategories] = useState<MicroCategory[]>(cachedMicroCategories ?? []);
-  const [allSpecializations, setAllSpecializations] = useState<Specialization[]>(cachedSpecializations ?? []);
-  const [allServices, setAllServices] = useState<BusinessService[]>(cachedServices ?? []);
-  const [loading, setLoading] = useState(!cachedMacroCategories);
+  const { macroCategories, loading } = useMacroCategories();
+  const [allMicroCategories, setAllMicroCategories] = useState<MicroCategory[]>([]);
+  const [allSpecializations, setAllSpecializations] = useState<Specialization[]>([]);
+  const [allServices, setAllServices] = useState<BusinessService[]>([]);
 
   useEffect(() => {
-    if (cachedMacroCategories && cachedMicroCategories && cachedSpecializations && cachedServices) return;
+    if (macroCategories.length === 0) return;
     let cancelled = false;
-    setLoading(true);
 
     (async () => {
-      const [macroRes, microRes, specRes, svcRes] = await Promise.all([
-        cachedMacroCategories ? Promise.resolve({ data: cachedMacroCategories, error: null }) : supabase.from('catalog_macro_categories').select('*').eq('is_active', true).order('sort_order').order('name'),
-        cachedMicroCategories ? Promise.resolve({ data: cachedMicroCategories, error: null }) : supabase.from('catalog_micro_categories').select('*').eq('is_active', true).order('sort_order').order('name'),
-        cachedSpecializations ? Promise.resolve({ data: cachedSpecializations, error: null }) : supabase.from('business_specializations').select('*').eq('is_active', true).order('sort_order').order('name'),
-        cachedServices ? Promise.resolve({ data: cachedServices, error: null }) : supabase.from('business_services').select('*').eq('is_active', true).order('sort_order').order('name'),
-      ]);
+      const macroIds = macroCategories.map(m => m.id);
+      const { data: microData } = await supabase
+        .from('business_categories')
+        .select('id, name, slug, parent_id')
+        .in('parent_id', macroIds)
+        .order('name');
 
-      if (cancelled) return;
-      if (macroRes.data) { cachedMacroCategories = macroRes.data; setMacroCategories(macroRes.data); }
-      if (microRes.data) { cachedMicroCategories = microRes.data; setAllMicroCategories(microRes.data); }
-      if (specRes.data) { cachedSpecializations = specRes.data; setAllSpecializations(specRes.data); }
-      if (svcRes.data) { cachedServices = svcRes.data; setAllServices(svcRes.data); }
-      setLoading(false);
+      if (!cancelled && microData) {
+        const mapped: MicroCategory[] = (microData as BusinessCategoryRow[]).map(row => ({
+          id: row.id, macro_category_id: row.parent_id ?? '', name: row.name,
+          slug: row.slug, sort_order: 0, is_active: true,
+        }));
+        setAllMicroCategories(mapped);
+      }
+
+      const [specRes, svcRes] = await Promise.all([
+        supabase.from('business_specializations').select('*').eq('is_active', true).order('sort_order').order('name'),
+        supabase.from('business_services').select('*').eq('is_active', true).order('sort_order').order('name'),
+      ]);
+      if (!cancelled) {
+        if (specRes.data) setAllSpecializations(specRes.data as Specialization[]);
+        if (svcRes.data) setAllServices(svcRes.data as BusinessService[]);
+      }
     })();
 
     return () => { cancelled = true; };
-  }, []);
+  }, [macroCategories]);
 
   const getMicroByMacro = useCallback((macroId: string) => allMicroCategories.filter(m => m.macro_category_id === macroId), [allMicroCategories]);
   const getSpecByMacro = useCallback((macroId: string) => allSpecializations.filter(s => s.macro_category_id === macroId), [allSpecializations]);
