@@ -220,7 +220,7 @@ function EditSelect({ label, fieldKey, form, icon: Icon, onChange, options }: {
 function ProfileDataSection({ profile, isBiz, registeredBusiness, familyMembers = [], businessLocations = [], editing, form, saving, saveMsg, onEdit, onCancel, onSave, onChange, onFamilyMemberSave, onLocationSave, memberAvatars, locationAvatars, onMemberAvatarChange, onLocationAvatarChange, uploadAvatar, showToast }: ProfileDataSectionProps) {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   useEffect(() => {
-    supabase.from('business_categories').select('id, name').order('name').then(({ data }) => {
+    supabase.from('catalog_macro_categories').select('id, name').eq('is_active', true).order('sort_order').order('name').then(({ data }) => {
       if (data) setCategories(data);
     });
   }, []);
@@ -1448,7 +1448,7 @@ export function DashboardPage() {
         setUserRank({ points: pts, rank: (ownerCount || 0) + (familyCount || 0) + 1, reviews_count: actData?.reviews_count || 0 });
 
         // Attività aggiunte: unclaimed businesses inseriti dall'utente (o membro famiglia attivo)
-        const abSelect = 'id, name, city, province, created_at, approval_status, rejection_reason, phone, email, website, business_categories(name)';
+        const abSelect = 'id, name, city, province, created_at, approval_status, rejection_reason, phone, email, website, catalog_macro_categories(name)';
         let abQuery = supabase.from('unclaimed_business_locations').select(abSelect).eq('added_by', profile.id).order('created_at', { ascending: false });
         if (fmId) {
           abQuery = supabase.from('unclaimed_business_locations').select(abSelect).eq('added_by', profile.id).eq('added_by_family_member_id', fmId).order('created_at', { ascending: false });
@@ -2130,7 +2130,7 @@ export function DashboardPage() {
                                     </div>
                                     <div className="min-w-0">
                                       <p className="text-sm font-semibold text-gray-900 truncate">{biz.name}</p>
-                                      <p className="text-xs text-gray-400">{biz.city}{biz.province ? ` (${biz.province})` : ''}{biz.business_categories?.name ? ` · ${biz.business_categories.name}` : ''}</p>
+                                      <p className="text-xs text-gray-400">{biz.city}{biz.province ? ` (${biz.province})` : ''}{biz.catalog_macro_categories?.name ? ` · ${biz.catalog_macro_categories.name}` : ''}</p>
                                     </div>
                                   </div>
                                   <div className="flex-shrink-0">

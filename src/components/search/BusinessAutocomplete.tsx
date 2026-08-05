@@ -6,7 +6,7 @@ interface Business {
   id: string;
   name: string;
   city?: string;
-  category?: {
+  macro_category?: {
     name: string;
   };
 }
@@ -79,7 +79,7 @@ export default function BusinessAutocomplete({
           business:businesses(
             id,
             name,
-            category:business_categories(name)
+            macro_category:catalog_macro_categories(name)
           )
         `)
         .or(`name.ilike.%${query}%,business.name.ilike.%${query}%`)
@@ -91,7 +91,7 @@ export default function BusinessAutocomplete({
           id,
           name,
           city,
-          category:business_categories(name)
+          macro_category:catalog_macro_categories(name)
         `)
         .ilike('name', `%${query}%`)
         .limit(10);
@@ -102,14 +102,14 @@ export default function BusinessAutocomplete({
           id: loc.id,
           name: loc.name || loc.business?.name || 'Nome non disponibile',
           city: loc.city,
-          category: loc.business?.category,
+          macro_category: loc.business?.macro_category,
         }));
 
       const unclaimed = (unclaimedData || []).map(b => ({
         id: b.id,
         name: b.name,
         city: b.city,
-        category: b.category,
+        macro_category: b.macro_category,
       }));
 
       const combined = [...claimed, ...unclaimed];
@@ -189,12 +189,12 @@ export default function BusinessAutocomplete({
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900 truncate">{business.name}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    {business.category && (
-                      <span className="text-xs text-gray-500">{business.category.name}</span>
+                    {business.macro_category && (
+                      <span className="text-xs text-gray-500">{business.macro_category.name}</span>
                     )}
                     {business.city && (
                       <>
-                        {business.category && <span className="text-gray-300">•</span>}
+                        {business.macro_category && <span className="text-gray-300">•</span>}
                         <span className="text-xs text-gray-500">{business.city}</span>
                       </>
                     )}

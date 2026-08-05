@@ -2,17 +2,12 @@ import { useState, useEffect } from 'react';
 import { Building, X, Save, Search, PlusCircle, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { SearchableSelect } from '../common/SearchableSelect';
-import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { ClaimBusinessLocationsForm } from './ClaimBusinessLocationsForm';
 import { getPlanDisplayName } from '../../lib/subscription-helper';
 import { useToast } from '../common/Toast';
-
-interface Category {
-  id: string;
-  name: string;
-  parent_id: string | null;
-}
+import { useMacroCategories, useMicroCategories, useSpecializations, useBusinessServices } from '../../hooks/useCatalog';
+import { MultiSelectCheckbox } from '../common/MultiSelectCheckbox';
 
 interface UnclaimedLocation {
   id: string;
@@ -25,7 +20,6 @@ interface UnclaimedLocation {
   phone: string;
   email: string;
   website: string;
-  category_id: string;
 }
 
 interface CreateBusinessFormProps {
@@ -63,10 +57,17 @@ export function CreateBusinessForm({ ownerId, onSuccess, onCancel }: CreateBusin
   const [saving, setSaving] = useState(false);
   const [checkingVat, setCheckingVat] = useState(false);
   const [existingBusiness, setExistingBusiness] = useState<ExistingBusinessInfo | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { macroCategories } = useMacroCategories();
+  const [selectedMacroId, setSelectedMacroId] = useState('');
+  const [selectedMicroId, setSelectedMicroId] = useState('');
+  const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const { microCategories } = useMicroCategories(selectedMacroId || null);
+  const { specializations } = useSpecializations(selectedMacroId || null);
+  const { services } = useBusinessServices(selectedMacroId || null);
+
   const [formData, setFormData] = useState({
     name: '',
-    category_id: '',
     city: '',
     province: '',
     address: '',
@@ -91,11 +92,12 @@ export function CreateBusinessForm({ ownerId, onSuccess, onCancel }: CreateBusin
     tiktok_url: '',
   });
 
-  useEffect(() => {
-    supabase.from('business_categories').select('id, name, parent_id').order('name').then(({ data }) => {
-      if (data) setCategories(data);
-    });
-  }, []);
+  const handleMacroChange = (macroId: string) => {
+    setSelectedMacroId(macroId);
+    setSelectedMicroId('');
+    setSelectedSpecializations([]);
+    setSelectedServices([]);
+  };
 
   const checkVatNumber = async (vat: string) => {
     if (vat.length !== 11) return;
@@ -174,7 +176,6 @@ export function CreateBusinessForm({ ownerId, onSuccess, onCancel }: CreateBusin
       const firstLocation = locations[0];
       setFormData({
         name: firstLocation.name,
-        category_id: firstLocation.category_id || '',
         city: firstLocation.city,
         province: firstLocation.province,
         address: firstLocation.street,
@@ -214,7 +215,10 @@ export function CreateBusinessForm({ ownerId, onSuccess, onCancel }: CreateBusin
         .insert({
           owner_id: ownerId,
           name: formData.name,
-          category_id: formData.category_id || claimedLocations[0]?.category_id || null,
+          macro_category_id: selectedMacroId || null,
+          micro_category_id: selectedMicroId || null,
+          specialization_ids: selectedSpecializations,
+          service_ids: selectedServices,
           city: formData.city,
           province: formData.province,
           address: formData.address,
@@ -254,6 +258,10 @@ export function CreateBusinessForm({ ownerId, onSuccess, onCancel }: CreateBusin
           website: location.website,
           country: 'Italia',
           is_primary: claimedLocations[0].id === location.id,
+          macro_category_id: selectedMacroId || null,
+          micro_category_id: selectedMicroId || null,
+          specialization_ids: selectedSpecializations,
+          service_ids: selectedServices,
           description: index === 0 && formData.location_description ? formData.location_description : null,
         }));
 
@@ -821,13 +829,52 @@ export function CreateBusinessForm({ ownerId, onSuccess, onCancel }: CreateBusin
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Categoria Attivita *
+                Macro Categoria *
               </label>
-              <CategoryHierarchySelect
-                value={formData.category_id}
-                onChange={(value) => setFormData({ ...formData, category_id: value })}
-                categories={categories}
-                placeholder="Seleziona categoria"
+              <SearchableSelect
+                value={selectedMacroId}
+                onChange={(value) => handleMacroChange(value)}
+                options={macroCategories.map(m => ({ value: m.id, label: m.name }))}
+                placeholder="Seleziona macro categoria"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Micro Categoria *
+              </label>
+              <SearchableSelect
+                value={selectedMicroId}
+                onChange={(value) => setSelectedMicroId(value)}
+                options={microCategories.map(m => ({ value: m.id, label: m.name }))}
+                placeholder={selectedMacroId ? 'Seleziona micro categoria' : 'Prima seleziona una macro categoria'}
+                disabled={!selectedMacroId}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Specializzazioni (opzionale)
+              </label>
+              <MultiSelectCheckbox
+                options={specializations.map(s => ({ id: s.id, name: s.name }))}
+                selected={selectedSpecializations}
+                onChange={setSelectedSpecializations}
+                placeholder={selectedMacroId ? 'Seleziona specializzazioni' : 'Prima seleziona una macro categoria'}
+                loading={false}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Servizi (opzionale)
+              </label>
+              <MultiSelectCheckbox
+                options={services.map(s => ({ id: s.id, name: s.name }))}
+                selected={selectedServices}
+                onChange={setSelectedServices}
+                placeholder={selectedMacroId ? 'Seleziona servizi' : 'Prima seleziona una macro categoria'}
+                loading={false}
               />
             </div>
           </div>

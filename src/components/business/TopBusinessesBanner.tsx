@@ -4,7 +4,7 @@ import { useNavigate } from '../Router';
 interface Business {
   id: string;
   name: string;
-  business_categories: { name: string } | null;
+  catalog_macro_categories: { name: string } | null;
   business_locations: Array<{
     city: string;
     province: string;
@@ -75,9 +75,9 @@ export default function TopBusinessesBanner({ businesses }: TopBusinessesBannerP
                 {business.name}
               </h3>
 
-              {business.business_categories && (
+              {business.catalog_macro_categories && (
                 <p className="text-sm text-blue-600 font-medium mb-2">
-                  {business.business_categories.name}
+                  {business.catalog_macro_categories.name}
                 </p>
               )}
 

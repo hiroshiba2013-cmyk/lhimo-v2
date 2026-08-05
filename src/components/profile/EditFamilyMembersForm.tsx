@@ -3,7 +3,7 @@ import { Users, FileEdit as Edit, Save, X, Plus, Trash2, TrendingUp, AlertTriang
 import { supabase } from '../../lib/supabase';
 import { FamilyMemberAvatarUpload } from './FamilyMemberAvatarUpload';
 import { SearchableSelect } from '../common/SearchableSelect';
-import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
+import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
 import { useToast } from '../common/Toast';
 
 interface FamilyMember {
@@ -17,6 +17,8 @@ interface FamilyMember {
   avatar_url: string | null;
   resume_url: string | null;
   category_id: string | null;
+  macro_category_id: string | null;
+  micro_category_id: string | null;
 }
 
 interface SubscriptionPlan {
@@ -47,14 +49,11 @@ export function EditFamilyMembersForm({ customerId, onUpdate }: EditFamilyMember
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
   const [nextPlan, setNextPlan] = useState<SubscriptionPlan | null>(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
-  const [categories, setCategories] = useState<{ id: string; name: string; parent_id: string | null }[]>([]);
+  const { macroCategories } = useMacroCategories();
 
   useEffect(() => {
     loadFamilyMembers();
     loadSubscriptionData();
-    supabase.from('business_categories').select('id, name, parent_id').order('name').then(({ data }) => {
-      if (data) setCategories(data);
-    });
   }, [customerId]);
 
   const loadFamilyMembers = async () => {
@@ -129,6 +128,8 @@ export function EditFamilyMembersForm({ customerId, onUpdate }: EditFamilyMember
         avatar_url: null,
         resume_url: null,
         category_id: null,
+        macro_category_id: null,
+        micro_category_id: null,
       },
     ]);
   };
@@ -228,6 +229,8 @@ export function EditFamilyMembersForm({ customerId, onUpdate }: EditFamilyMember
               date_of_birth: member.date_of_birth,
               fiscal_code: member.fiscal_code,
               category_id: member.category_id || null,
+              macro_category_id: member.macro_category_id || null,
+              micro_category_id: member.micro_category_id || null,
             });
 
           if (error) throw error;
@@ -242,6 +245,8 @@ export function EditFamilyMembersForm({ customerId, onUpdate }: EditFamilyMember
               date_of_birth: member.date_of_birth,
               fiscal_code: member.fiscal_code,
               category_id: member.category_id || null,
+              macro_category_id: member.macro_category_id || null,
+              micro_category_id: member.micro_category_id || null,
             })
             .eq('id', member.id);
 
@@ -437,8 +442,8 @@ export function EditFamilyMembersForm({ customerId, onUpdate }: EditFamilyMember
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Categoria</p>
                     <p className="text-lg font-semibold text-gray-900">
-                      {member.category_id
-                        ? categories.find(c => c.id === member.category_id)?.name || '-'
+                      {member.macro_category_id
+                        ? macroCategories.find(c => c.id === member.macro_category_id)?.name || '-'
                         : '-'}
                     </p>
                   </div>
@@ -647,15 +652,26 @@ export function EditFamilyMembersForm({ customerId, onUpdate }: EditFamilyMember
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Categoria
+                    Macro Categoria
                   </label>
-                  <CategoryHierarchySelect
-                    value={member.category_id || ''}
-                    onChange={(value) => handleChange(member.id, 'category_id', value)}
-                    categories={categories}
-                    placeholder="Seleziona la categoria"
+                  <SearchableSelect
+                    value={member.macro_category_id || ''}
+                    onChange={(value) => handleChange(member.id, 'macro_category_id', value)}
+                    options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+                    placeholder="Seleziona la macro categoria"
                   />
                   <p className="text-xs text-gray-500 mt-1">Viene mostrata nelle attivita aggiunte da questo membro</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Micro Categoria
+                  </label>
+                  <MemberMicroCategorySelect
+                    macroCategoryId={member.macro_category_id}
+                    value={member.micro_category_id || ''}
+                    onChange={(value) => handleChange(member.id, 'micro_category_id', value)}
+                  />
                 </div>
               </div>
             </div>
@@ -712,5 +728,28 @@ export function EditFamilyMembersForm({ customerId, onUpdate }: EditFamilyMember
         </div>
       </form>
     </div>
+  );
+}
+
+// Sub-component so the micro-categories hook is called at the top level
+// (React rules of hooks forbid calling hooks inside .map() callbacks).
+function MemberMicroCategorySelect({
+  macroCategoryId,
+  value,
+  onChange,
+}: {
+  macroCategoryId: string | null;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const { microCategories } = useMicroCategories(macroCategoryId);
+  return (
+    <SearchableSelect
+      value={value}
+      onChange={onChange}
+      options={microCategories.map(c => ({ value: c.id, label: c.name }))}
+      placeholder="Seleziona la micro categoria"
+      disabled={!macroCategoryId}
+    />
   );
 }

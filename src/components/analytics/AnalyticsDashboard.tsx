@@ -37,8 +37,10 @@ export default function AnalyticsDashboard() {
         supabase.from('businesses').select('id', { count: 'exact', head: true }),
         supabase.from('reviews').select('overall_rating'),
         supabase
-          .from('business_categories')
+          .from('catalog_macro_categories')
           .select('name, businesses(count)')
+          .eq('is_active', true)
+          .order('sort_order')
           .limit(10),
         supabase
           .from('business_locations')

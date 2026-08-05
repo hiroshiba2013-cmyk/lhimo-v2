@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Briefcase, Plus, X, FileEdit as Edit, Trash2, User, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { SearchableSelect } from '../common/SearchableSelect';
+import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
 import { useToast } from '../common/Toast';
 
 interface JobSeeker {
@@ -23,15 +24,12 @@ interface JobSeeker {
   status: string;
   created_at: string;
   category_id: string | null;
+  macro_category_id: string | null;
+  micro_category_id: string | null;
   family_member_id: string | null;
-  business_categories?: {
+  catalog_macro_categories?: {
     name: string;
   } | null;
-}
-
-interface Category {
-  id: string;
-  name: string;
 }
 
 interface FamilyMember {
@@ -51,10 +49,11 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
   const { showToast } = useToast();
   const [jobSeekers, setJobSeekers] = useState<JobSeeker[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const { macroCategories } = useMacroCategories();
+  const { microCategories } = useMicroCategories(formData.macro_category_id || null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -68,7 +67,8 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
     education_level: '',
     phone: '',
     email: '',
-    category_id: '',
+    macro_category_id: '',
+    micro_category_id: '',
     status: 'active',
   });
 
@@ -78,7 +78,7 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
 
   const loadData = async () => {
     setLoading(true);
-    await Promise.all([loadJobSeekers(), loadFamilyMembers(), loadCategories()]);
+    await Promise.all([loadJobSeekers(), loadFamilyMembers()]);
     setLoading(false);
   };
 
@@ -88,7 +88,7 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
         .from('job_seekers')
         .select(`
           *,
-          business_categories(name)
+          catalog_macro_categories(name)
         `)
         .eq('user_id', customerId);
 
@@ -102,19 +102,6 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
       setJobSeekers(data || []);
     } catch (error) {
       console.error('Error loading job seekers:', error);
-    }
-  };
-
-  const loadCategories = async () => {
-    try {
-      const { data } = await supabase
-        .from('business_categories')
-        .select('id, name')
-        .order('name');
-
-      setCategories(data || []);
-    } catch (error) {
-      console.error('Error loading categories:', error);
     }
   };
 
@@ -150,7 +137,8 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
         education_level: formData.education_level || null,
         phone: formData.phone || null,
         email: formData.email || null,
-        category_id: formData.category_id || null,
+        macro_category_id: formData.macro_category_id || null,
+        micro_category_id: formData.micro_category_id || null,
         status: formData.status,
       };
 
@@ -196,7 +184,8 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
       education_level: jobSeeker.education_level || '',
       phone: jobSeeker.phone || '',
       email: jobSeeker.email || '',
-      category_id: jobSeeker.category_id || '',
+      macro_category_id: jobSeeker.macro_category_id || '',
+      micro_category_id: jobSeeker.micro_category_id || '',
       status: jobSeeker.status,
     });
     setEditingId(jobSeeker.id);
@@ -248,7 +237,8 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
       education_level: '',
       phone: '',
       email: '',
-      category_id: '',
+      macro_category_id: '',
+      micro_category_id: '',
       status: 'active',
     });
     setEditingId(null);
@@ -326,19 +316,32 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Categoria Lavorativa
+                Macro Categoria Lavorativa
               </label>
               <SearchableSelect
-                value={formData.category_id}
-                onChange={(value) => setFormData({ ...formData, category_id: value })}
-                options={[
-                  { value: '', label: 'Seleziona una categoria...' },
-                  ...categories.map((cat) => ({
-                    value: cat.id,
-                    label: cat.name,
-                  }))
-                ]}
-                placeholder="Seleziona una categoria..."
+                value={formData.macro_category_id}
+                onChange={(value) => setFormData({ ...formData, macro_category_id: value, micro_category_id: '' })}
+                options={macroCategories.map((cat) => ({
+                  value: cat.id,
+                  label: cat.name,
+                }))}
+                placeholder="Seleziona una macro categoria..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Micro Categoria Lavorativa
+              </label>
+              <SearchableSelect
+                value={formData.micro_category_id}
+                onChange={(value) => setFormData({ ...formData, micro_category_id: value })}
+                options={microCategories.map((cat) => ({
+                  value: cat.id,
+                  label: cat.name,
+                }))}
+                placeholder="Seleziona una micro categoria..."
+                disabled={!formData.macro_category_id}
               />
             </div>
 
@@ -553,7 +556,7 @@ export function JobRequestForm({ customerId, familyMemberId }: JobRequestFormPro
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mb-1">
-                    {jobSeeker.business_categories?.name || 'Categoria non specificata'} • {jobSeeker.location} • {jobSeeker.contract_type}
+                    {jobSeeker.catalog_macro_categories?.name || 'Categoria non specificata'} • {jobSeeker.location} • {jobSeeker.contract_type}
                   </p>
                   <p className="text-sm text-gray-600">
                     {jobSeeker.experience_years} {jobSeeker.experience_years === 1 ? 'anno' : 'anni'} di esperienza

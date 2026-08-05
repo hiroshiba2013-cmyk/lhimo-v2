@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FileEdit as Edit, Save, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { SearchableSelect } from '../common/SearchableSelect';
-import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
+import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
 import { useToast } from '../common/Toast';
 
 interface ProfileData {
@@ -36,6 +36,10 @@ interface ProfileData {
   office_address?: string;
   business_category_id?: string;
   category_id?: string;
+  macro_category_id?: string;
+  micro_category_id?: string;
+  business_macro_category_id?: string;
+  business_micro_category_id?: string;
   description?: string;
 }
 
@@ -44,17 +48,13 @@ interface EditProfileFormProps {
   onUpdate: () => void;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  parent_id: string | null;
-}
-
 export function EditProfileForm({ profile, onUpdate }: EditProfileFormProps) {
   const { showToast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { macroCategories } = useMacroCategories();
+  const { microCategories: businessMicroCategories } = useMicroCategories(formData.business_macro_category_id || null);
+  const { microCategories: customerMicroCategories } = useMicroCategories(formData.macro_category_id || null);
   const [formData, setFormData] = useState({
     first_name: profile.first_name || '',
     last_name: profile.last_name || '',
@@ -80,24 +80,13 @@ export function EditProfileForm({ profile, onUpdate }: EditProfileFormProps) {
     office_city: profile.office_city || '',
     office_province: profile.office_province || '',
     business_category_id: profile.business_category_id || '',
+    business_macro_category_id: profile.business_macro_category_id || '',
+    business_micro_category_id: profile.business_micro_category_id || '',
     category_id: profile.category_id || '',
+    macro_category_id: profile.macro_category_id || '',
+    micro_category_id: profile.micro_category_id || '',
     description: profile.description || '',
   });
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  const loadCategories = async () => {
-    const { data } = await supabase
-      .from('business_categories')
-      .select('id, name, parent_id')
-      .order('name');
-
-    if (data) {
-      setCategories(data);
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -126,7 +115,8 @@ export function EditProfileForm({ profile, onUpdate }: EditProfileFormProps) {
         billing_province: formData.billing_province.toUpperCase(),
         billing_address: billingAddress,
         full_name: `${formData.first_name} ${formData.last_name}`,
-        category_id: profile.user_type !== 'business' ? (formData.category_id || null) : undefined,
+        macro_category_id: profile.user_type !== 'business' ? (formData.macro_category_id || null) : undefined,
+        micro_category_id: profile.user_type !== 'business' ? (formData.micro_category_id || null) : undefined,
       };
 
       if (profile.user_type === 'business') {
@@ -143,6 +133,8 @@ export function EditProfileForm({ profile, onUpdate }: EditProfileFormProps) {
         updateData.office_city = formData.office_city;
         updateData.office_province = formData.office_province?.toUpperCase();
         updateData.business_category_id = formData.business_category_id || null;
+        updateData.business_macro_category_id = formData.business_macro_category_id || null;
+        updateData.business_micro_category_id = formData.business_micro_category_id || null;
         updateData.description = formData.description;
 
         const officeAddress = formData.office_street && formData.office_street_number
@@ -194,7 +186,11 @@ export function EditProfileForm({ profile, onUpdate }: EditProfileFormProps) {
       office_city: profile.office_city || '',
       office_province: profile.office_province || '',
       business_category_id: profile.business_category_id || '',
+      business_macro_category_id: profile.business_macro_category_id || '',
+      business_micro_category_id: profile.business_micro_category_id || '',
       category_id: profile.category_id || '',
+      macro_category_id: profile.macro_category_id || '',
+      micro_category_id: profile.micro_category_id || '',
       description: profile.description || '',
     });
     setIsEditing(false);
@@ -259,8 +255,8 @@ export function EditProfileForm({ profile, onUpdate }: EditProfileFormProps) {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Categoria</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {profile.business_category_id
-                    ? categories.find(c => c.id === profile.business_category_id)?.name || '-'
+                  {profile.business_macro_category_id
+                    ? macroCategories.find(c => c.id === profile.business_macro_category_id)?.name || '-'
                     : '-'}
                 </p>
               </div>
@@ -315,8 +311,8 @@ export function EditProfileForm({ profile, onUpdate }: EditProfileFormProps) {
             <div>
               <p className="text-sm text-gray-600 mb-1">Categoria</p>
               <p className="text-lg font-semibold text-gray-900">
-                {profile.category_id
-                  ? categories.find(c => c.id === profile.category_id)?.name || '-'
+                {profile.macro_category_id
+                  ? macroCategories.find(c => c.id === profile.macro_category_id)?.name || '-'
                   : '-'}
               </p>
             </div>
@@ -460,13 +456,26 @@ export function EditProfileForm({ profile, onUpdate }: EditProfileFormProps) {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Categoria
+                  Macro Categoria
                 </label>
-                <CategoryHierarchySelect
-                  value={formData.business_category_id}
-                  onChange={(value) => setFormData(prev => ({ ...prev, business_category_id: value }))}
-                  categories={categories}
-                  placeholder="Seleziona categoria"
+                <SearchableSelect
+                  value={formData.business_macro_category_id}
+                  onChange={(value) => setFormData(prev => ({ ...prev, business_macro_category_id: value, business_micro_category_id: '' }))}
+                  options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+                  placeholder="Seleziona macro categoria"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Micro Categoria
+                </label>
+                <SearchableSelect
+                  value={formData.business_micro_category_id}
+                  onChange={(value) => setFormData(prev => ({ ...prev, business_micro_category_id: value }))}
+                  options={businessMicroCategories.map(c => ({ value: c.id, label: c.name }))}
+                  placeholder="Seleziona micro categoria"
+                  disabled={!formData.business_macro_category_id}
                 />
               </div>
 
@@ -751,15 +760,28 @@ export function EditProfileForm({ profile, onUpdate }: EditProfileFormProps) {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Categoria
+                Macro Categoria
               </label>
-              <CategoryHierarchySelect
-                value={formData.category_id}
-                onChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
-                categories={categories}
-                placeholder="Seleziona la tua categoria"
+              <SearchableSelect
+                value={formData.macro_category_id}
+                onChange={(value) => setFormData(prev => ({ ...prev, macro_category_id: value, micro_category_id: '' }))}
+                options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+                placeholder="Seleziona la tua macro categoria"
               />
               <p className="text-xs text-gray-500 mt-1">Viene mostrata nelle attivita che aggiungi alla piattaforma</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Micro Categoria
+              </label>
+              <SearchableSelect
+                value={formData.micro_category_id}
+                onChange={(value) => setFormData(prev => ({ ...prev, micro_category_id: value }))}
+                options={customerMicroCategories.map(c => ({ value: c.id, label: c.name }))}
+                placeholder="Seleziona la tua micro categoria"
+                disabled={!formData.macro_category_id}
+              />
             </div>
           </div>
         )}

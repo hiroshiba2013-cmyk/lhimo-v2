@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, Award, MapPin, Phone, Mail, Globe, User, FileEdit as Edit2, Trash2, CheckCircle, Clock, XCircle } from 'lucide-react';
-import { supabase, BusinessCategory } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
+import { SearchableSelect } from '../common/SearchableSelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { useItalianLocations } from '../../hooks/useItalianLocations';
+import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
 import { useToast } from '../common/Toast';
 
 const PROVINCE_NAMES: Record<string, string> = {
@@ -63,7 +65,7 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
   const { showToast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<BusinessCategory[]>([]);
+  const { macroCategories } = useMacroCategories();
   const [userAddedBusinesses, setUserAddedBusinesses] = useState<UserAddedBusiness[]>([]);
   const [loadingBusinesses, setLoadingBusinesses] = useState(true);
   const [editingBusinessId, setEditingBusinessId] = useState<string | null>(null);
@@ -72,7 +74,8 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
 
   const [formData, setFormData] = useState({
     name: '',
-    category_id: '',
+    macro_category_id: '',
+    micro_category_id: '',
     street: '',
     city: '',
     province: '',      // nome completo, usato da ItalianCityProvinceSelect per caricare i comuni
@@ -84,21 +87,11 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
     phone: '',
   });
 
+  const { microCategories } = useMicroCategories(formData.macro_category_id || null);
+
   useEffect(() => {
-    loadCategories();
     loadUserAddedBusinesses();
   }, [customerId, activeFamilyMemberId]);
-
-  const loadCategories = async () => {
-    const { data } = await supabase
-      .from('business_categories')
-      .select('*')
-      .order('name');
-
-    if (data) {
-      setCategories(data);
-    }
-  };
 
   const loadUserAddedBusinesses = async () => {
     try {
@@ -121,7 +114,7 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
           created_at,
           approval_status,
           rejection_reason,
-          business_categories(name)
+          catalog_macro_categories(name)
         `)
         .eq('added_by', customerId);
 
@@ -139,7 +132,7 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
           allBusinesses.push({
             id: business.id,
             name: business.name,
-            category: business.business_categories?.name || null,
+            category: business.catalog_macro_categories?.name || null,
             street: business.street,
             city: business.city,
             province: business.province,
@@ -168,7 +161,7 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
           email,
           website,
           created_at,
-          business_categories(name)
+          catalog_macro_categories(name)
         `)
         .eq('added_by', customerId)
         .order('created_at', { ascending: false });
@@ -178,7 +171,7 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
           allBusinesses.push({
             id: business.id,
             name: business.name,
-            category: business.business_categories?.name || null,
+            category: business.catalog_macro_categories?.name || null,
             street: business.street,
             city: business.city,
             province: business.province,
@@ -247,7 +240,8 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
         .from('unclaimed_business_locations')
         .insert({
           name: formData.name,
-          category_id: formData.category_id || null,
+          macro_category_id: formData.macro_category_id || null,
+          micro_category_id: formData.micro_category_id || null,
           street: formData.street,
           city: formData.city,
           province: formData.provinceCode || formData.province,
@@ -269,7 +263,8 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
 
       setFormData({
         name: '',
-        category_id: '',
+        macro_category_id: '',
+        micro_category_id: '',
         street: '',
         city: '',
         province: '',
@@ -301,14 +296,14 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
   };
 
   const handleEdit = (business: UserAddedBusiness) => {
-    const category = categories.find(c => c.name === business.category);
     const storedProvince = business.province || '';
     const isSigla = storedProvince.length <= 2 && storedProvince === storedProvince.toUpperCase();
     const provinceName = isSigla ? (PROVINCE_NAMES[storedProvince] || storedProvince) : storedProvince;
     const provinceCode = isSigla ? storedProvince : '';
     setFormData({
       name: business.name,
-      category_id: category?.id || '',
+      macro_category_id: '',
+      micro_category_id: '',
       street: business.street || '',
       city: business.city,
       province: provinceName,
@@ -334,7 +329,8 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
         .from('unclaimed_business_locations')
         .update({
           name: formData.name,
-          category_id: formData.category_id || null,
+          macro_category_id: formData.macro_category_id || null,
+          micro_category_id: formData.micro_category_id || null,
           street: formData.street,
           city: formData.city,
           province: formData.provinceCode || formData.province,
@@ -352,7 +348,8 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
 
       setFormData({
         name: '',
-        category_id: '',
+        macro_category_id: '',
+        micro_category_id: '',
         street: '',
         city: '',
         province: '',
@@ -419,10 +416,12 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
   const handleCancelEdit = () => {
     setFormData({
       name: '',
-      category_id: '',
+      macro_category_id: '',
+      micro_category_id: '',
       street: '',
       city: '',
       province: '',
+      provinceCode: '',
       region: '',
       postal_code: '',
       website: '',
@@ -519,21 +518,28 @@ export function AddUnclaimedBusinessForm({ customerId, activeFamilyMemberId, onS
 
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Categoria *
+                Macro Categoria *
               </label>
-              <select
-                value={formData.category_id}
-                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+              <SearchableSelect
+                value={formData.macro_category_id}
+                onChange={(value) => setFormData(prev => ({ ...prev, macro_category_id: value, micro_category_id: '' }))}
+                options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+                placeholder="Seleziona macro categoria"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Seleziona categoria</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Micro Categoria
+              </label>
+              <SearchableSelect
+                value={formData.micro_category_id}
+                onChange={(value) => setFormData(prev => ({ ...prev, micro_category_id: value }))}
+                options={microCategories.map(c => ({ value: c.id, label: c.name }))}
+                placeholder="Seleziona micro categoria"
+                disabled={!formData.macro_category_id}
+              />
             </div>
 
             <div className="md:col-span-2">

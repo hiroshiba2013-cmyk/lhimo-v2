@@ -2,24 +2,19 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { SearchableSelect } from '../common/SearchableSelect';
-import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { useItalianLocations } from '../../hooks/useItalianLocations';
+import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
 
 interface Business {
   id: string;
   name: string;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  parent_id: string | null;
-}
-
 interface JobFormData {
   businessId: string;
-  categoryId: string;
+  macroCategoryId: string;
+  microCategoryId: string;
   title: string;
   description: string;
   positionType: string;
@@ -41,17 +36,19 @@ interface BusinessJobFormProps {
 
 export function BusinessJobForm({ onSuccess }: BusinessJobFormProps) {
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const { user } = useAuth();
 
   const { regions } = useItalianLocations();
+  const { macroCategories } = useMacroCategories();
+  const { microCategories } = useMicroCategories(formData.macroCategoryId || null);
 
   const [formData, setFormData] = useState<JobFormData>({
     businessId: '',
-    categoryId: '',
+    macroCategoryId: '',
+    microCategoryId: '',
     title: '',
     description: '',
     positionType: 'Full-time',
@@ -69,7 +66,6 @@ export function BusinessJobForm({ onSuccess }: BusinessJobFormProps) {
 
   useEffect(() => {
     loadBusinesses();
-    loadCategories();
   }, [user]);
 
   const loadBusinesses = async () => {
@@ -89,19 +85,6 @@ export function BusinessJobForm({ onSuccess }: BusinessJobFormProps) {
       }
     } catch (err) {
       console.error('Error loading businesses:', err);
-    }
-  };
-
-  const loadCategories = async () => {
-    try {
-      const { data } = await supabase
-        .from('business_categories')
-        .select('id, name, parent_id')
-        .order('name');
-      if (!data) return;
-      setCategories(data);
-    } catch (error) {
-      console.error('Error loading categories:', error);
     }
   };
 
@@ -156,7 +139,8 @@ export function BusinessJobForm({ onSuccess }: BusinessJobFormProps) {
         .from('job_postings')
         .insert({
           business_id: formData.businessId,
-          category_id: formData.categoryId || null,
+          macro_category_id: formData.macroCategoryId || null,
+          micro_category_id: formData.microCategoryId || null,
           title: formData.title.trim(),
           description: formData.description.trim(),
           position_type: formData.positionType,
@@ -177,7 +161,8 @@ export function BusinessJobForm({ onSuccess }: BusinessJobFormProps) {
       setSuccess('Annuncio pubblicato con successo!');
       setFormData({
         businessId: formData.businessId,
-        categoryId: '',
+        macroCategoryId: '',
+        microCategoryId: '',
         title: '',
         description: '',
         positionType: 'Full-time',
@@ -229,13 +214,28 @@ export function BusinessJobForm({ onSuccess }: BusinessJobFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Categoria Lavorativa
+          Macro Categoria Lavorativa
         </label>
-        <CategoryHierarchySelect
-          value={formData.categoryId}
-          onChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
-          categories={categories}
-          placeholder="Seleziona una categoria..."
+        <SearchableSelect
+          name="macroCategoryId"
+          value={formData.macroCategoryId}
+          onChange={(value) => setFormData(prev => ({ ...prev, macroCategoryId: value, microCategoryId: '' }))}
+          options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+          placeholder="Seleziona una macro categoria..."
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Micro Categoria Lavorativa
+        </label>
+        <SearchableSelect
+          name="microCategoryId"
+          value={formData.microCategoryId}
+          onChange={(value) => setFormData(prev => ({ ...prev, microCategoryId: value }))}
+          options={microCategories.map(c => ({ value: c.id, label: c.name }))}
+          placeholder="Seleziona una micro categoria..."
+          disabled={!formData.macroCategoryId}
         />
       </div>
 

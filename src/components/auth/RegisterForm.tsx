@@ -4,6 +4,7 @@ import { SearchableSelect } from '../common/SearchableSelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { Plus, Trash2, MapPin, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
 
 interface FamilyMember {
   firstName: string;
@@ -44,6 +45,8 @@ interface BusinessLocation {
   email: string;
   vatNumber: string;
   categoryId: string;
+  macroCategoryId: string;
+  microCategoryId: string;
   businessHours: BusinessHours;
 }
 
@@ -106,13 +109,9 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [businessLocations, setBusinessLocations] = useState<BusinessLocation[]>([]);
   const [businessBillingPeriod, setBusinessBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [hasClaimedLocations, setHasClaimedLocations] = useState(false);
-  const [businessCategories, setBusinessCategories] = useState<{ id: string; name: string }[]>([]);
-
-  useEffect(() => {
-    supabase.from('business_categories').select('id, name').order('name').then(({ data }) => {
-      if (data) setBusinessCategories(data);
-    });
-  }, []);
+  const { macroCategories } = useMacroCategories();
+  const { microCategories: businessMicroCategories } = useMicroCategories(businessForm.macroCategoryId || null);
+  const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
 
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
@@ -130,6 +129,8 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         email: '',
         vatNumber: '',
         categoryId: '',
+        macroCategoryId: '',
+        microCategoryId: '',
         businessHours: {
           monday: defaultHours,
           tuesday: defaultHours,
@@ -232,6 +233,8 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         email: loc.email || '',
         vatNumber: '',
         categoryId: loc.category_id || '',
+        macroCategoryId: loc.macro_category_id || '',
+        microCategoryId: loc.micro_category_id || '',
         businessHours: typeof loc.business_hours === 'string'
           ? JSON.parse(loc.business_hours)
           : (loc.business_hours || defaultBusinessHours),
@@ -315,6 +318,8 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             email: '',
             vatNumber: '',
             categoryId: '',
+            macroCategoryId: '',
+            microCategoryId: '',
             businessHours: {
               monday: defaultHours,
               tuesday: defaultHours,
@@ -396,6 +401,8 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
     officeCity: '',
     officeProvince: '',
     categoryId: '',
+    macroCategoryId: '',
+    microCategoryId: '',
   });
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -451,6 +458,8 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       email: '',
       vatNumber: '',
       categoryId: '',
+      macroCategoryId: '',
+      microCategoryId: '',
       businessHours: {
         monday: defaultHours,
         tuesday: defaultHours,
@@ -871,6 +880,8 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
               verified: false,
               source_type: 'direct_registration',
               category_id: businessForm.categoryId || null,
+              macro_category_id: businessForm.macroCategoryId || null,
+              micro_category_id: businessForm.microCategoryId || null,
             })
             .select('id')
             .single();
@@ -906,6 +917,8 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             email: location.email || null,
             business_hours: location.businessHours,
             category_id: location.categoryId || null,
+            macro_category_id: location.macroCategoryId || null,
+            micro_category_id: location.microCategoryId || null,
             instagram_url: businessForm.instagram_url || null,
             facebook_url: businessForm.facebook_url || null,
             tiktok_url: businessForm.tiktok_url || null,
@@ -1963,20 +1976,27 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
             <div className="mb-3">
               <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
-                Categoria Attivita
+                Macro Categoria Attivita
               </label>
-              <select
-                id="categoryId"
-                name="categoryId"
-                value={businessForm.categoryId}
-                onChange={(e) => setBusinessForm(prev => ({ ...prev, categoryId: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              >
-                <option value="">Seleziona una categoria</option>
-                {businessCategories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
+              <SearchableSelect
+                value={businessForm.macroCategoryId}
+                onChange={(value) => setBusinessForm(prev => ({ ...prev, macroCategoryId: value, microCategoryId: '' }))}
+                options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+                placeholder="Seleziona una macro categoria"
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+                Micro Categoria Attivita
+              </label>
+              <SearchableSelect
+                value={businessForm.microCategoryId}
+                onChange={(value) => setBusinessForm(prev => ({ ...prev, microCategoryId: value }))}
+                options={businessMicroCategories.map(c => ({ value: c.id, label: c.name }))}
+                placeholder="Seleziona una micro categoria"
+                disabled={!businessForm.macroCategoryId}
+              />
             </div>
 
             <div className="mb-3">
@@ -2239,18 +2259,27 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
               <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Categoria Sede (opzionale)
+                  Macro Categoria Sede (opzionale)
                 </label>
-                <select
-                  value={location.categoryId}
-                  onChange={(e) => updateBusinessLocation(index, 'categoryId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                >
-                  <option value="">Stessa categoria dell'azienda</option>
-                  {businessCategories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  value={location.macroCategoryId}
+                  onChange={(value) => updateBusinessLocation(index, 'macroCategoryId', value)}
+                  options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+                  placeholder="Stessa macro categoria dell'azienda"
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Micro Categoria Sede (opzionale)
+                </label>
+                <SearchableSelect
+                  value={location.microCategoryId}
+                  onChange={(value) => updateBusinessLocation(index, 'microCategoryId', value)}
+                  options={locationMicroCategories.map(c => ({ value: c.id, label: c.name }))}
+                  placeholder="Stessa micro categoria dell'azienda"
+                  disabled={!location.macroCategoryId}
+                />
               </div>
 
               <div className="mb-3">

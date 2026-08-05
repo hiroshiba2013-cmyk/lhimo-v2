@@ -166,7 +166,10 @@ export function SearchResultsPage() {
   useEffect(() => {
     const params = new URLSearchParams(currentSearch);
     const filters: SearchFilters = {
-      category: params.get('category') || '',
+      macro_category: params.get('macro_category') || '',
+      micro_category: params.get('micro_category') || '',
+      specializations: params.get('specializations') ? params.get('specializations')!.split(',').filter(Boolean) : [],
+      services: params.get('services') ? params.get('services')!.split(',').filter(Boolean) : [],
       region: params.get('region') || '',
       province: params.get('province') || '',
       city: params.get('city') || '',
@@ -212,7 +215,7 @@ export function SearchResultsPage() {
           search_city: filters.city || null,
           search_province: provinceCode || null,
           search_region: filters.region || null,
-          search_category_id: filters.category || null,
+          search_category_id: filters.macro_category || filters.micro_category || null,
           verified_only: filters.verifiedOnly || false,
           limit_count: QUERY_LIMIT
         });

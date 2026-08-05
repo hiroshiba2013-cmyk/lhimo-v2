@@ -30,7 +30,7 @@ interface JobSeeker {
     nickname: string | null;
     avatar_url: string | null;
   };
-  business_categories: {
+  catalog_macro_categories: {
     name: string;
   } | null;
 }
@@ -52,7 +52,7 @@ export function JobSeekerDetailPage() {
       setLoading(true);
       const { data, error } = await supabase
         .from('job_seekers')
-        .select('*, business_categories(name)')
+        .select('*, catalog_macro_categories(name)')
         .eq('id', seekerId)
         .maybeSingle();
 
@@ -155,10 +155,10 @@ export function JobSeekerDetailPage() {
                     <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
                       {jobSeeker.contract_type}
                     </span>
-                    {jobSeeker.business_categories && (
+                    {jobSeeker.catalog_macro_categories && (
                       <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
                         <Tag className="w-3.5 h-3.5" />
-                        {jobSeeker.business_categories.name}
+                        {jobSeeker.catalog_macro_categories.name}
                       </span>
                     )}
                   </div>

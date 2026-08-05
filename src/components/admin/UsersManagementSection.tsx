@@ -127,7 +127,7 @@ export default function UsersManagementSection() {
 
   useEffect(() => {
     loadUsers();
-    supabase.from('business_categories').select('id, name').order('name').then(({ data }) => {
+    supabase.from('catalog_macro_categories').select('id, name').eq('is_active', true).order('sort_order').order('name').then(({ data }) => {
       if (data) setCategories(data);
     });
   }, [filterType]);

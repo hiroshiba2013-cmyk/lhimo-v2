@@ -139,7 +139,7 @@ export function BusinessesSection({ onReload }: BusinessesSectionProps) {
   const loadBusinessesRef = useRef<(page?: number) => Promise<void>>(async () => {});
 
   useEffect(() => {
-    supabase.from('business_categories').select('id, name').order('name').then(({ data }) => {
+    supabase.from('catalog_macro_categories').select('id, name').eq('is_active', true).order('sort_order').order('name').then(({ data }) => {
       if (data) setAllCategories(data);
     });
     supabase

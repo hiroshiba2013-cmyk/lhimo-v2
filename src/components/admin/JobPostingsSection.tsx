@@ -201,7 +201,7 @@ export function JobPostingsSection({ jobPostings: initialJobPostings, onReload, 
 
         if (seeker.category_id) {
           const { data: categoryData } = await supabase
-            .from('business_categories')
+            .from('catalog_macro_categories')
             .select('name')
             .eq('id', seeker.category_id)
             .maybeSingle();

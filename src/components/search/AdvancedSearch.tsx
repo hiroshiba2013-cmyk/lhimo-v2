@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, X, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 import { SearchableSelect } from '../common/SearchableSelect';
-import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
+import { MultiSelectCheckbox } from '../common/MultiSelectCheckbox';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import BusinessAutocomplete from './BusinessAutocomplete';
 import { useItalianLocations } from '../../hooks/useItalianLocations';
+import { useMacroCategories, useMicroCategories, useSpecializations, useBusinessServices } from '../../hooks/useCatalog';
 
 export interface SearchFilters {
-  category: string;
+  macro_category: string;
+  micro_category: string;
+  specializations: string[];
+  services: string[];
   region: string;
   province: string;
   city: string;
@@ -40,12 +43,23 @@ const RATING_OPTIONS = [
 
 export function AdvancedSearch({ onSearch, isLoading = false, navigateToSearchPage = false, initialFilters }: AdvancedSearchProps) {
   const { regions } = useItalianLocations();
+  const { macroCategories } = useMacroCategories();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showRatingFilters, setShowRatingFilters] = useState(false);
-  const [categories, setCategories] = useState<{ id: string; name: string; parent_id: string | null }[]>([]);
+
+  const [selectedMacroId, setSelectedMacroId] = useState('');
+  const [selectedMicroId, setSelectedMicroId] = useState('');
+  const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const { microCategories } = useMicroCategories(selectedMacroId || null);
+  const { specializations } = useSpecializations(selectedMacroId || null);
+  const { services } = useBusinessServices(selectedMacroId || null);
 
   const [filters, setFilters] = useState<SearchFilters>(initialFilters || {
-    category: '',
+    macro_category: '',
+    micro_category: '',
+    specializations: [],
+    services: [],
     region: '',
     province: '',
     city: '',
@@ -62,7 +76,11 @@ export function AdvancedSearch({ onSearch, isLoading = false, navigateToSearchPa
   useEffect(() => {
     if (initialFilters) {
       setFilters({ ...initialFilters });
-      const hasAdvanced = initialFilters.category || initialFilters.province || initialFilters.city || (initialFilters.minRating || 0) > 0;
+      setSelectedMacroId(initialFilters.macro_category || '');
+      setSelectedMicroId(initialFilters.micro_category || '');
+      setSelectedSpecializations(initialFilters.specializations || []);
+      setSelectedServices(initialFilters.services || []);
+      const hasAdvanced = initialFilters.macro_category || initialFilters.province || initialFilters.city || (initialFilters.minRating || 0) > 0;
       if (hasAdvanced) setShowAdvanced(true);
       const hasRating = (initialFilters.minServiceUsedRating || 0) > 0 || (initialFilters.minBookingRating || 0) > 0 ||
         (initialFilters.minQuoteRating || 0) > 0 || (initialFilters.minCustomerServiceRating || 0) > 0 || (initialFilters.minProblemRating || 0) > 0;
@@ -70,25 +88,20 @@ export function AdvancedSearch({ onSearch, isLoading = false, navigateToSearchPa
     }
   }, [initialFilters]);
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  const loadCategories = async () => {
-    try {
-      const { data } = await supabase
-        .from('business_categories')
-        .select('id, name, parent_id')
-        .order('name');
-      if (data) setCategories(data);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
+  const handleMacroChange = (macroId: string) => {
+    setSelectedMacroId(macroId);
+    setSelectedMicroId('');
+    setSelectedSpecializations([]);
+    setSelectedServices([]);
+    setFilters(prev => ({ ...prev, macro_category: macroId, micro_category: '', specializations: [], services: [] }));
   };
 
   const handleSearchClick = () => {
     const params = new URLSearchParams();
-    if (filters.category) params.set('category', filters.category);
+    if (filters.macro_category) params.set('macro_category', filters.macro_category);
+    if (filters.micro_category) params.set('micro_category', filters.micro_category);
+    if (filters.specializations?.length) params.set('specializations', filters.specializations.join(','));
+    if (filters.services?.length) params.set('services', filters.services.join(','));
     if (filters.region) params.set('region', filters.region);
     if (filters.province) params.set('province', filters.province);
     if (filters.city) params.set('city', filters.city);
@@ -114,23 +127,30 @@ export function AdvancedSearch({ onSearch, isLoading = false, navigateToSearchPa
 
   const handleReset = () => {
     const empty: SearchFilters = {
-      category: '', region: '', province: '', city: '',
+      macro_category: '', micro_category: '', specializations: [], services: [],
+      region: '', province: '', city: '',
       businessName: '', minRating: 0, verifiedOnly: false,
       minServiceUsedRating: 0, minBookingRating: 0,
       minQuoteRating: 0, minCustomerServiceRating: 0, minProblemRating: 0,
     };
+    setSelectedMacroId('');
+    setSelectedMicroId('');
+    setSelectedSpecializations([]);
+    setSelectedServices([]);
     setFilters(empty);
     onSearch(empty);
   };
 
-  const hasActiveFilters = filters.category || filters.region || filters.province || filters.city ||
-    filters.businessName || filters.minRating > 0 ||
+  const hasActiveFilters = filters.macro_category || filters.region || filters.province || filters.city ||
+    filters.businessName || filters.minRating > 0 || (filters.specializations?.length || 0) > 0 || (filters.services?.length || 0) > 0 ||
     (filters.minServiceUsedRating || 0) > 0 || (filters.minBookingRating || 0) > 0 ||
     (filters.minQuoteRating || 0) > 0 || (filters.minCustomerServiceRating || 0) > 0 || (filters.minProblemRating || 0) > 0;
 
   const activeFilterCount = [
-    filters.category, filters.region, filters.province, filters.city,
+    filters.macro_category, filters.region, filters.province, filters.city,
     filters.minRating > 0 ? 'rating' : '',
+    (filters.specializations?.length || 0) > 0 ? 'specs' : '',
+    (filters.services?.length || 0) > 0 ? 'svcs' : '',
     (filters.minServiceUsedRating || 0) > 0 ? 'service' : '',
     (filters.minBookingRating || 0) > 0 ? 'booking' : '',
     (filters.minQuoteRating || 0) > 0 ? 'quote' : '',
@@ -154,12 +174,26 @@ export function AdvancedSearch({ onSearch, isLoading = false, navigateToSearchPa
           <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
-                <CategoryHierarchySelect
-                  value={filters.category}
-                  onChange={(value) => setFilters(prev => ({ ...prev, category: value }))}
-                  categories={categories}
-                  placeholder="Tutte le categorie"
+                <label className="block text-sm font-medium text-gray-700 mb-2">Macro Categoria</label>
+                <SearchableSelect
+                  value={selectedMacroId}
+                  onChange={(value) => handleMacroChange(value)}
+                  options={macroCategories.map(m => ({ value: m.id, label: m.name }))}
+                  placeholder="Tutte le macro categorie"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Micro Categoria</label>
+                <SearchableSelect
+                  value={selectedMicroId}
+                  onChange={(value) => {
+                    setSelectedMicroId(value);
+                    setFilters(prev => ({ ...prev, micro_category: value }));
+                  }}
+                  options={microCategories.map(m => ({ value: m.id, label: m.name }))}
+                  placeholder={selectedMacroId ? 'Tutte le micro categorie' : 'Prima seleziona una macro'}
+                  disabled={!selectedMacroId}
                 />
               </div>
 
@@ -171,6 +205,32 @@ export function AdvancedSearch({ onSearch, isLoading = false, navigateToSearchPa
                   options={RATING_OPTIONS}
                   placeholder="Qualsiasi"
                   className="text-sm"
+                />
+              </div>
+
+              <div className="lg:col-span-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Specializzazioni</label>
+                <MultiSelectCheckbox
+                  options={specializations.map(s => ({ id: s.id, name: s.name }))}
+                  selected={selectedSpecializations}
+                  onChange={(sel) => {
+                    setSelectedSpecializations(sel);
+                    setFilters(prev => ({ ...prev, specializations: sel }));
+                  }}
+                  placeholder={selectedMacroId ? 'Seleziona specializzazioni' : 'Prima seleziona una macro'}
+                />
+              </div>
+
+              <div className="lg:col-span-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Servizi</label>
+                <MultiSelectCheckbox
+                  options={services.map(s => ({ id: s.id, name: s.name }))}
+                  selected={selectedServices}
+                  onChange={(sel) => {
+                    setSelectedServices(sel);
+                    setFilters(prev => ({ ...prev, services: sel }));
+                  }}
+                  placeholder={selectedMacroId ? 'Seleziona servizi' : 'Prima seleziona una macro'}
                 />
               </div>
 

@@ -62,7 +62,7 @@ interface JobSeeker {
     full_name: string;
     nickname: string;
   };
-  business_categories: {
+  catalog_macro_categories: {
     name: string;
   } | null;
 }
@@ -157,7 +157,7 @@ export function JobsPage() {
   const loadCategories = async () => {
     try {
       const { data } = await supabase
-        .from('business_categories')
+        .from('catalog_macro_categories')
         .select('id, name, parent_id')
         .order('name');
 
@@ -281,7 +281,7 @@ export function JobsPage() {
         .from('job_seekers')
         .select(`
           *,
-          business_categories(name)
+          catalog_macro_categories(name)
         `)
         .eq('status', 'active')
         .eq('approval_status', 'approved')

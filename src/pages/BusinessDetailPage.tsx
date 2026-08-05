@@ -37,7 +37,7 @@ export function BusinessDetailPage({ businessId }: BusinessDetailPageProps) {
         // Try unclaimed_business_locations first (new table)
         const { data: unclaimedData } = await supabase
           .from('unclaimed_business_locations')
-          .select('*, category:business_categories(name)')
+          .select('*, macro_category:catalog_macro_categories(name)')
           .eq('id', businessId)
           .maybeSingle();
         if (unclaimedData) {
@@ -48,7 +48,7 @@ export function BusinessDetailPage({ businessId }: BusinessDetailPageProps) {
         // Fallback to legacy business_locations table
         const { data, error: err } = await supabase
           .from('business_locations')
-          .select('*, business:businesses(name, category:business_categories(name))')
+          .select('*, business:businesses(name, macro_category:catalog_macro_categories(name))')
           .eq('id', businessId)
           .maybeSingle();
         if (err) throw err;
@@ -60,14 +60,14 @@ export function BusinessDetailPage({ businessId }: BusinessDetailPageProps) {
         const targetId = locationId || businessId;
         const { data, error: err } = await supabase
           .from('registered_business_locations')
-          .select('*, business:registered_businesses(name, category:business_categories(name))')
+          .select('*, business:registered_businesses(name, macro_category:catalog_macro_categories(name))')
           .eq('id', targetId)
           .maybeSingle();
         if (err || !data) {
           // Fallback: try by business_id (get first location)
           const { data: byBusiness } = await supabase
             .from('registered_business_locations')
-            .select('*, business:registered_businesses(name, category:business_categories(name))')
+            .select('*, business:registered_businesses(name, macro_category:catalog_macro_categories(name))')
             .eq('business_id', businessId)
             .order('is_primary', { ascending: false })
             .limit(1)
@@ -80,7 +80,7 @@ export function BusinessDetailPage({ businessId }: BusinessDetailPageProps) {
           // Final fallback: legacy business_locations table
           const { data: loc, error: locErr } = await supabase
             .from('business_locations')
-            .select('*, business:businesses(name, category:business_categories(name))')
+            .select('*, business:businesses(name, macro_category:catalog_macro_categories(name))')
             .eq('id', targetId)
             .maybeSingle();
           if (locErr) throw locErr;
@@ -139,7 +139,7 @@ export function BusinessDetailPage({ businessId }: BusinessDetailPageProps) {
   const name = business.source === 'registered'
     ? business.business?.name || business.location_name || business.name || 'Attività'
     : business.business?.name || business.name || 'Attività';
-  const category = business.category?.name || business.business?.category?.name || '';
+  const category = business.macro_category?.name || business.business?.macro_category?.name || '';
   const city = business.city || '';
   const address = business.address || business.street || '';
   const phone = business.phone || '';

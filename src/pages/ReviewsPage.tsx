@@ -100,7 +100,7 @@ export function ReviewsPage() {
   }, [profile?.id]);
 
   useEffect(() => {
-    supabase.from('business_categories').select('id, name, parent_id').order('name')
+    supabase.from('catalog_macro_categories').select('id, name, parent_id').order('name')
       .then(({ data }) => setCategories(data || []));
   }, []);
 
@@ -183,7 +183,7 @@ export function ReviewsPage() {
       const categoryMap: Record<string, string> = {};
       if (categoryIds.length > 0) {
         const { data: cats } = await supabase
-          .from('business_categories')
+          .from('catalog_macro_categories')
           .select('id, name')
           .in('id', categoryIds);
         (cats || []).forEach((c: any) => { categoryMap[c.id] = c.name; });

@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { MapPin, FileEdit as Edit, Save, X, Building2, Instagram, Facebook, Globe } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { SearchableSelect } from '../common/SearchableSelect';
-import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { BusinessLocationAvatarUpload } from './BusinessLocationAvatarUpload';
 import { BusinessLocationPhotos } from './BusinessLocationPhotos';
 import { useAuth } from '../../contexts/AuthContext';
+import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
 import { useToast } from '../common/Toast';
 
 interface DayHours {
@@ -43,6 +43,8 @@ interface BusinessLocation {
   services?: string;
   services_description?: string | null;
   category_id?: string | null;
+  macro_category_id?: string | null;
+  micro_category_id?: string | null;
   instagram_url?: string | null;
   facebook_url?: string | null;
   tiktok_url?: string | null;
@@ -64,13 +66,8 @@ export function EditBusinessLocationsForm({ businessId, selectedLocationId, onUp
   const [maxLocations, setMaxLocations] = useState<number>(1);
   const [subscriptionPlan, setSubscriptionPlan] = useState<string>('');
   const [isRegisteredBusiness, setIsRegisteredBusiness] = useState(false);
-  const [categories, setCategories] = useState<{ id: string; name: string; parent_id: string | null }[]>([]);
-
-  useEffect(() => {
-    supabase.from('business_categories').select('id, name, parent_id').order('name').then(({ data }) => {
-      if (data) setCategories(data);
-    });
-  }, []);
+  const { macroCategories } = useMacroCategories();
+  const { microCategories } = useMicroCategories(locations[0]?.macro_category_id || null);
 
   useEffect(() => {
     const loadLocations = async () => {
@@ -372,7 +369,10 @@ export function EditBusinessLocationsForm({ businessId, selectedLocationId, onUp
           instagram_url: location.instagram_url?.trim() || null,
           facebook_url: location.facebook_url?.trim() || null,
           tiktok_url: location.tiktok_url?.trim() || null,
-          ...(isRegisteredBusiness && { category_id: location.category_id || null }),
+          ...(isRegisteredBusiness && {
+            macro_category_id: location.macro_category_id || null,
+            micro_category_id: location.micro_category_id || null,
+          }),
         };
 
         if (isRegisteredBusiness) {
@@ -737,13 +737,28 @@ export function EditBusinessLocationsForm({ businessId, selectedLocationId, onUp
                 {isRegisteredBusiness && (
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Categoria Sede (opzionale)
+                      Macro Categoria Sede (opzionale)
                     </label>
-                    <CategoryHierarchySelect
-                      value={location.category_id || ''}
-                      onChange={(value) => handleChange(location.id, 'category_id', value)}
-                      categories={categories}
-                      placeholder="Stessa categoria dell'azienda"
+                    <SearchableSelect
+                      value={location.macro_category_id || ''}
+                      onChange={(value) => handleChange(location.id, 'macro_category_id', value)}
+                      options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+                      placeholder="Stessa macro categoria dell'azienda"
+                    />
+                  </div>
+                )}
+
+                {isRegisteredBusiness && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Micro Categoria Sede (opzionale)
+                    </label>
+                    <SearchableSelect
+                      value={location.micro_category_id || ''}
+                      onChange={(value) => handleChange(location.id, 'micro_category_id', value)}
+                      options={microCategories.map(c => ({ value: c.id, label: c.name }))}
+                      placeholder="Stessa micro categoria dell'azienda"
+                      disabled={!location.macro_category_id}
                     />
                   </div>
                 )}

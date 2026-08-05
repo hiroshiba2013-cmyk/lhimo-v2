@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Building, MapPin, Phone, Mail, Globe, Award, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
+import { SearchableSelect } from '../common/SearchableSelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { useItalianLocations } from '../../hooks/useItalianLocations';
+import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
 import { useToast } from '../common/Toast';
 
 interface UserAddBusinessModalProps {
@@ -13,21 +14,17 @@ interface UserAddBusinessModalProps {
   onCancel: () => void;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  parent_id: string | null;
-}
-
 export function UserAddBusinessModal({ userId, familyMemberId, onSuccess, onCancel }: UserAddBusinessModalProps) {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
   const { regions } = useItalianLocations();
+  const { macroCategories } = useMacroCategories();
+  const { microCategories } = useMicroCategories(form.macro_category_id || null);
 
   const [form, setForm] = useState({
     name: '',
-    category_id: '',
+    macro_category_id: '',
+    micro_category_id: '',
     street: '',
     city: '',
     province: '',
@@ -38,12 +35,6 @@ export function UserAddBusinessModal({ userId, familyMemberId, onSuccess, onCanc
     email: '',
     website: '',
   });
-
-  useEffect(() => {
-    supabase.from('business_categories').select('id, name, parent_id').order('name').then(({ data }) => {
-      if (data) setCategories(data);
-    });
-  }, []);
 
   const hasContact = !!(form.phone.trim() || form.email.trim() || form.website.trim());
   const expectedPoints = hasContact ? 25 : 10;
@@ -72,7 +63,8 @@ export function UserAddBusinessModal({ userId, familyMemberId, onSuccess, onCanc
         .from('unclaimed_business_locations')
         .insert({
           name: form.name.trim(),
-          category_id: form.category_id || null,
+          macro_category_id: form.macro_category_id || null,
+          micro_category_id: form.micro_category_id || null,
           street: form.street.trim() || null,
           city: form.city,
           province: form.provinceCode || form.province || null,
@@ -155,16 +147,30 @@ export function UserAddBusinessModal({ userId, familyMemberId, onSuccess, onCanc
             />
           </div>
 
-          {/* Categoria */}
+          {/* Macro Categoria */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-              Categoria <span className="text-xs font-normal text-gray-400">(facoltativa)</span>
+              Macro Categoria <span className="text-xs font-normal text-gray-400">(facoltativa)</span>
             </label>
-            <CategoryHierarchySelect
-              value={form.category_id}
-              onChange={value => setForm(f => ({ ...f, category_id: value }))}
-              categories={categories}
-              placeholder="Seleziona categoria"
+            <SearchableSelect
+              value={form.macro_category_id}
+              onChange={value => setForm(f => ({ ...f, macro_category_id: value, micro_category_id: '' }))}
+              options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+              placeholder="Seleziona macro categoria"
+            />
+          </div>
+
+          {/* Micro Categoria */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              Micro Categoria <span className="text-xs font-normal text-gray-400">(facoltativa)</span>
+            </label>
+            <SearchableSelect
+              value={form.micro_category_id}
+              onChange={value => setForm(f => ({ ...f, micro_category_id: value }))}
+              options={microCategories.map(c => ({ value: c.id, label: c.name }))}
+              placeholder="Seleziona micro categoria"
+              disabled={!form.macro_category_id}
             />
           </div>
 

@@ -22,7 +22,7 @@ interface JobSeekerCardProps {
       full_name: string;
       nickname: string;
     };
-    business_categories: {
+    catalog_macro_categories: {
       name: string;
     } | null;
   };
@@ -48,10 +48,10 @@ export function JobSeekerCard({ jobSeeker, onContact, showContactButton = true }
               {jobSeeker.profiles.nickname || 'Candidato'}
             </a>
           )}
-          {jobSeeker.business_categories && (
+          {jobSeeker.catalog_macro_categories && (
             <div className="flex items-center gap-1 mt-1">
               <Tag className="w-3 h-3 text-gray-500" />
-              <span className="text-xs text-gray-500">{jobSeeker.business_categories.name}</span>
+              <span className="text-xs text-gray-500">{jobSeeker.catalog_macro_categories.name}</span>
             </div>
           )}
         </div>

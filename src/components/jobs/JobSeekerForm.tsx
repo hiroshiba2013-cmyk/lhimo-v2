@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
-import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
+import { SearchableSelect } from '../common/SearchableSelect';
 import { useItalianLocations } from '../../hooks/useItalianLocations';
+import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
 import { X } from 'lucide-react';
 import { useToast } from '../common/Toast';
 
@@ -12,18 +13,13 @@ interface JobSeekerFormProps {
   onCancel: () => void;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  parent_id: string | null;
-}
-
 export function JobSeekerForm({ onSuccess, onCancel }: JobSeekerFormProps) {
   const { showToast } = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
   const { regions } = useItalianLocations();
+  const { macroCategories } = useMacroCategories();
+  const { microCategories } = useMicroCategories(formData.macro_category_id || null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -42,25 +38,9 @@ export function JobSeekerForm({ onSuccess, onCancel }: JobSeekerFormProps) {
     education_level: '',
     phone: '',
     email: '',
-    category_id: '',
+    macro_category_id: '',
+    micro_category_id: '',
   });
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  const loadCategories = async () => {
-    try {
-      const { data } = await supabase
-        .from('business_categories')
-        .select('id, name, parent_id')
-        .order('name');
-      if (!data) return;
-      setCategories(data);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +70,8 @@ export function JobSeekerForm({ onSuccess, onCancel }: JobSeekerFormProps) {
         education_level: formData.education_level || null,
         phone: formData.phone || null,
         email: formData.email || null,
-        category_id: formData.category_id || null,
+        macro_category_id: formData.macro_category_id || null,
+        micro_category_id: formData.micro_category_id || null,
         status: 'active',
       };
 
@@ -138,13 +119,26 @@ export function JobSeekerForm({ onSuccess, onCancel }: JobSeekerFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Categoria Lavorativa
+            Macro Categoria Lavorativa
           </label>
-          <CategoryHierarchySelect
-            value={formData.category_id}
-            onChange={(value) => setFormData({ ...formData, category_id: value })}
-            categories={categories}
-            placeholder="Seleziona una categoria..."
+          <SearchableSelect
+            value={formData.macro_category_id}
+            onChange={(value) => setFormData(prev => ({ ...prev, macro_category_id: value, micro_category_id: '' }))}
+            options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+            placeholder="Seleziona una macro categoria..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Micro Categoria Lavorativa
+          </label>
+          <SearchableSelect
+            value={formData.micro_category_id}
+            onChange={(value) => setFormData(prev => ({ ...prev, micro_category_id: value }))}
+            options={microCategories.map(c => ({ value: c.id, label: c.name }))}
+            placeholder="Seleziona una micro categoria..."
+            disabled={!formData.macro_category_id}
           />
         </div>
 

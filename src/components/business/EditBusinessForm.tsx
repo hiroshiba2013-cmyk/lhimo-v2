@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FileEdit as Edit, Save, X, Building2, User } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { CategoryHierarchySelect } from '../common/CategoryHierarchySelect';
+import { SearchableSelect } from '../common/SearchableSelect';
+import { MultiSelectCheckbox } from '../common/MultiSelectCheckbox';
 import { useToast } from '../common/Toast';
-
-interface Category {
-  id: string;
-  name: string;
-  parent_id: string | null;
-}
+import { useMacroCategories, useMicroCategories, useSpecializations, useBusinessServices } from '../../hooks/useCatalog';
 
 interface BusinessData {
   id: string;
@@ -34,7 +30,13 @@ interface BusinessData {
   office_address: string;
   website_url: string;
   category_id: string | null;
+  macro_category_id: string | null;
+  micro_category_id: string | null;
+  specialization_ids: string[] | null;
+  service_ids: string[] | null;
   category?: { id: string; name: string } | null;
+  macro_category?: { id: string; name: string } | null;
+  micro_category?: { id: string; name: string } | null;
 }
 
 interface OwnerData {
@@ -78,7 +80,15 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
   const [loading, setLoading] = useState(true);
   const [business, setBusiness] = useState<BusinessData | null>(null);
   const [owner, setOwner] = useState<OwnerData | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { macroCategories } = useMacroCategories();
+  const [selectedMacroId, setSelectedMacroId] = useState('');
+  const [selectedMicroId, setSelectedMicroId] = useState('');
+  const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const { microCategories } = useMicroCategories(selectedMacroId || null);
+  const { specializations } = useSpecializations(selectedMacroId || null);
+  const { services } = useBusinessServices(selectedMacroId || null);
+
   const [formData, setFormData] = useState({
     name: '',
     vat_number: '',
@@ -98,18 +108,18 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
     office_province: '',
     website_url: '',
     description: '',
-    category_id: '',
     owner_first_name: '',
     owner_last_name: '',
     owner_phone: '',
     owner_fiscal_code: '',
   });
 
-  useEffect(() => {
-    supabase.from('business_categories').select('id, name, parent_id').order('name').then(({ data }) => {
-      if (data) setCategories(data);
-    });
-  }, []);
+  const handleMacroChange = (macroId: string) => {
+    setSelectedMacroId(macroId);
+    setSelectedMicroId('');
+    setSelectedSpecializations([]);
+    setSelectedServices([]);
+  };
 
   useEffect(() => {
     const loadBusiness = async () => {
@@ -118,7 +128,7 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
       // Cerca prima in registered_businesses (nuovo sistema)
       let { data } = await supabase
         .from('registered_businesses')
-        .select('*, category:category_id(id, name)')
+        .select('*, category:category_id(id, name), macro_category:macro_category_id(id, name), micro_category:micro_category_id(id, name)')
         .eq('id', businessId)
         .maybeSingle();
 
@@ -126,7 +136,7 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
       if (!data) {
         const result = await supabase
           .from('businesses')
-          .select('*, category:category_id(id, name)')
+          .select('*, category:category_id(id, name), macro_category:macro_category_id(id, name), micro_category:micro_category_id(id, name)')
           .eq('id', businessId)
           .maybeSingle();
         data = result.data;
@@ -164,7 +174,6 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
           office_province: data.office_province || '',
           website_url: data.website || '',
           description: data.description || '',
-          category_id: data.category_id || '',
           owner_first_name: ownerData?.first_name || '',
           owner_last_name: ownerData?.last_name || '',
           owner_phone: ownerData?.phone || '',
@@ -259,7 +268,10 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
           office_province: formData.office_province ? formData.office_province.toUpperCase() : null,
           office_address: officeAddress,
           website_url: formData.website_url,
-          category_id: formData.category_id || null,
+          macro_category_id: selectedMacroId || null,
+          micro_category_id: selectedMicroId || null,
+          specialization_ids: selectedSpecializations,
+          service_ids: selectedServices,
         })
         .eq('id', businessId);
 
@@ -299,7 +311,10 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
             office_province: formData.office_province ? formData.office_province.toUpperCase() : null,
             office_address: officeAddress,
             website_url: formData.website_url,
-            category_id: formData.category_id || null,
+            macro_category_id: selectedMacroId || null,
+            micro_category_id: selectedMicroId || null,
+            specialization_ids: selectedSpecializations,
+            service_ids: selectedServices,
           })
           .eq('id', businessId);
 
@@ -359,12 +374,15 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
         office_province: business.office_province || '',
         website_url: business.website_url || '',
         description: business.description || '',
-        category_id: business.category_id || '',
         owner_first_name: owner?.first_name || '',
         owner_last_name: owner?.last_name || '',
         owner_phone: owner?.phone || '',
         owner_fiscal_code: owner?.fiscal_code || '',
       });
+      setSelectedMacroId(business.macro_category_id || '');
+      setSelectedMicroId(business.micro_category_id || '');
+      setSelectedSpecializations(Array.isArray(business.specialization_ids) ? business.specialization_ids : []);
+      setSelectedServices(Array.isArray(business.service_ids) ? business.service_ids : []);
     }
     setIsEditing(false);
   };
@@ -427,9 +445,15 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
               <p className="text-lg font-semibold text-gray-900">{business.ateco_code || '-'}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Categoria Attivita</p>
+              <p className="text-sm text-gray-600 mb-1">Macro Categoria</p>
               <p className="text-lg font-semibold text-gray-900">
-                {business.category?.name || (business.category_id ? categories.find(c => c.id === business.category_id)?.name : null) || '-'}
+                {business.macro_category?.name || macroCategories.find(m => m.id === business.macro_category_id)?.name || '-'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Micro Categoria</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {business.micro_category?.name || (business.micro_category_id ? microCategories.find(m => m.id === business.micro_category_id)?.name : null) || '-'}
               </p>
             </div>
             <div>
@@ -598,13 +622,50 @@ export function EditBusinessForm({ businessId, selectedLocationId, onUpdate }: E
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Categoria Attivita
+              Macro Categoria
             </label>
-            <CategoryHierarchySelect
-              value={formData.category_id}
-              onChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
-              categories={categories}
-              placeholder="Nessuna categoria"
+            <SearchableSelect
+              value={selectedMacroId}
+              onChange={(value) => handleMacroChange(value)}
+              options={macroCategories.map(m => ({ value: m.id, label: m.name }))}
+              placeholder="Seleziona macro categoria"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Micro Categoria
+            </label>
+            <SearchableSelect
+              value={selectedMicroId}
+              onChange={(value) => setSelectedMicroId(value)}
+              options={microCategories.map(m => ({ value: m.id, label: m.name }))}
+              placeholder={selectedMacroId ? 'Seleziona micro categoria' : 'Prima seleziona una macro categoria'}
+              disabled={!selectedMacroId}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Specializzazioni (opzionale)
+            </label>
+            <MultiSelectCheckbox
+              options={specializations.map(s => ({ id: s.id, name: s.name }))}
+              selected={selectedSpecializations}
+              onChange={setSelectedSpecializations}
+              placeholder={selectedMacroId ? 'Seleziona specializzazioni' : 'Prima seleziona una macro categoria'}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Servizi (opzionale)
+            </label>
+            <MultiSelectCheckbox
+              options={services.map(s => ({ id: s.id, name: s.name }))}
+              selected={selectedServices}
+              onChange={setSelectedServices}
+              placeholder={selectedMacroId ? 'Seleziona servizi' : 'Prima seleziona una macro categoria'}
             />
           </div>
 

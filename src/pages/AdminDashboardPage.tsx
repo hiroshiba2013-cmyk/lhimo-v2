@@ -570,8 +570,8 @@ export function AdminDashboardPage() {
         customer:profiles!customer_id(id, full_name, nickname, email),
         family_member:customer_family_members!family_member_id(first_name, last_name, nickname),
         business_location:business_locations!business_location_id(name, internal_name, city, province, region, address),
-        unclaimed_business_location:unclaimed_business_locations!unclaimed_business_location_id(name, city, province, region, street, category:business_categories!category_id(name)),
-        registered_business_location:registered_business_locations!registered_business_location_id(name, internal_name, city, province, region, street, category:business_categories!category_id(name), parent_business:registered_businesses!business_id(name)),
+        unclaimed_business_location:unclaimed_business_locations!unclaimed_business_location_id(name, city, province, region, street, macro_category:catalog_macro_categories!macro_category_id(name)),
+        registered_business_location:registered_business_locations!registered_business_location_id(name, internal_name, city, province, region, street, macro_category:catalog_macro_categories!macro_category_id(name), parent_business:registered_businesses!business_id(name)),
         registered_business:registered_businesses!registered_business_id(name),
         businesses:businesses!business_id(name),
         responses:review_responses(*)
