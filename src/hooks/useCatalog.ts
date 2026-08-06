@@ -80,3 +80,158 @@ export function useMacroCategories() {
   };
 
 }
+export function useMicroCategories(macroCategoryId: string | null) {
+
+  const [microCategories, setMicroCategories] = useState<MicroCategory[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+
+    if (!macroCategoryId) {
+      setMicroCategories([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function load() {
+
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from('catalog_micro_categories')
+        .select('*')
+        .eq('macro_category_id', macroCategoryId)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Micro Categories:', error);
+      }
+
+      if (!cancelled) {
+        setMicroCategories(data ?? []);
+        setLoading(false);
+      }
+
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+
+  }, [macroCategoryId]);
+
+  return {
+    microCategories,
+    loading
+  };
+
+}
+
+export function useSpecializations(macroCategoryId: string | null) {
+
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+
+    if (!macroCategoryId) {
+      setSpecializations([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function load() {
+
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from('business_specializations')
+        .select('*')
+        .eq('macro_category_id', macroCategoryId)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Specializations:', error);
+      }
+
+      if (!cancelled) {
+        setSpecializations(data ?? []);
+        setLoading(false);
+      }
+
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+
+  }, [macroCategoryId]);
+
+  return {
+    specializations,
+    loading
+  };
+
+}
+
+export function useBusinessServices(macroCategoryId: string | null) {
+
+  const [services, setServices] = useState<BusinessService[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+
+    if (!macroCategoryId) {
+      setServices([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function load() {
+
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from('business_services')
+        .select('*')
+        .eq('macro_category_id', macroCategoryId)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Business Services:', error);
+      }
+
+      if (!cancelled) {
+        setServices(data ?? []);
+        setLoading(false);
+      }
+
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+
+  }, [macroCategoryId]);
+
+  return {
+    services,
+    loading
+  };
+
+}
