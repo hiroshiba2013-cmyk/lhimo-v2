@@ -295,3 +295,51 @@ export function useAllCatalogData() {
     };
 
   }, []);
+  const getMicroByMacro = useCallback(
+    (macroId: string) => {
+      return allMicroCategories.filter(
+        (m) => m.macro_category_id === macroId
+      );
+    },
+    [allMicroCategories]
+  );
+
+  const getSpecByMacro = useCallback(
+    (macroId: string) => {
+      return allSpecializations.filter(
+        (s) => s.macro_category_id === macroId
+      );
+    },
+    [allSpecializations]
+  );
+
+  const getServicesByMacro = useCallback(
+    (macroId: string) => {
+      return allServices.filter(
+        (s) => s.macro_category_id === macroId
+      );
+    },
+    [allServices]
+  );
+
+  return {
+
+    macroCategories,
+
+    allMicroCategories,
+
+    allSpecializations,
+
+    allServices,
+
+    getMicroByMacro,
+
+    getSpecByMacro,
+
+    getServicesByMacro,
+
+    loading
+
+  };
+
+}
