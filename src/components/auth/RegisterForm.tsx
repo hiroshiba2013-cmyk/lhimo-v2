@@ -110,6 +110,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [businessBillingPeriod, setBusinessBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [hasClaimedLocations, setHasClaimedLocations] = useState(false);
   const { macroCategories } = useMacroCategories();
+  console.log("REGISTER MACRO:", macroCategories);
   const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
 
   useEffect(() => {
