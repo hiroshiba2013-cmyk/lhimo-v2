@@ -54,6 +54,8 @@ export function useMacroCategories() {
         .eq('is_active', true)
         .order('sort_order', { ascending: true })
         .order('name', { ascending: true });
+      console.log("CATALOGO:", data);
+console.log("ERRORE:", error);
 
       if (error) {
         console.error('Macro Categories:', error);
