@@ -235,3 +235,63 @@ export function useBusinessServices(macroCategoryId: string | null) {
   };
 
 }
+export function useAllCatalogData() {
+
+  const { macroCategories, loading } = useMacroCategories();
+
+  const [allMicroCategories, setAllMicroCategories] = useState<MicroCategory[]>([]);
+  const [allSpecializations, setAllSpecializations] = useState<Specialization[]>([]);
+  const [allServices, setAllServices] = useState<BusinessService[]>([]);
+
+  useEffect(() => {
+
+    let cancelled = false;
+
+    async function load() {
+
+      const [microRes, specRes, serviceRes] = await Promise.all([
+
+        supabase
+          .from("catalog_micro_categories")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true })
+          .order("name", { ascending: true }),
+
+        supabase
+          .from("business_specializations")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true })
+          .order("name", { ascending: true }),
+
+        supabase
+          .from("business_services")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true })
+          .order("name", { ascending: true })
+
+      ]);
+
+      if (cancelled) return;
+
+      if (microRes.error) console.error(microRes.error);
+      if (specRes.error) console.error(specRes.error);
+      if (serviceRes.error) console.error(serviceRes.error);
+
+      setAllMicroCategories(microRes.data ?? []);
+      setAllSpecializations(specRes.data ?? []);
+      setAllServices(serviceRes.data ?? []);
+
+    }
+
+    load();
+
+    return () => {
+
+      cancelled = true;
+
+    };
+
+  }, []);
