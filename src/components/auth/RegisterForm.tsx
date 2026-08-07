@@ -4,7 +4,12 @@ import { SearchableSelect } from '../common/SearchableSelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { Plus, Trash2, MapPin, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
+import {
+  useMacroCategories,
+  useMicroCategories,
+  useBusinessServices,
+  useSpecializations,
+} from '../../hooks/useCatalog';
 
 interface FamilyMember {
   firstName: string;
@@ -112,6 +117,11 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const { macroCategories } = useMacroCategories();
   console.log("MACRO CATEGORIES:", macroCategories);
   const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
+  const { services, loading: servicesLoading } =
+  useBusinessServices(businessLocations[0]?.macroCategoryId || null);
+
+const { specializations, loading: specializationsLoading } =
+  useSpecializations(businessLocations[0]?.macroCategoryId || null);
 
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
