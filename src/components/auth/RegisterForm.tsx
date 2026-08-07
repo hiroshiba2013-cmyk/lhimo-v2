@@ -5,7 +5,6 @@ import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { Plus, Trash2, MapPin, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
-import { MultiSelectCheckbox } from '../common/MultiSelectCheckbox';
 
 interface FamilyMember {
   firstName: string;
