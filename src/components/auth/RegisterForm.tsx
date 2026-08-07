@@ -117,8 +117,6 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
       setBusinessLocations([{
-         console.log("Macro count:", macroCategories.length);
-}, [macroCategories]);
         name: 'Sede 1',
         description: '',
         services: [],
