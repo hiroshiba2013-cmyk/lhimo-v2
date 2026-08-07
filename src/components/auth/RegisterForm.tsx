@@ -488,18 +488,11 @@ const { specializations, loading: specializationsLoading } =
     setBusinessLocations(businessLocations.filter((_, i) => i !== index));
   };
 
-const updateBusinessLocation = (
-  index: number,
-  field: keyof BusinessLocation,
-  value: string | string[] | BusinessHours
-) => {
-  const updated = [...businessLocations];
-  updated[index] = {
-    ...updated[index],
-    [field]: value,
+  const updateBusinessLocation = (index: number, field: keyof BusinessLocation, value: string) => {
+    const updated = [...businessLocations];
+    updated[index] = { ...updated[index], [field]: value };
+    setBusinessLocations(updated);
   };
-  setBusinessLocations(updated);
-};
 
   const updateBusinessHours = (locationIndex: number, day: keyof BusinessHours, field: keyof DayHours, value: string | boolean) => {
     const updated = [...businessLocations];
@@ -2302,17 +2295,16 @@ const updateBusinessLocation = (
               </div>
 
               <div className="mb-3">
-               <label className="block text-sm font-medium text-gray-700 mb-1">
-  Servizi Disponibili
-</label>
-
-<MultiSelectCheckbox
-  options={services}
-  selected={location.services}
-  onChange={(selected) => updateBusinessLocation(index, 'services', selected)}
-  loading={servicesLoading}
-  placeholder="Seleziona i servizi disponibili"
-/>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Servizi Disponibili
+                </label>
+                <textarea
+                  value={location.servicesDescription || ''}
+                  onChange={(e) => updateBusinessLocation(index, 'servicesDescription', e.target.value)}
+                  placeholder="Descrivi i servizi offerti in questa sede (es. WiFi gratuito, parcheggio, consegna a domicilio, ecc.)"
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
               </div>
 
               <div className="grid grid-cols-3 gap-3 mb-3">
