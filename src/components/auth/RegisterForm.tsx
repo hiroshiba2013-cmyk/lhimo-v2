@@ -110,12 +110,15 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [businessBillingPeriod, setBusinessBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [hasClaimedLocations, setHasClaimedLocations] = useState(false);
   const { macroCategories } = useMacroCategories();
+  console.log("MACRO CATEGORIES:", macroCategories);
   const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
 
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
       setBusinessLocations([{
+         console.log("Macro count:", macroCategories.length);
+}, [macroCategories]);
         name: 'Sede 1',
         description: '',
         services: [],
