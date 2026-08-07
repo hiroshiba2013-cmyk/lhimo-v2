@@ -95,38 +95,56 @@ export function useMacroCategories() {
 }
 
 export function useMicroCategories(macroCategoryId: string | null) {
+
   const [microCategories, setMicroCategories] = useState<MicroCategory[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!macroCategoryId) { setMicroCategories([]); return; }
+
+    if (!macroCategoryId) {
+      setMicroCategories([]);
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
 
-    supabase
-      .from('business_categories')
-      .select('id, name, slug, parent_id')
-      .eq('parent_id', macroCategoryId)
-      .order('name')
-      .then(({ data, error }) => {
-        if (!cancelled && !error && data) {
-          const mapped: MicroCategory[] = (data as BusinessCategoryRow[]).map(row => ({
-            id: row.id,
-            macro_category_id: row.parent_id ?? macroCategoryId,
-            name: row.name,
-            slug: row.slug,
-            sort_order: 0,
-            is_active: true,
-          }));
-          setMicroCategories(mapped);
-        }
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
+    async function load() {
+
+      const { data, error } = await supabase
+        .from('catalog_micro_categories')
+        .select('*')
+        .eq('macro_category_id', macroCategoryId)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Micro categories:', error);
+      }
+
+      if (!cancelled) {
+        setMicroCategories(data ?? []);
+        setLoading(false);
+      }
+
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+
   }, [macroCategoryId]);
 
-  return { microCategories, loading };
+  return {
+    microCategories,
+    loading
+  };
+
 }
+
 
 export function useSpecializations(macroCategoryId: string | null) {
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
