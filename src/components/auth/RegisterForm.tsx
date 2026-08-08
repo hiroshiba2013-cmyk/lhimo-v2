@@ -117,6 +117,11 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [hasClaimedLocations, setHasClaimedLocations] = useState(false);
   const { macroCategories } = useMacroCategories();
   console.log("MACRO CATEGORIES:", macroCategories);
+  const {
+  allMicroCategories,
+  allSpecializations,
+  allServices,
+} = useAllCatalogData();
   const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
   const { services, loading: servicesLoading } =
   useBusinessServices(businessLocations[0]?.macroCategoryId || null);
@@ -453,15 +458,25 @@ const { specializations, loading: specializationsLoading } =
     setFamilyMembers(updated);
   };
 
-  const addBusinessLocation = () => {
-    if (businessLocations.length >= 10) {
-      return;
-    }
-    const defaultHours: DayHours = { open: '09:00', close: '18:00', closed: false };
-    setBusinessLocations([...businessLocations, {
+ const addBusinessLocation = () => {
+  if (businessLocations.length >= 10) {
+    return;
+  }
+
+  const defaultHours: DayHours = {
+    open: '09:00',
+    close: '18:00',
+    closed: false,
+  };
+
+  setBusinessLocations([
+    ...businessLocations,
+    {
+      companyName: businessForm.companyName,
       name: `Sede ${businessLocations.length + 1}`,
       description: '',
       services: [],
+      specializations: [],
       address: '',
       streetNumber: '',
       city: '',
@@ -474,16 +489,17 @@ const { specializations, loading: specializationsLoading } =
       macroCategoryId: '',
       microCategoryId: '',
       businessHours: {
-        monday: defaultHours,
-        tuesday: defaultHours,
-        wednesday: defaultHours,
-        thursday: defaultHours,
-        friday: defaultHours,
+        monday: { ...defaultHours },
+        tuesday: { ...defaultHours },
+        wednesday: { ...defaultHours },
+        thursday: { ...defaultHours },
+        friday: { ...defaultHours },
         saturday: { ...defaultHours, closed: true },
         sunday: { ...defaultHours, closed: true },
       },
-    }]);
-  };
+    },
+  ]);
+};
 
   const removeBusinessLocation = (index: number) => {
     setBusinessLocations(businessLocations.filter((_, i) => i !== index));
@@ -495,10 +511,12 @@ const updateBusinessLocation = (
   value: string | string[]
 ) => {
   const updated = [...businessLocations];
+
   updated[index] = {
     ...updated[index],
     [field]: value,
   };
+
   setBusinessLocations(updated);
 };
 
@@ -2364,10 +2382,12 @@ const updateBusinessLocation = (
                 value
               )
             }
-            options={locationMicroCategories.map(c => ({
-              value: c.id,
-              label: c.name,
-            }))}
+  options={allSpecializations
+  .filter(s => s.macro_category_id === location.macroCategoryId)
+  .map(s => ({
+    id: s.id,
+    name: s.name,
+  }))}
             placeholder="Seleziona una micro categoria"
             disabled={!location.macroCategoryId}
           />
@@ -2412,10 +2432,13 @@ const updateBusinessLocation = (
           </label>
 
           <MultiSelectCheckbox
-            options={locationServices.map(s => ({
-              id: s.id,
-              name: s.name,
-            }))}
+            options={allServices
+  .filter(s => s.macro_category_id === location.macroCategoryId)
+  .map(s => ({
+    id: s.id,
+    name: s.name,
+  }))}
+          
             selected={location.services || []}
             onChange={(selected) =>
               updateBusinessLocation(
