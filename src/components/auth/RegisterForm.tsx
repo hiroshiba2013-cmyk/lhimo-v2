@@ -2375,13 +2375,32 @@ const updateBusinessLocation = (
 
           <SearchableSelect
             value={location.microCategoryId}
-            onChange={(value) =>
-              updateBusinessLocation(
-                index,
-                'microCategoryId',
-                value
-              )
-            }
+           onChange={(value) => {
+  updateBusinessLocation(
+    index,
+    'macroCategoryId',
+    value
+  );
+
+  updateBusinessLocation(
+    index,
+    'microCategoryId',
+    ''
+  );
+
+  updateBusinessLocation(
+    index,
+    'specializations',
+    []
+  );
+
+  updateBusinessLocation(
+    index,
+    'services',
+    []
+  );
+}}
+            
   options={allSpecializations
   .filter(s => s.macro_category_id === location.macroCategoryId)
   .map(s => ({
