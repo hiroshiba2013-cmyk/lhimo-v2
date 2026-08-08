@@ -2225,22 +2225,17 @@ const { specializations, loading: specializationsLoading } =
             </p>
           </div>
 
-          {planTier === 'paid' && businessLocations.map((location, index) => (
-            <div key={index} className="bg-emerald-50 p-4 rounded-lg border-2 border-emerald-300 mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-gray-900">
-                  Sede {index + 1}
-                </h3>
-                {index > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => removeBusinessLocation(index)}
-                    className="text-red-600 hover:text-red-700 p-1"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+         <div className="mb-3">
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Ragione Sociale
+  </label>
+  <input
+    type="text"
+    value={location.companyName}
+    readOnly
+    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-sm"
+  />
+</div>
 
               <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
