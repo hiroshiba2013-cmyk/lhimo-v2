@@ -2591,27 +2591,28 @@ const { specializations, loading: specializationsLoading } =
               </span>
             </label>
 
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={acceptPrivacy}
-                onChange={(e) => setAcceptPrivacy(e.target.checked)}
-                className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700">
-                Accetto la{' '}
-                <a
-                  href="/rules#privacy-policy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline font-semibold"
-                >
-                  Privacy Policy e GDPR
-                </a>{' '}
-                e autorizzo il trattamento dei dati aziendali{' '}
-                <span className="text-red-600 font-bold">*</span>
-              </span>
-            </label>
+           <label className="flex items-start gap-3 cursor-pointer group">
+  <input
+    type="checkbox"
+    checked={acceptPrivacy}
+    onChange={(e) => setAcceptPrivacy(e.target.checked)}
+    className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+  />
+
+  <span className="text-sm text-gray-700">
+    Accetto la{' '}
+    <a
+      href="/rules#privacy-policy"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 hover:underline font-semibold"
+    >
+      Privacy Policy e GDPR
+    </a>{' '}
+    e autorizzo il trattamento dei dati aziendali{' '}
+    <span className="text-red-600 font-bold">*</span>
+  </span>
+</label>
 
             <label className="flex items-start gap-3 cursor-pointer group">
               <input
