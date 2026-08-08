@@ -2503,7 +2503,6 @@ const { specializations, loading: specializationsLoading } =
                     );
                   })}
                 </div>
-              </div>
             </div>
           ))}
 
