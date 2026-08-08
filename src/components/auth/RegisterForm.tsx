@@ -2953,5 +2953,6 @@ const updateBusinessLocation = (
         </form>
       )}
     </div>
+  </div>
   );
 }
