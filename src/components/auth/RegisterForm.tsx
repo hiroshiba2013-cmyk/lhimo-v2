@@ -127,7 +127,6 @@ const { specializations, loading: specializationsLoading } =
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
       setBusinessLocations([{
-        companyName: string;
         name: 'Sede 1',
         description: '',
         services: [],
