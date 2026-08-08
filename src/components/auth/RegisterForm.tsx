@@ -130,6 +130,7 @@ const { specializations, loading: specializationsLoading } =
         name: 'Sede 1',
         description: '',
         services: [],
+        specializations: [],
         address: '',
         streetNumber: '',
         city: '',
