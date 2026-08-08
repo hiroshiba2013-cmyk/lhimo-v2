@@ -2225,241 +2225,590 @@ const { specializations, loading: specializationsLoading } =
             </p>
           </div>
 
-          {planTier === 'paid' && businessLocations.map((location, index) => (
-            <div key={index} className="bg-emerald-50 p-4 rounded-lg border-2 border-emerald-300 mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-gray-900">
-                  Sede {index + 1}
-                </h3>
-                {index > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => removeBusinessLocation(index)}
-                    className="text-red-600 hover:text-red-700 p-1"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+          {planTier === 'paid' && (
+  <>
+    {/* ============================================
+        SEDI OPERATIVE
+        ============================================ */}
 
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome Sede
-                </label>
-                <input
-                  type="text"
-                  value={location.name}
-                  onChange={(e) => updateBusinessLocation(index, 'name', e.target.value)}
-                  required
-                  placeholder={`Sede ${index + 1}`}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-              </div>
+    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+      <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+        <MapPin className="w-5 h-5 text-green-600" />
+        Punti Vendita / Sedi Operative
+      </h3>
 
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrizione Sede
-                </label>
-                <textarea
-                  value={location.description}
-                  onChange={(e) => updateBusinessLocation(index, 'description', e.target.value)}
-                  placeholder="Descrivi questa sede: cosa offre, caratteristiche particolari, ecc."
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-              </div>
+      <p className="text-sm text-gray-700">
+        Inserisci le sedi operative dove i clienti possono trovarti.
+      </p>
+    </div>
 
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Macro Categoria Sede (opzionale)
-                </label>
-                <SearchableSelect
-                  value={location.macroCategoryId}
-                  onChange={(value) => updateBusinessLocation(index, 'macroCategoryId', value)}
-                  options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
-                  placeholder="Stessa macro categoria dell'azienda"
-                />
-              </div>
+    {businessLocations.map((location, index) => (
+      <div
+        key={index}
+        className="border border-gray-200 rounded-xl p-4 mb-5 bg-white shadow-sm"
+      >
 
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Micro Categoria Sede (opzionale)
-                </label>
-                <SearchableSelect
-                  value={location.microCategoryId}
-                  onChange={(value) => updateBusinessLocation(index, 'microCategoryId', value)}
-                  options={locationMicroCategories.map(c => ({ value: c.id, label: c.name }))}
-                  placeholder="Stessa micro categoria dell'azienda"
-                  disabled={!location.macroCategoryId}
-                />
-              </div>
+        {/* ============================================
+            TITOLO SEDE
+            ============================================ */}
 
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Servizi Disponibili
-                </label>
-                <textarea
-                  value={location.servicesDescription || ''}
-                  onChange={(e) => updateBusinessLocation(index, 'servicesDescription', e.target.value)}
-                  placeholder="Descrivi i servizi offerti in questa sede (es. WiFi gratuito, parcheggio, consegna a domicilio, ecc.)"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-              </div>
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-lg font-bold text-gray-900">
+            Sede {index + 1}
+          </h4>
 
-              <div className="grid grid-cols-3 gap-3 mb-3">
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Via/Piazza
+          {index > 0 && (
+            <button
+              type="button"
+              onClick={() => removeBusinessLocation(index)}
+              className="text-red-600 hover:text-red-700 p-1"
+              title="Rimuovi sede"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+
+        {/* ============================================
+            RAGIONE SOCIALE
+            ============================================ */}
+
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Ragione Sociale
+          </label>
+
+          <input
+            type="text"
+            value={businessForm.companyName || ''}
+            readOnly
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-sm"
+          />
+        </div>
+
+        {/* ============================================
+            NOME SEDE
+            ============================================ */}
+
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nome Sede
+          </label>
+
+          <input
+            type="text"
+            value={location.name}
+            onChange={(e) =>
+              updateBusinessLocation(
+                index,
+                'name',
+                e.target.value
+              )
+            }
+            required
+            placeholder={`Sede ${index + 1}`}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          />
+
+          <p className="text-xs text-gray-500 mt-1">
+            Questo nome sarà visibile nella tua dashboard per identificare la sede.
+          </p>
+        </div>
+
+        {/* ============================================
+            DESCRIZIONE SEDE
+            ============================================ */}
+
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Descrizione Sede
+          </label>
+
+          <textarea
+            value={location.description}
+            onChange={(e) =>
+              updateBusinessLocation(
+                index,
+                'description',
+                e.target.value
+              )
+            }
+            placeholder="Descrivi questa sede e le sue caratteristiche."
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          />
+        </div>
+
+        {/* ============================================
+            MACRO CATEGORIA
+            ============================================ */}
+
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Macro Categoria
+          </label>
+
+          <SearchableSelect
+            value={location.macroCategoryId}
+            onChange={(value) => {
+              updateBusinessLocation(
+                index,
+                'macroCategoryId',
+                value
+              );
+
+              updateBusinessLocation(
+                index,
+                'microCategoryId',
+                ''
+              );
+
+              updateBusinessLocation(
+                index,
+                'specializations',
+                []
+              );
+
+              updateBusinessLocation(
+                index,
+                'services',
+                []
+              );
+            }}
+            options={macroCategories.map(category => ({
+              value: category.id,
+              label: category.name,
+            }))}
+            placeholder="Seleziona una macro categoria"
+          />
+        </div>
+
+        {/* ============================================
+            MICRO CATEGORIA
+            ============================================ */}
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Micro Categoria
+          </label>
+
+          <SearchableSelect
+            value={location.microCategoryId}
+            onChange={(value) =>
+              updateBusinessLocation(
+                index,
+                'microCategoryId',
+                value
+              )
+            }
+            options={allMicroCategories
+              .filter(
+                category =>
+                  category.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(category => ({
+                value: category.id,
+                label: category.name,
+              }))}
+            placeholder={
+              location.macroCategoryId
+                ? 'Seleziona una micro categoria'
+                : 'Seleziona prima una macro categoria'
+            }
+            disabled={!location.macroCategoryId}
+          />
+        </div>
+
+        {/* ============================================
+            SPECIALIZZAZIONI
+            ============================================ */}
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Specializzazioni
+          </label>
+
+          <MultiSelectCheckbox
+            options={allSpecializations
+              .filter(
+                specialization =>
+                  specialization.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(specialization => ({
+                id: specialization.id,
+                name: specialization.name,
+              }))}
+            selected={location.specializations || []}
+            onChange={(selected) =>
+              updateBusinessLocation(
+                index,
+                'specializations',
+                selected
+              )
+            }
+            placeholder={
+              location.macroCategoryId
+                ? 'Seleziona una o più specializzazioni'
+                : 'Seleziona prima una macro categoria'
+            }
+          />
+
+          <p className="text-xs text-gray-500 mt-1">
+            Puoi selezionare più specializzazioni.
+          </p>
+        </div>
+
+        {/* ============================================
+            SERVIZI
+            ============================================ */}
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Servizi Disponibili
+          </label>
+
+          <MultiSelectCheckbox
+            options={allServices
+              .filter(
+                service =>
+                  service.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(service => ({
+                id: service.id,
+                name: service.name,
+              }))}
+            selected={location.services || []}
+            onChange={(selected) =>
+              updateBusinessLocation(
+                index,
+                'services',
+                selected
+              )
+            }
+            placeholder={
+              location.macroCategoryId
+                ? 'Seleziona uno o più servizi'
+                : 'Seleziona prima una macro categoria'
+            }
+          />
+
+          <p className="text-xs text-gray-500 mt-1">
+            Puoi selezionare più servizi.
+          </p>
+        </div>
+
+        {/* ============================================
+            INDIRIZZO
+            ============================================ */}
+
+        <div className="grid grid-cols-3 gap-3 mb-3">
+
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Via / Piazza
+            </label>
+
+            <input
+              type="text"
+              value={location.address}
+              onChange={(e) =>
+                updateBusinessLocation(
+                  index,
+                  'address',
+                  e.target.value
+                )
+              }
+              required
+              placeholder="Es. Via Roma"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Numero
+            </label>
+
+            <input
+              type="text"
+              value={location.streetNumber}
+              onChange={(e) =>
+                updateBusinessLocation(
+                  index,
+                  'streetNumber',
+                  e.target.value
+                )
+              }
+              required
+              placeholder="Es. 42"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            />
+          </div>
+
+        </div>
+
+        {/* ============================================
+            CITTÀ E PROVINCIA
+            ============================================ */}
+
+        <div className="mb-3">
+          <ItalianCityProvinceSelect
+            province={location.province}
+            city={location.city}
+            required
+            onProvinceChange={(province, code) => {
+              updateBusinessLocation(
+                index,
+                'province',
+                code
+              );
+            }}
+            onCityChange={(city) =>
+              updateBusinessLocation(
+                index,
+                'city',
+                city
+              )
+            }
+          />
+        </div>
+
+        {/* ============================================
+            CAP
+            ============================================ */}
+
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            CAP
+          </label>
+
+          <input
+            type="text"
+            value={location.postalCode}
+            onChange={(e) =>
+              updateBusinessLocation(
+                index,
+                'postalCode',
+                e.target.value
+              )
+            }
+            required
+            maxLength={5}
+            placeholder="Es. 20121"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          />
+        </div>
+
+        {/* ============================================
+            TELEFONO ED EMAIL
+            ============================================ */}
+
+        <div className="grid grid-cols-2 gap-3 mb-3">
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Telefono Sede
+            </label>
+
+            <input
+              type="tel"
+              value={location.phone}
+              onChange={(e) =>
+                updateBusinessLocation(
+                  index,
+                  'phone',
+                  e.target.value
+                )
+              }
+              placeholder="Telefono della sede"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email Sede
+            </label>
+
+            <input
+              type="email"
+              value={location.email}
+              onChange={(e) =>
+                updateBusinessLocation(
+                  index,
+                  'email',
+                  e.target.value
+                )
+              }
+              placeholder="Email della sede"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            />
+          </div>
+
+        </div>
+
+        {/* ============================================
+            PARTITA IVA SEDE
+            ============================================ */}
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Partita IVA Sede
+            <span className="font-normal text-gray-500">
+              {' '} (opzionale)
+            </span>
+          </label>
+
+          <input
+            type="text"
+            value={location.vatNumber}
+            onChange={(e) =>
+              updateBusinessLocation(
+                index,
+                'vatNumber',
+                e.target.value
+              )
+            }
+            placeholder="Partita IVA specifica della sede"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          />
+        </div>
+
+        {/* ============================================
+            ORARI SEDE
+            ============================================ */}
+
+        <div className="mb-3">
+
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Orari Sede
+          </label>
+
+          <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+
+            {(
+              [
+                'monday',
+                'tuesday',
+                'wednesday',
+                'thursday',
+                'friday',
+                'saturday',
+                'sunday',
+              ] as const
+            ).map(day => {
+
+              const dayNames = {
+                monday: 'Lunedì',
+                tuesday: 'Martedì',
+                wednesday: 'Mercoledì',
+                thursday: 'Giovedì',
+                friday: 'Venerdì',
+                saturday: 'Sabato',
+                sunday: 'Domenica',
+              };
+
+              const dayHours =
+                location.businessHours[day];
+
+              return (
+                <div
+                  key={day}
+                  className="flex items-center gap-2 text-sm"
+                >
+
+                  <label className="flex items-center gap-2 w-28">
+                    <input
+                      type="checkbox"
+                      checked={!dayHours.closed}
+                      onChange={(e) =>
+                        updateBusinessHours(
+                          index,
+                          day,
+                          'closed',
+                          !e.target.checked
+                        )
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+
+                    <span className="font-medium">
+                      {dayNames[day]}
+                    </span>
                   </label>
-                  <input
-                    type="text"
-                    value={location.address}
-                    onChange={(e) => updateBusinessLocation(index, 'address', e.target.value)}
-                    required
-                    placeholder="Es. Via Roma"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  />
+
+                  {!dayHours.closed && (
+                    <>
+                      <input
+                        type="time"
+                        value={dayHours.open}
+                        onChange={(e) =>
+                          updateBusinessHours(
+                            index,
+                            day,
+                            'open',
+                            e.target.value
+                          )
+                        }
+                        className="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-xs"
+                      />
+
+                      <span>-</span>
+
+                      <input
+                        type="time"
+                        value={dayHours.close}
+                        onChange={(e) =>
+                          updateBusinessHours(
+                            index,
+                            day,
+                            'close',
+                            e.target.value
+                          )
+                        }
+                        className="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-xs"
+                      />
+                    </>
+                  )}
+
+                  {dayHours.closed && (
+                    <span className="text-gray-500 italic">
+                      Chiuso
+                    </span>
+                  )}
+
                 </div>
+              );
+            })}
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Numero
-                  </label>
-                  <input
-                    type="text"
-                    value={location.streetNumber}
-                    onChange={(e) => updateBusinessLocation(index, 'streetNumber', e.target.value)}
-                    required
-                    placeholder="Es. 42"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  />
-                </div>
-              </div>
+          </div>
+        </div>
 
-              <div className="mb-3">
-                <ItalianCityProvinceSelect
-                  province={location.province}
-                  city={location.city}
-                  required
-                  onProvinceChange={(province, code) => {
-                    updateBusinessLocation(index, 'province', code);
-                  }}
-                  onCityChange={(city) => updateBusinessLocation(index, 'city', city)}
-                />
-              </div>
+      </div>
+    ))}
 
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  CAP
-                </label>
-                <input
-                  type="text"
-                  value={location.postalCode}
-                  onChange={(e) => updateBusinessLocation(index, 'postalCode', e.target.value)}
-                  required
-                  placeholder="Es. 20121"
-                  maxLength={5}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-              </div>
+    {/* ============================================
+        AGGIUNGI ALTRA SEDE
+        ============================================ */}
 
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Telefono Sede
-                  </label>
-                  <input
-                    type="tel"
-                    value={location.phone}
-                    onChange={(e) => updateBusinessLocation(index, 'phone', e.target.value)}
-                    placeholder="Es. +39 02 1234567"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  />
-                </div>
+    {(numberOfLocations === '6-10' ||
+      numberOfLocations === '10+') &&
+      businessLocations.length < 10 && (
+        <button
+          type="button"
+          onClick={addBusinessLocation}
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors text-sm font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          Aggiungi altra sede
+        </button>
+      )}
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Sede (opzionale)
-                  </label>
-                  <input
-                    type="email"
-                    value={location.email}
-                    onChange={(e) => updateBusinessLocation(index, 'email', e.target.value)}
-                    placeholder="Es. sede@azienda.it"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  P.IVA Sede (opzionale)
-                </label>
-                <input
-                  type="text"
-                  value={location.vatNumber}
-                  onChange={(e) => updateBusinessLocation(index, 'vatNumber', e.target.value)}
-                  placeholder="Es. IT12345678900"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-              </div>
-
-              <div className="mb-3">
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Orari di Apertura
-                </label>
-                <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
-                  {(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map(day => {
-                    const dayNames = {
-                      monday: 'Lunedì',
-                      tuesday: 'Martedì',
-                      wednesday: 'Mercoledì',
-                      thursday: 'Giovedì',
-                      friday: 'Venerdì',
-                      saturday: 'Sabato',
-                      sunday: 'Domenica',
-                    };
-                    const dayHours = location.businessHours[day];
-
-                    return (
-                      <div key={day} className="flex items-center gap-2 text-sm">
-                        <label className="flex items-center gap-2 w-28">
-                          <input
-                            type="checkbox"
-                            checked={!dayHours.closed}
-                            onChange={(e) => updateBusinessHours(index, day, 'closed', !e.target.checked)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                          />
-                          <span className="font-medium">{dayNames[day]}</span>
-                        </label>
-                        {!dayHours.closed && (
-                          <>
-                            <input
-                              type="time"
-                              value={dayHours.open}
-                              onChange={(e) => updateBusinessHours(index, day, 'open', e.target.value)}
-                              className="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs"
-                            />
-                            <span>-</span>
-                            <input
-                              type="time"
-                              value={dayHours.close}
-                              onChange={(e) => updateBusinessHours(index, day, 'close', e.target.value)}
-                              className="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs"
-                            />
-                          </>
-                        )}
-                        {dayHours.closed && (
-                          <span className="text-gray-500 italic">Chiuso</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          ))}
+  </>
+)}
 
           {planTier === 'paid' && (numberOfLocations === '6-10' || numberOfLocations === '10+') && businessLocations.length < 10 && (
             <button
