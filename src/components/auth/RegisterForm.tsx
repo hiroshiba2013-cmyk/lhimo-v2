@@ -10,6 +10,7 @@ import {
   useBusinessServices,
   useSpecializations,
 } from '../../hooks/useCatalog';
+import { MultiSelectCheckbox } from '../common/MultiSelectCheckbox';
 
 interface FamilyMember {
   firstName: string;
