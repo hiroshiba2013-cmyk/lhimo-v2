@@ -126,11 +126,10 @@ const { specializations, loading: specializationsLoading } =
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
-  setBusinessLocations([{
-  name: 'Sede 1',
+      setBusinessLocations([{
+        name: 'Sede 1',
         description: '',
         services: [],
-        specializations: [],
         address: '',
         streetNumber: '',
         city: '',
@@ -2298,60 +2297,15 @@ const { specializations, loading: specializationsLoading } =
               <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Servizi Disponibili
-<label className="block text-sm font-medium text-gray-700 mb-1">
-  Servizi Disponibili
-</label>
-
-<MultiSelectCheckbox
-  options={services.map(service => ({
-    id: service.id,
-    name: service.name,
-  }))}
-  selected={location.services || []}
-  onChange={(selected) =>
-    updateBusinessLocation(
-      index,
-      'services',
-      selected
-    )
-  }
-  loading={servicesLoading}
-  placeholder={
-    location.macroCategoryId
-      ? 'Seleziona i servizi disponibili'
-      : 'Seleziona prima una macro categoria'
-  }
-/>
-           <div className="mt-4">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Specializzazioni
-  </label>
-
-  <MultiSelectCheckbox
-    options={specializations.map(specialization => ({
-      id: specialization.id,
-      name: specialization.name,
-    }))}
-    selected={location.specializations || []}
-    onChange={(selected) =>
-      updateBusinessLocation(
-        index,
-        'specializations',
-        selected
-      )
-    }
-    loading={specializationsLoading}
-    placeholder={
-      location.macroCategoryId
-        ? 'Seleziona le specializzazioni'
-        : 'Seleziona prima una macro categoria'
-    }
-  />
-
-  <p className="text-xs text-gray-500 mt-1">
-    Puoi selezionare più specializzazioni.
-  </p>
-</div>       
+                </label>
+                <textarea
+                  value={location.servicesDescription || ''}
+                  onChange={(e) => updateBusinessLocation(index, 'servicesDescription', e.target.value)}
+                  placeholder="Descrivi i servizi offerti in questa sede (es. WiFi gratuito, parcheggio, consegna a domicilio, ecc.)"
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
 
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <div className="col-span-2">
@@ -2503,6 +2457,7 @@ const { specializations, loading: specializationsLoading } =
                     );
                   })}
                 </div>
+              </div>
             </div>
           ))}
 
@@ -2591,28 +2546,27 @@ const { specializations, loading: specializationsLoading } =
               </span>
             </label>
 
-           <label className="flex items-start gap-3 cursor-pointer group">
-  <input
-    type="checkbox"
-    checked={acceptPrivacy}
-    onChange={(e) => setAcceptPrivacy(e.target.checked)}
-    className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-  />
-
-  <span className="text-sm text-gray-700">
-    Accetto la{' '}
-    <a
-      href="/rules#privacy-policy"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 hover:underline font-semibold"
-    >
-      Privacy Policy e GDPR
-    </a>{' '}
-    e autorizzo il trattamento dei dati aziendali{' '}
-    <span className="text-red-600 font-bold">*</span>
-  </span>
-</label>
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={acceptPrivacy}
+                onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">
+                Accetto la{' '}
+                <a
+                  href="/rules#privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline font-semibold"
+                >
+                  Privacy Policy e GDPR
+                </a>{' '}
+                e autorizzo il trattamento dei dati aziendali{' '}
+                <span className="text-red-600 font-bold">*</span>
+              </span>
+            </label>
 
             <label className="flex items-start gap-3 cursor-pointer group">
               <input
