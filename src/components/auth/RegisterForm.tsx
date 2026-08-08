@@ -38,8 +38,8 @@ interface BusinessHours {
 
 interface BusinessLocation {
   name: string;
-  description: string;
   services: string[];
+  specializations: string[];
   servicesDescription?: string;
   address: string;
   streetNumber: string;
