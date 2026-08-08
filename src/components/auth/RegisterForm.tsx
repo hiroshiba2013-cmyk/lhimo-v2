@@ -2238,8 +2238,12 @@ const updateBusinessLocation = (
           </div>
 
           <div className="bg-gradient-to-r from-green-50 to-blue-50 p-5 rounded-lg border-2 border-green-300 mb-4">
-            {planTier === 'paid' && (
+ {planTier === 'paid' && (
   <>
+    {/* ==========================================
+        PUNTI VENDITA / SEDI OPERATIVE
+        ========================================== */}
+
     <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
       <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
         <MapPin className="w-5 h-5 text-green-600" />
@@ -2251,12 +2255,13 @@ const updateBusinessLocation = (
       </p>
     </div>
 
+    {/* ELENCO SEDI */}
     {businessLocations.map((location, index) => (
       <div
         key={index}
         className="border border-gray-200 rounded-xl p-4 mb-5 bg-white shadow-sm"
       >
-
+        {/* INTESTAZIONE SEDE */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-lg font-bold text-gray-900">
             Sede {index + 1}
@@ -2267,6 +2272,7 @@ const updateBusinessLocation = (
               type="button"
               onClick={() => removeBusinessLocation(index)}
               className="text-red-600 hover:text-red-700 p-1"
+              title="Rimuovi sede"
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -2297,7 +2303,11 @@ const updateBusinessLocation = (
             type="text"
             value={location.name}
             onChange={(e) =>
-              updateBusinessLocation(index, 'name', e.target.value)
+              updateBusinessLocation(
+                index,
+                'name',
+                e.target.value
+              )
             }
             required
             placeholder={`Sede ${index + 1}`}
@@ -2318,7 +2328,11 @@ const updateBusinessLocation = (
           <textarea
             value={location.description}
             onChange={(e) =>
-              updateBusinessLocation(index, 'description', e.target.value)
+              updateBusinessLocation(
+                index,
+                'description',
+                e.target.value
+              )
             }
             placeholder="Descrivi questa sede e le sue caratteristiche."
             rows={3}
@@ -2326,7 +2340,11 @@ const updateBusinessLocation = (
           />
         </div>
 
-                {/* MACRO CATEGORIA */}
+        {/* ==========================================
+            CATEGORIA
+            ========================================== */}
+
+        {/* MACRO CATEGORIA */}
         <div className="mb-3">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Macro Categoria
@@ -2341,6 +2359,8 @@ const updateBusinessLocation = (
                 value
               );
 
+              // Quando cambia la macro categoria,
+              // azzeriamo micro categoria, specializzazioni e servizi
               updateBusinessLocation(
                 index,
                 'microCategoryId',
@@ -2375,39 +2395,28 @@ const updateBusinessLocation = (
 
           <SearchableSelect
             value={location.microCategoryId}
-           onChange={(value) => {
-  updateBusinessLocation(
-    index,
-    'macroCategoryId',
-    value
-  );
-
-  updateBusinessLocation(
-    index,
-    'microCategoryId',
-    ''
-  );
-
-  updateBusinessLocation(
-    index,
-    'specializations',
-    []
-  );
-
-  updateBusinessLocation(
-    index,
-    'services',
-    []
-  );
-}}
-            
-  options={allSpecializations
-  .filter(s => s.macro_category_id === location.macroCategoryId)
-  .map(s => ({
-    id: s.id,
-    name: s.name,
-  }))}
-            placeholder="Seleziona una micro categoria"
+            onChange={(value) =>
+              updateBusinessLocation(
+                index,
+                'microCategoryId',
+                value
+              )
+            }
+            options={allMicroCategories
+              .filter(
+                c =>
+                  c.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(c => ({
+                value: c.id,
+                label: c.name,
+              }))}
+            placeholder={
+              location.macroCategoryId
+                ? 'Seleziona una micro categoria'
+                : 'Seleziona prima una macro categoria'
+            }
             disabled={!location.macroCategoryId}
           />
         </div>
@@ -2419,10 +2428,16 @@ const updateBusinessLocation = (
           </label>
 
           <MultiSelectCheckbox
-            options={locationSpecializations.map(s => ({
-              id: s.id,
-              name: s.name,
-            }))}
+            options={allSpecializations
+              .filter(
+                s =>
+                  s.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(s => ({
+                id: s.id,
+                name: s.name,
+              }))}
             selected={location.specializations || []}
             onChange={(selected) =>
               updateBusinessLocation(
@@ -2431,7 +2446,7 @@ const updateBusinessLocation = (
                 selected
               )
             }
-            loading={locationSpecializationsLoading}
+            loading={false}
             placeholder={
               location.macroCategoryId
                 ? 'Seleziona una o più specializzazioni'
@@ -2452,12 +2467,15 @@ const updateBusinessLocation = (
 
           <MultiSelectCheckbox
             options={allServices
-  .filter(s => s.macro_category_id === location.macroCategoryId)
-  .map(s => ({
-    id: s.id,
-    name: s.name,
-  }))}
-          
+              .filter(
+                s =>
+                  s.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(s => ({
+                id: s.id,
+                name: s.name,
+              }))}
             selected={location.services || []}
             onChange={(selected) =>
               updateBusinessLocation(
@@ -2466,7 +2484,7 @@ const updateBusinessLocation = (
                 selected
               )
             }
-            loading={locationServicesLoading}
+            loading={false}
             placeholder={
               location.macroCategoryId
                 ? 'Seleziona uno o più servizi'
@@ -2479,7 +2497,11 @@ const updateBusinessLocation = (
           </p>
         </div>
 
-                {/* INDIRIZZO */}
+        {/* ==========================================
+            INDIRIZZO
+            ========================================== */}
+
+        {/* INDIRIZZO + NUMERO CIVICO */}
         <div className="mb-3">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Indirizzo
@@ -2487,6 +2509,7 @@ const updateBusinessLocation = (
 
           <div className="grid grid-cols-3 gap-3">
 
+            {/* VIA / PIAZZA */}
             <div className="col-span-2">
               <input
                 type="text"
@@ -2504,6 +2527,7 @@ const updateBusinessLocation = (
               />
             </div>
 
+            {/* NUMERO CIVICO */}
             <div>
               <input
                 type="text"
@@ -2530,7 +2554,6 @@ const updateBusinessLocation = (
             province={location.province}
             city={location.city}
             required
-
             onProvinceChange={(province, code) => {
               updateBusinessLocation(
                 index,
@@ -2538,7 +2561,6 @@ const updateBusinessLocation = (
                 code
               );
             }}
-
             onCityChange={(city) =>
               updateBusinessLocation(
                 index,
@@ -2572,9 +2594,14 @@ const updateBusinessLocation = (
           />
         </div>
 
-        {/* TELEFONO ED EMAIL */}
+        {/* ==========================================
+            CONTATTI
+            ========================================== */}
+
+        {/* TELEFONO + EMAIL */}
         <div className="grid grid-cols-2 gap-3 mb-3">
 
+          {/* TELEFONO */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Telefono Sede
@@ -2595,6 +2622,7 @@ const updateBusinessLocation = (
             />
           </div>
 
+          {/* EMAIL */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email Sede
@@ -2617,7 +2645,7 @@ const updateBusinessLocation = (
 
         </div>
 
-        {/* P.IVA SEDE */}
+        {/* PARTITA IVA SEDE */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Partita IVA Sede
@@ -2641,7 +2669,10 @@ const updateBusinessLocation = (
           />
         </div>
 
-                {/* ORARI SEDE */}
+        {/* ==========================================
+            ORARI
+            ========================================== */}
+
         <div className="mb-3">
           <label className="block text-sm font-bold text-gray-700 mb-2">
             Orari Sede
@@ -2671,7 +2702,8 @@ const updateBusinessLocation = (
                 sunday: 'Domenica',
               };
 
-              const dayHours = location.businessHours[day];
+              const dayHours =
+                location.businessHours[day];
 
               return (
                 <div
@@ -2679,6 +2711,7 @@ const updateBusinessLocation = (
                   className="flex items-center gap-2 text-sm"
                 >
 
+                  {/* GIORNO + APERTO/CHIUSO */}
                   <label className="flex items-center gap-2 w-28">
                     <input
                       type="checkbox"
@@ -2699,6 +2732,7 @@ const updateBusinessLocation = (
                     </span>
                   </label>
 
+                  {/* ORARI */}
                   {!dayHours.closed && (
                     <>
                       <input
@@ -2733,6 +2767,7 @@ const updateBusinessLocation = (
                     </>
                   )}
 
+                  {/* CHIUSO */}
                   {dayHours.closed && (
                     <span className="text-gray-500 italic">
                       Chiuso
@@ -2749,7 +2784,10 @@ const updateBusinessLocation = (
       </div>
     ))}
 
-    {/* AGGIUNGI ALTRA SEDE */}
+    {/* ==========================================
+        AGGIUNGI ALTRA SEDE
+        ========================================== */}
+
     {(numberOfLocations === '6-10' ||
       numberOfLocations === '10+') &&
       businessLocations.length < 10 && (
@@ -2762,7 +2800,6 @@ const updateBusinessLocation = (
           Aggiungi altra sede
         </button>
       )}
-
   </>
 )}
 
