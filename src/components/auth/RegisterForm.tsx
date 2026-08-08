@@ -38,8 +38,8 @@ interface BusinessHours {
 
 interface BusinessLocation {
   name: string;
+  description: string;
   services: string[];
-  specializations: string[];
   servicesDescription?: string;
   address: string;
   streetNumber: string;
@@ -127,11 +127,9 @@ const { specializations, loading: specializationsLoading } =
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
       setBusinessLocations([{
-        companyName: businessForm.companyName,
         name: 'Sede 1',
         description: '',
         services: [],
-        specializations: [],
         address: '',
         streetNumber: '',
         city: '',
