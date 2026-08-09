@@ -118,15 +118,11 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const { macroCategories } = useMacroCategories();
   console.log("MACRO CATEGORIES:", macroCategories);
   const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
- const { services, loading: servicesLoading } =
-  useBusinessServices(
-    businessForm.macroCategoryId || null
-  );
+  const { services, loading: servicesLoading } =
+  useBusinessServices(businessLocations[0]?.macroCategoryId || null);
 
 const { specializations, loading: specializationsLoading } =
-  useSpecializations(
-    businessForm.macroCategoryId || null
-  );
+  useSpecializations(businessLocations[0]?.macroCategoryId || null);
 
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
