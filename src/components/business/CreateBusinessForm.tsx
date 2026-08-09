@@ -358,6 +358,10 @@ export function CreateBusinessForm({ ownerId, onSuccess, onCancel }: CreateBusin
             country: 'Italia',
             is_primary: true,
             description: formData.location_description || null,
+            macro_category_id: selectedMacroId || null,
+            micro_category_id: selectedMicroId || null,
+            specialization_ids: selectedSpecializations.length > 0 ? selectedSpecializations : null,
+            service_ids: selectedServices.length > 0 ? selectedServices : null,
             instagram_url: formData.instagram_url || null,
             facebook_url: formData.facebook_url || null,
             tiktok_url: formData.tiktok_url || null,
@@ -1056,6 +1060,65 @@ export function CreateBusinessForm({ ownerId, onSuccess, onCancel }: CreateBusin
                   placeholder="Via, numero civico"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+              </div>
+
+              <div className="border-t pt-4 space-y-4">
+                <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Categoria Sede</h4>
+                <p className="text-xs text-gray-500">
+                  La macro categoria viene ereditata dai dati aziendali. Puoi scegliere una micro categoria, specializzazioni e servizi specifici per questa sede.
+                </p>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Macro Categoria Sede
+                  </label>
+                  <input
+                    type="text"
+                    value={macroCategories.find(m => m.id === selectedMacroId)?.name || ''}
+                    disabled
+                    placeholder="Seleziona prima la macro categoria nei dati aziendali"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Micro Categoria Sede (opzionale)
+                  </label>
+                  <SearchableSelect
+                    value={selectedMicroId}
+                    onChange={(value) => setSelectedMicroId(value)}
+                    options={microCategories.map(m => ({ value: m.id, label: m.name }))}
+                    placeholder={selectedMacroId ? 'Seleziona micro categoria' : 'Prima seleziona una macro categoria'}
+                    disabled={!selectedMacroId}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Specializzazioni Sede (opzionale)
+                  </label>
+                  <MultiSelectCheckbox
+                    options={specializations.map(s => ({ id: s.id, name: s.name }))}
+                    selected={selectedSpecializations}
+                    onChange={setSelectedSpecializations}
+                    placeholder={selectedMacroId ? 'Seleziona specializzazioni' : 'Prima seleziona una macro categoria'}
+                    loading={false}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Servizi Sede (opzionale)
+                  </label>
+                  <MultiSelectCheckbox
+                    options={services.map(s => ({ id: s.id, name: s.name }))}
+                    selected={selectedServices}
+                    onChange={setSelectedServices}
+                    placeholder={selectedMacroId ? 'Seleziona servizi' : 'Prima seleziona una macro categoria'}
+                    loading={false}
+                  />
+                </div>
               </div>
 
             </div>

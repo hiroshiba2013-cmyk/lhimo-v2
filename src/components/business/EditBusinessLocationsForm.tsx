@@ -6,7 +6,8 @@ import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
 import { BusinessLocationAvatarUpload } from './BusinessLocationAvatarUpload';
 import { BusinessLocationPhotos } from './BusinessLocationPhotos';
 import { useAuth } from '../../contexts/AuthContext';
-import { useMacroCategories, useMicroCategories } from '../../hooks/useCatalog';
+import { useMacroCategories, useMicroCategories, useSpecializations, useBusinessServices } from '../../hooks/useCatalog';
+import { MultiSelectCheckbox } from '../common/MultiSelectCheckbox';
 import { useToast } from '../common/Toast';
 
 interface DayHours {
@@ -45,6 +46,8 @@ interface BusinessLocation {
   category_id?: string | null;
   macro_category_id?: string | null;
   micro_category_id?: string | null;
+  specialization_ids?: string[] | null;
+  service_ids?: string[] | null;
   instagram_url?: string | null;
   facebook_url?: string | null;
   tiktok_url?: string | null;
@@ -67,7 +70,6 @@ export function EditBusinessLocationsForm({ businessId, selectedLocationId, onUp
   const [subscriptionPlan, setSubscriptionPlan] = useState<string>('');
   const [isRegisteredBusiness, setIsRegisteredBusiness] = useState(false);
   const { macroCategories } = useMacroCategories();
-  const { microCategories } = useMicroCategories(locations[0]?.macro_category_id || null);
 
   useEffect(() => {
     const loadLocations = async () => {
@@ -372,6 +374,8 @@ export function EditBusinessLocationsForm({ businessId, selectedLocationId, onUp
           ...(isRegisteredBusiness && {
             macro_category_id: location.macro_category_id || null,
             micro_category_id: location.micro_category_id || null,
+            specialization_ids: location.specialization_ids || null,
+            service_ids: location.service_ids || null,
           }),
         };
 
@@ -735,32 +739,11 @@ export function EditBusinessLocationsForm({ businessId, selectedLocationId, onUp
                 </div>
 
                 {isRegisteredBusiness && (
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Macro Categoria Sede (opzionale)
-                    </label>
-                    <SearchableSelect
-                      value={location.macro_category_id || ''}
-                      onChange={(value) => handleChange(location.id, 'macro_category_id', value)}
-                      options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
-                      placeholder="Stessa macro categoria dell'azienda"
-                    />
-                  </div>
-                )}
-
-                {isRegisteredBusiness && (
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Micro Categoria Sede (opzionale)
-                    </label>
-                    <SearchableSelect
-                      value={location.micro_category_id || ''}
-                      onChange={(value) => handleChange(location.id, 'micro_category_id', value)}
-                      options={microCategories.map(c => ({ value: c.id, label: c.name }))}
-                      placeholder="Stessa micro categoria dell'azienda"
-                      disabled={!location.macro_category_id}
-                    />
-                  </div>
+                  <LocationCategoryFields
+                    location={location}
+                    macroCategories={macroCategories}
+                    onChange={handleChange}
+                  />
                 )}
 
                 <div className="md:col-span-2">
@@ -1010,6 +993,82 @@ export function EditBusinessLocationsForm({ businessId, selectedLocationId, onUp
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+interface LocationCategoryFieldsProps {
+  location: BusinessLocation;
+  macroCategories: { id: string; name: string }[];
+  onChange: (id: string, field: keyof BusinessLocation, value: string | boolean | string[]) => void;
+}
+
+function LocationCategoryFields({ location, macroCategories, onChange }: LocationCategoryFieldsProps) {
+  const { microCategories } = useMicroCategories(location.macro_category_id || null);
+  const { specializations } = useSpecializations(location.macro_category_id || null);
+  const { services } = useBusinessServices(location.macro_category_id || null);
+
+  const handleMacroChange = (value: string) => {
+    onChange(location.id, 'macro_category_id', value);
+    onChange(location.id, 'micro_category_id', '');
+    onChange(location.id, 'specialization_ids', []);
+    onChange(location.id, 'service_ids', []);
+  };
+
+  return (
+    <div className="md:col-span-2 space-y-4 border-t pt-4">
+      <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Categoria Sede</h4>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Macro Categoria Sede (opzionale)
+        </label>
+        <SearchableSelect
+          value={location.macro_category_id || ''}
+          onChange={handleMacroChange}
+          options={macroCategories.map(c => ({ value: c.id, label: c.name }))}
+          placeholder="Stessa macro categoria dell'azienda"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Micro Categoria Sede (opzionale)
+        </label>
+        <SearchableSelect
+          value={location.micro_category_id || ''}
+          onChange={(value) => onChange(location.id, 'micro_category_id', value)}
+          options={microCategories.map(c => ({ value: c.id, label: c.name }))}
+          placeholder={location.macro_category_id ? 'Seleziona micro categoria' : 'Prima seleziona una macro categoria'}
+          disabled={!location.macro_category_id}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Specializzazioni (opzionale)
+        </label>
+        <MultiSelectCheckbox
+          options={specializations.map(s => ({ id: s.id, name: s.name }))}
+          selected={location.specialization_ids || []}
+          onChange={(selected) => onChange(location.id, 'specialization_ids', selected)}
+          placeholder={location.macro_category_id ? 'Seleziona specializzazioni' : 'Prima seleziona una macro categoria'}
+          loading={false}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Servizi (opzionale)
+        </label>
+        <MultiSelectCheckbox
+          options={services.map(s => ({ id: s.id, name: s.name }))}
+          selected={location.service_ids || []}
+          onChange={(selected) => onChange(location.id, 'service_ids', selected)}
+          placeholder={location.macro_category_id ? 'Seleziona servizi' : 'Prima seleziona una macro categoria'}
+          loading={false}
+        />
+      </div>
     </div>
   );
 }
