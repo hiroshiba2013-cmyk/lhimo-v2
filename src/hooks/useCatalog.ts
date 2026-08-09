@@ -95,12 +95,10 @@ export function useMacroCategories() {
 }
 
 export function useMicroCategories(macroCategoryId: string | null) {
-
   const [microCategories, setMicroCategories] = useState<MicroCategory[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-
     if (!macroCategoryId) {
       setMicroCategories([]);
       return;
@@ -110,7 +108,6 @@ export function useMicroCategories(macroCategoryId: string | null) {
     setLoading(true);
 
     async function load() {
-
       const { data, error } = await supabase
         .from('catalog_micro_categories')
         .select('*')
@@ -127,7 +124,6 @@ export function useMicroCategories(macroCategoryId: string | null) {
         setMicroCategories(data ?? []);
         setLoading(false);
       }
-
     }
 
     load();
@@ -135,14 +131,12 @@ export function useMicroCategories(macroCategoryId: string | null) {
     return () => {
       cancelled = true;
     };
-
   }, [macroCategoryId]);
 
   return {
     microCategories,
     loading
   };
-
 }
 
 
