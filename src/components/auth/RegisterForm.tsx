@@ -138,6 +138,18 @@ const {
   businessForm.macroCategoryId || null
 );
   useEffect(() => {
+  if (!businessForm.macroCategoryId || businessLocations.length === 0) {
+    return;
+  }
+
+  setBusinessLocations(prev =>
+    prev.map(location => ({
+      ...location,
+      macroCategoryId: businessForm.macroCategoryId,
+    }))
+  );
+}, [businessForm.macroCategoryId]);
+  useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
       setBusinessLocations([{
