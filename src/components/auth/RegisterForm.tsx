@@ -2358,40 +2358,27 @@ const updateBusinessLocation = (
             Macro Categoria
           </label>
 
-          <SearchableSelect
-            value={location.macroCategoryId}
-            onChange={(value) => {
-              updateBusinessLocation(
-                index,
-                'macroCategoryId',
-                value
-              );
+         {/* MACRO CATEGORIA */}
+<div className="mb-3">
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Macro Categoria
+  </label>
 
-              updateBusinessLocation(
-                index,
-                'microCategoryId',
-                ''
-              );
+  <SearchableSelect
+    value={businessForm.macroCategoryId}
+    onChange={() => {}}
+    options={macroCategories.map(category => ({
+      value: category.id,
+      label: category.name,
+    }))}
+    placeholder="Macro categoria dell'azienda"
+    disabled
+  />
 
-              updateBusinessLocation(
-                index,
-                'specializations',
-                []
-              );
-
-              updateBusinessLocation(
-                index,
-                'services',
-                []
-              );
-            }}
-            options={macroCategories.map(category => ({
-              value: category.id,
-              label: category.name,
-            }))}
-            placeholder="Seleziona una macro categoria"
-          />
-        </div>
+  <p className="text-xs text-gray-500 mt-1">
+    La macro categoria è quella selezionata nei dati aziendali e vale per tutte le sedi.
+  </p>
+</div>
 
         {/* ============================================
             MICRO CATEGORIA
