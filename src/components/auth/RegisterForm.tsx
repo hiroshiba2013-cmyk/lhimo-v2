@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth, CustomerData, BusinessData } from '../../contexts/AuthContext';
 import { SearchableSelect } from '../common/SearchableSelect';
 import { ItalianCityProvinceSelect } from '../common/ItalianCityProvinceSelect';
+import { MultiSelectCheckbox } from '../common/MultiSelectCheckbox';
 import { Plus, Trash2, MapPin, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import {
