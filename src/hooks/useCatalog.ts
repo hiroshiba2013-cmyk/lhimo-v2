@@ -101,7 +101,6 @@ export function useMicroCategories(macroCategoryId: string | null) {
   useEffect(() => {
     if (!macroCategoryId) {
       setMicroCategories([]);
-      setLoading(false);
       return;
     }
 
@@ -110,9 +109,11 @@ export function useMicroCategories(macroCategoryId: string | null) {
 
     async function load() {
       const { data, error } = await supabase
-        .from('business_categories')
-        .select('id, name, slug, parent_id')
-        .eq('parent_id', macroCategoryId)
+        .from('catalog_micro_categories')
+        .select('*')
+        .eq('macro_category_id', macroCategoryId)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
         .order('name', { ascending: true });
 
       if (error) {
@@ -120,16 +121,7 @@ export function useMicroCategories(macroCategoryId: string | null) {
       }
 
       if (!cancelled) {
-        const mapped: MicroCategory[] = (data ?? []).map(row => ({
-          id: row.id,
-          macro_category_id: row.parent_id ?? '',
-          name: row.name,
-          slug: row.slug ?? null,
-          sort_order: 0,
-          is_active: true,
-        }));
-
-        setMicroCategories(mapped);
+        setMicroCategories(data ?? []);
         setLoading(false);
       }
     }
@@ -143,7 +135,7 @@ export function useMicroCategories(macroCategoryId: string | null) {
 
   return {
     microCategories,
-    loading,
+    loading
   };
 }
 
