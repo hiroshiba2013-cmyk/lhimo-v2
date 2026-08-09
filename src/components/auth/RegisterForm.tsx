@@ -124,6 +124,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 const { specializations, loading: specializationsLoading } =
   useSpecializations(businessLocations[0]?.macroCategoryId || null);
 
+
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
