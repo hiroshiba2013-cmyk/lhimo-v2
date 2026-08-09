@@ -2379,38 +2379,43 @@ const updateBusinessLocation = (
             MICRO CATEGORIA
             ============================================ */}
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Micro Categoria
-          </label>
+      {/* MICRO CATEGORIA */}
+<div className="mb-4">
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Micro Categoria
+  </label>
 
-          <SearchableSelect
-            value={location.microCategoryId}
-            onChange={(value) =>
-              updateBusinessLocation(
-                index,
-                'microCategoryId',
-                value
-              )
-            }
-            options={locationMicroCategories
-              .filter(
-                category =>
-                  category.macro_category_id ===
-                  location.macroCategoryId
-              )
-              .map(category => ({
-                value: category.id,
-                label: category.name,
-              }))}
-            placeholder={
-              location.macroCategoryId
-                ? 'Seleziona una micro categoria'
-                : 'Seleziona prima una macro categoria'
-            }
-            disabled={!location.macroCategoryId}
-          />
-        </div>
+  <SearchableSelect
+    value={location.microCategoryId || ''}
+    onChange={(value) =>
+      updateBusinessLocation(
+        index,
+        'microCategoryId',
+        value
+      )
+    }
+    options={locationMicroCategories
+      .filter(
+        category =>
+          category.macro_category_id ===
+          businessForm.macroCategoryId
+      )
+      .map(category => ({
+        value: category.id,
+        label: category.name,
+      }))}
+    placeholder={
+      businessForm.macroCategoryId
+        ? 'Seleziona una micro categoria'
+        : 'Seleziona prima la macro categoria aziendale'
+    }
+    disabled={!businessForm.macroCategoryId}
+  />
+
+  <p className="text-xs text-gray-500 mt-1">
+    La micro categoria può essere scelta per ogni sede.
+  </p>
+</div>
 
         {/* ============================================
             SPECIALIZZAZIONI
