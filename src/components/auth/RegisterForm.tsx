@@ -427,6 +427,10 @@ const {
   businessForm.macroCategoryId || null
 );
 
+  console.log('MACRO AZIENDA:', businessForm.macroCategoryId);
+console.log('SPECIALIZZAZIONI:', specializations);
+console.log('SERVIZI:', services);
+
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCustomerForm(prev => ({ ...prev, [name]: value }));
