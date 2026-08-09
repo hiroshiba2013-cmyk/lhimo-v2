@@ -117,7 +117,6 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [hasClaimedLocations, setHasClaimedLocations] = useState(false);
   const { macroCategories } = useMacroCategories();
   console.log("MACRO CATEGORIES:", macroCategories);
-  const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
   const { services, loading: servicesLoading } =
   useBusinessServices(businessLocations[0]?.macroCategoryId || null);
 
@@ -2379,7 +2378,7 @@ const updateBusinessLocation = (
             MICRO CATEGORIA
             ============================================ */}
 
-      {/* MICRO CATEGORIA */}
+  {/* MICRO CATEGORIA */}
 <div className="mb-4">
   <label className="block text-sm font-medium text-gray-700 mb-1">
     Micro Categoria
@@ -2394,16 +2393,10 @@ const updateBusinessLocation = (
         value
       )
     }
-    options={locationMicroCategories
-      .filter(
-        category =>
-          category.macro_category_id ===
-          businessForm.macroCategoryId
-      )
-      .map(category => ({
-        value: category.id,
-        label: category.name,
-      }))}
+    options={businessMicroCategories.map(category => ({
+      value: category.id,
+      label: category.name,
+    }))}
     placeholder={
       businessForm.macroCategoryId
         ? 'Seleziona una micro categoria'
