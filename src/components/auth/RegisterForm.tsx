@@ -430,7 +430,26 @@ const {
     microCategoryId: '',
   });
 
-  const { microCategories: businessMicroCategories } = useMicroCategories(businessForm.macroCategoryId || null);
+  const {
+  microCategories: businessMicroCategories,
+  loading: microCategoriesLoading,
+} = useMicroCategories(
+  businessForm.macroCategoryId || null
+);
+
+const {
+  specializations,
+  loading: specializationsLoading,
+} = useSpecializations(
+  businessForm.macroCategoryId || null
+);
+
+const {
+  services,
+  loading: servicesLoading,
+} = useBusinessServices(
+  businessForm.macroCategoryId || null
+);
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -2407,16 +2426,10 @@ const updateBusinessLocation = (
         value
       )
     }
-    options={locationMicroCategories
-      .filter(
-        category =>
-          category.macro_category_id ===
-          businessForm.macroCategoryId
-      )
-      .map(category => ({
-        value: category.id,
-        label: category.name,
-      }))}
+ options={businessMicroCategories.map(category => ({
+  value: category.id,
+  label: category.name,
+}))}
     placeholder={
       businessForm.macroCategoryId
         ? 'Seleziona una micro categoria'
@@ -2441,16 +2454,10 @@ const updateBusinessLocation = (
   </label>
 
   <MultiSelectCheckbox
-    options={allSpecializations
-      .filter(
-        specialization =>
-          specialization.macro_category_id ===
-          businessForm.macroCategoryId
-      )
-      .map(specialization => ({
-        id: specialization.id,
-        name: specialization.name,
-      }))}
+    options={specializations.map(specialization => ({
+      id: specialization.id,
+      name: specialization.name,
+    }))}
     selected={location.specializations || []}
     onChange={(selected) =>
       updateBusinessLocation(
@@ -2470,7 +2477,6 @@ const updateBusinessLocation = (
     Puoi selezionare una o più specializzazioni per questa sede.
   </p>
 </div>
-
         {/* SERVIZI DISPONIBILI */}
 <div className="mb-4">
   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -2478,16 +2484,10 @@ const updateBusinessLocation = (
   </label>
 
   <MultiSelectCheckbox
-    options={allServices
-      .filter(
-        service =>
-          service.macro_category_id ===
-          businessForm.macroCategoryId
-      )
-      .map(service => ({
-        id: service.id,
-        name: service.name,
-      }))}
+    options={services.map(service => ({
+      id: service.id,
+      name: service.name,
+    }))}
     selected={location.services || []}
     onChange={(selected) =>
       updateBusinessLocation(
