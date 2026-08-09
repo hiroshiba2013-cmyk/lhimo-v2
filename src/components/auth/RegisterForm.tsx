@@ -2353,12 +2353,7 @@ const updateBusinessLocation = (
             MACRO CATEGORIA
             ============================================ */}
 
-        <div className="mb-3">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Macro Categoria
-          </label>
-
-         {/* MACRO CATEGORIA */}
+     {/* MACRO CATEGORIA */}
 <div className="mb-3">
   <label className="block text-sm font-medium text-gray-700 mb-1">
     Macro Categoria
@@ -2378,7 +2373,7 @@ const updateBusinessLocation = (
   <p className="text-xs text-gray-500 mt-1">
     La macro categoria è quella selezionata nei dati aziendali e vale per tutte le sedi.
   </p>
-</div>
+</div>  
 
         {/* ============================================
             MICRO CATEGORIA
