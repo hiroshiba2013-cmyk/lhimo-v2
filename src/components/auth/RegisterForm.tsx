@@ -8,7 +8,8 @@ import { supabase } from '../../lib/supabase';
 import {
   useMacroCategories,
   useMicroCategories,
-  useAllCatalogData,
+  useBusinessServices,
+  useSpecializations,
 } from '../../hooks/useCatalog';
 
 interface FamilyMember {
@@ -114,13 +115,28 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [businessLocations, setBusinessLocations] = useState<BusinessLocation[]>([]);
   const [businessBillingPeriod, setBusinessBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [hasClaimedLocations, setHasClaimedLocations] = useState(false);
-  const { macroCategories } = useMacroCategories();
-  console.log("MACRO CATEGORIES:", macroCategories);
-  const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
+const { macroCategories } = useMacroCategories();
+
 const {
-  allSpecializations,
-  allServices,
-} = useAllCatalogData();
+  microCategories: businessMicroCategories,
+  loading: microCategoriesLoading,
+} = useMicroCategories(
+  businessForm.macroCategoryId || null
+);
+
+const {
+  specializations,
+  loading: specializationsLoading,
+} = useSpecializations(
+  businessForm.macroCategoryId || null
+);
+
+const {
+  services,
+  loading: servicesLoading,
+} = useBusinessServices(
+  businessForm.macroCategoryId || null
+);
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
