@@ -2411,7 +2411,7 @@ const updateBusinessLocation = (
                 value
               )
             }
-            options={allMicroCategories
+            options={locationMicroCategories
               .filter(
                 category =>
                   category.macro_category_id ===
@@ -2440,7 +2440,7 @@ const updateBusinessLocation = (
           </label>
 
           <MultiSelectCheckbox
-            options={allSpecializations
+            options={specializations
               .filter(
                 specialization =>
                   specialization.macro_category_id ===
@@ -2480,7 +2480,7 @@ const updateBusinessLocation = (
           </label>
 
           <MultiSelectCheckbox
-            options={allServices
+            options={services
               .filter(
                 service =>
                   service.macro_category_id ===
