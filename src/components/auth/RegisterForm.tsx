@@ -2379,7 +2379,7 @@ const updateBusinessLocation = (
             MICRO CATEGORIA
             ============================================ */}
 
-    {/* MICRO CATEGORIA */}
+      {/* MICRO CATEGORIA */}
 <div className="mb-4">
   <label className="block text-sm font-medium text-gray-700 mb-1">
     Micro Categoria
@@ -2394,10 +2394,16 @@ const updateBusinessLocation = (
         value
       )
     }
-    options={businessMicroCategories.map(category => ({
-      value: category.id,
-      label: category.name,
-    }))}
+    options={locationMicroCategories
+      .filter(
+        category =>
+          category.macro_category_id ===
+          businessForm.macroCategoryId
+      )
+      .map(category => ({
+        value: category.id,
+        label: category.name,
+      }))}
     placeholder={
       businessForm.macroCategoryId
         ? 'Seleziona una micro categoria'
@@ -2407,7 +2413,7 @@ const updateBusinessLocation = (
   />
 
   <p className="text-xs text-gray-500 mt-1">
-    Puoi scegliere una micro categoria specifica per questa sede.
+    La micro categoria può essere scelta per ogni sede.
   </p>
 </div>
 
