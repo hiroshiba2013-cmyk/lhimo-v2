@@ -95,14 +95,13 @@ export function useMacroCategories() {
 }
 
 export function useMicroCategories(macroCategoryId: string | null) {
-
   const [microCategories, setMicroCategories] = useState<MicroCategory[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-
     if (!macroCategoryId) {
       setMicroCategories([]);
+      setLoading(false);
       return;
     }
 
@@ -110,13 +109,10 @@ export function useMicroCategories(macroCategoryId: string | null) {
     setLoading(true);
 
     async function load() {
-
       const { data, error } = await supabase
-        .from('catalog_micro_categories')
-        .select('*')
-        .eq('macro_category_id', macroCategoryId)
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true })
+        .from('business_categories')
+        .select('id, name, slug, parent_id')
+        .eq('parent_id', macroCategoryId)
         .order('name', { ascending: true });
 
       if (error) {
@@ -124,10 +120,18 @@ export function useMicroCategories(macroCategoryId: string | null) {
       }
 
       if (!cancelled) {
-        setMicroCategories(data ?? []);
+        const mapped: MicroCategory[] = (data ?? []).map(row => ({
+          id: row.id,
+          macro_category_id: row.parent_id ?? '',
+          name: row.name,
+          slug: row.slug ?? null,
+          sort_order: 0,
+          is_active: true,
+        }));
+
+        setMicroCategories(mapped);
         setLoading(false);
       }
-
     }
 
     load();
@@ -135,14 +139,12 @@ export function useMicroCategories(macroCategoryId: string | null) {
     return () => {
       cancelled = true;
     };
-
   }, [macroCategoryId]);
 
   return {
     microCategories,
-    loading
+    loading,
   };
-
 }
 
 
