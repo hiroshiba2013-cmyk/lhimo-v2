@@ -155,24 +155,19 @@ export function useSpecializations(macroCategoryId: string | null) {
     let cancelled = false;
     setLoading(true);
 
-supabase
-  .from('business_specializations')
-  .select('id, macro_category_id, name, sort_order, is_active')
-  .eq('macro_category_id', macroCategoryId)
-  .eq('is_active', true)
-  .order('sort_order')
-  .order('name')
-  .then(({ data, error }) => {
-    console.log('SPECIALIZATIONS QUERY - MACRO:', macroCategoryId);
-    console.log('SPECIALIZATIONS QUERY - DATA:', data);
-    console.log('SPECIALIZATIONS QUERY - ERROR:', error);
-
-    if (!cancelled && !error && data) {
-      setSpecializations(data as Specialization[]);
-    }
-
-    if (!cancelled) setLoading(false);
-  });
+    supabase
+      .from('business_specializations')
+      .select('id, macro_category_id, name, sort_order, is_active')
+      .eq('macro_category_id', macroCategoryId)
+      .eq('is_active', true)
+      .order('sort_order')
+      .order('name')
+      .then(({ data, error }) => {
+        if (!cancelled && !error && data) {
+          setSpecializations(data as Specialization[]);
+        }
+        if (!cancelled) setLoading(false);
+      });
     return () => { cancelled = true; };
   }, [macroCategoryId]);
 
@@ -188,24 +183,19 @@ export function useBusinessServices(macroCategoryId: string | null) {
     let cancelled = false;
     setLoading(true);
 
-   supabase
-  .from('business_services')
-  .select('id, macro_category_id, name, sort_order, is_active')
-  .eq('macro_category_id', macroCategoryId)
-  .eq('is_active', true)
-  .order('sort_order')
-  .order('name')
-  .then(({ data, error }) => {
-    console.log('SERVICES QUERY - MACRO:', macroCategoryId);
-    console.log('SERVICES QUERY - DATA:', data);
-    console.log('SERVICES QUERY - ERROR:', error);
-
-    if (!cancelled && !error && data) {
-      setServices(data as BusinessService[]);
-    }
-
-    if (!cancelled) setLoading(false);
-  });
+    supabase
+      .from('business_services')
+      .select('id, macro_category_id, name, sort_order, is_active')
+      .eq('macro_category_id', macroCategoryId)
+      .eq('is_active', true)
+      .order('sort_order')
+      .order('name')
+      .then(({ data, error }) => {
+        if (!cancelled && !error && data) {
+          setServices(data as BusinessService[]);
+        }
+        if (!cancelled) setLoading(false);
+      });
     return () => { cancelled = true; };
   }, [macroCategoryId]);
 

@@ -117,6 +117,12 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [hasClaimedLocations, setHasClaimedLocations] = useState(false);
   const { macroCategories } = useMacroCategories();
   console.log("MACRO CATEGORIES:", macroCategories);
+  const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
+  const { services, loading: servicesLoading } =
+  useBusinessServices(businessLocations[0]?.macroCategoryId || null);
+
+const { specializations, loading: specializationsLoading } =
+  useSpecializations(businessLocations[0]?.macroCategoryId || null);
 
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
@@ -412,24 +418,6 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   });
 
   const { microCategories: businessMicroCategories } = useMicroCategories(businessForm.macroCategoryId || null);
-
-  const {
-  services,
-  loading: servicesLoading
-} = useBusinessServices(
-  businessForm.macroCategoryId || null
-);
-
-const {
-  specializations,
-  loading: specializationsLoading
-} = useSpecializations(
-  businessForm.macroCategoryId || null
-);
-
-  console.log('MACRO AZIENDA:', businessForm.macroCategoryId);
-console.log('SPECIALIZZAZIONI:', specializations);
-console.log('SERVIZI:', services);
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -2391,7 +2379,7 @@ const updateBusinessLocation = (
             MICRO CATEGORIA
             ============================================ */}
 
-   {/* MICRO CATEGORIA */}
+      {/* MICRO CATEGORIA */}
 <div className="mb-4">
   <label className="block text-sm font-medium text-gray-700 mb-1">
     Micro Categoria
@@ -2406,10 +2394,16 @@ const updateBusinessLocation = (
         value
       )
     }
-    options={businessMicroCategories.map(category => ({
-      value: category.id,
-      label: category.name,
-    }))}
+    options={locationMicroCategories
+      .filter(
+        category =>
+          category.macro_category_id ===
+          businessForm.macroCategoryId
+      )
+      .map(category => ({
+        value: category.id,
+        label: category.name,
+      }))}
     placeholder={
       businessForm.macroCategoryId
         ? 'Seleziona una micro categoria'
@@ -2419,7 +2413,7 @@ const updateBusinessLocation = (
   />
 
   <p className="text-xs text-gray-500 mt-1">
-    Puoi scegliere una micro categoria specifica per questa sede.
+    La micro categoria può essere scelta per ogni sede.
   </p>
 </div>
 
@@ -2427,73 +2421,81 @@ const updateBusinessLocation = (
             SPECIALIZZAZIONI
             ============================================ */}
 
-       {/* SPECIALIZZAZIONI */}
-<div className="mb-4">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Specializzazioni
-  </label>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Specializzazioni
+          </label>
 
-  <MultiSelectCheckbox
-    options={specializations.map(specialization => ({
-      id: specialization.id,
-      name: specialization.name,
-    }))}
-    selected={location.specializations || []}
-    onChange={(selected) =>
-      updateBusinessLocation(
-        index,
-        'specializations',
-        selected
-      )
-    }
-    loading={specializationsLoading}
-    placeholder={
-      businessForm.macroCategoryId
-        ? 'Seleziona una o più specializzazioni'
-        : 'Seleziona prima la macro categoria aziendale'
-    }
-  />
+          <MultiSelectCheckbox
+            options={specializations
+              .filter(
+                specialization =>
+                  specialization.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(specialization => ({
+                id: specialization.id,
+                name: specialization.name,
+              }))}
+            selected={location.specializations || []}
+            onChange={(selected) =>
+              updateBusinessLocation(
+                index,
+                'specializations',
+                selected
+              )
+            }
+            placeholder={
+              location.macroCategoryId
+                ? 'Seleziona una o più specializzazioni'
+                : 'Seleziona prima una macro categoria'
+            }
+          />
 
-  <p className="text-xs text-gray-500 mt-1">
-    Puoi selezionare più specializzazioni.
-  </p>
-</div>
+          <p className="text-xs text-gray-500 mt-1">
+            Puoi selezionare più specializzazioni.
+          </p>
+        </div>
 
         {/* ============================================
             SERVIZI
             ============================================ */}
 
-       {/* SERVIZI DISPONIBILI */}
-<div className="mb-4">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Servizi Disponibili
-  </label>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Servizi Disponibili
+          </label>
 
-  <MultiSelectCheckbox
-    options={services.map(service => ({
-      id: service.id,
-      name: service.name,
-    }))}
-    selected={location.services || []}
-    onChange={(selected) =>
-      updateBusinessLocation(
-        index,
-        'services',
-        selected
-      )
-    }
-    loading={servicesLoading}
-    placeholder={
-      businessForm.macroCategoryId
-        ? 'Seleziona uno o più servizi'
-        : 'Seleziona prima la macro categoria aziendale'
-    }
-  />
+          <MultiSelectCheckbox
+            options={services
+              .filter(
+                service =>
+                  service.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(service => ({
+                id: service.id,
+                name: service.name,
+              }))}
+            selected={location.services || []}
+            onChange={(selected) =>
+              updateBusinessLocation(
+                index,
+                'services',
+                selected
+              )
+            }
+            placeholder={
+              location.macroCategoryId
+                ? 'Seleziona uno o più servizi'
+                : 'Seleziona prima una macro categoria'
+            }
+          />
 
-  <p className="text-xs text-gray-500 mt-1">
-    Puoi selezionare più servizi.
-  </p>
-</div>
+          <p className="text-xs text-gray-500 mt-1">
+            Puoi selezionare più servizi.
+          </p>
+        </div>
 
         {/* ============================================
             INDIRIZZO
