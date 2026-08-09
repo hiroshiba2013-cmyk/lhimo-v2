@@ -40,8 +40,8 @@ interface BusinessHours {
 interface BusinessLocation {
   name: string;
   description: string;
+  specializations: string[];
   services: string[];
-  servicesDescription?: string;
   address: string;
   streetNumber: string;
   city: string;
@@ -130,6 +130,7 @@ const { specializations, loading: specializationsLoading } =
       setBusinessLocations([{
         name: 'Sede 1',
         description: '',
+        specializations: [],
         services: [],
         address: '',
         streetNumber: '',
@@ -461,6 +462,7 @@ const { specializations, loading: specializationsLoading } =
     setBusinessLocations([...businessLocations, {
       name: `Sede ${businessLocations.length + 1}`,
       description: '',
+      specializations: [],
       services: [],
       address: '',
       streetNumber: '',
@@ -489,11 +491,18 @@ const { specializations, loading: specializationsLoading } =
     setBusinessLocations(businessLocations.filter((_, i) => i !== index));
   };
 
-  const updateBusinessLocation = (index: number, field: keyof BusinessLocation, value: string) => {
-    const updated = [...businessLocations];
-    updated[index] = { ...updated[index], [field]: value };
-    setBusinessLocations(updated);
+const updateBusinessLocation = (
+  index: number,
+  field: keyof BusinessLocation,
+  value: string | string[]
+) => {
+  const updated = [...businessLocations];
+  updated[index] = {
+    ...updated[index],
+    [field]: value,
   };
+  setBusinessLocations(updated);
+};
 
   const updateBusinessHours = (locationIndex: number, day: keyof BusinessHours, field: keyof DayHours, value: string | boolean) => {
     const updated = [...businessLocations];
