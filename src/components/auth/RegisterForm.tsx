@@ -117,7 +117,6 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [hasClaimedLocations, setHasClaimedLocations] = useState(false);
   const { macroCategories } = useMacroCategories();
   console.log("MACRO CATEGORIES:", macroCategories);
- const { macroCategories } = useMacroCategories();
   
 const { microCategories: locationMicroCategories } =
   useMicroCategories(businessForm.macroCategoryId || null);
