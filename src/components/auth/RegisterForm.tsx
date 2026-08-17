@@ -117,13 +117,16 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [hasClaimedLocations, setHasClaimedLocations] = useState(false);
   const { macroCategories } = useMacroCategories();
   console.log("MACRO CATEGORIES:", macroCategories);
-  const { microCategories: locationMicroCategories } = useMicroCategories(businessLocations[0]?.macroCategoryId || null);
-  const { services, loading: servicesLoading } =
-  useBusinessServices(businessLocations[0]?.macroCategoryId || null);
+ const { macroCategories } = useMacroCategories();
+
+const { microCategories: locationMicroCategories } =
+  useMicroCategories(businessForm.macroCategoryId || null);
+
+const { services, loading: servicesLoading } =
+  useBusinessServices(businessForm.macroCategoryId || null);
 
 const { specializations, loading: specializationsLoading } =
-  useSpecializations(businessLocations[0]?.macroCategoryId || null);
-
+  useSpecializations(businessForm.macroCategoryId || null);
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
