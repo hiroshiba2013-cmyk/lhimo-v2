@@ -127,6 +127,7 @@ const { services, loading: servicesLoading } =
 
 const { specializations, loading: specializationsLoading } =
   useSpecializations(businessForm.macroCategoryId || null);
+  
   useEffect(() => {
     if (userType === 'business' && businessLocations.length === 0) {
       const defaultHours = { open: '09:00', close: '18:00', closed: false };
