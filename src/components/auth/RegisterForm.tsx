@@ -2431,16 +2431,10 @@ const updateBusinessLocation = (
   </label>
 
   <MultiSelectCheckbox
-    options={specializations
-      .filter(
-        specialization =>
-          specialization.macro_category_id ===
-          businessForm.macroCategoryId
-      )
-      .map(specialization => ({
-        id: specialization.id,
-        name: specialization.name,
-      }))}
+options={specializations.map(specialization => ({
+  id: specialization.id,
+  name: specialization.name,
+}))}
     selected={location.specializations || []}
     onChange={(selected) =>
       updateBusinessLocation(
@@ -2471,16 +2465,10 @@ const updateBusinessLocation = (
   </label>
 
   <MultiSelectCheckbox
-    options={services
-      .filter(
-        service =>
-          service.macro_category_id ===
-          businessForm.macroCategoryId
-      )
-      .map(service => ({
-        id: service.id,
-        name: service.name,
-      }))}
+   options={services.map(service => ({
+  id: service.id,
+  name: service.name,
+}))}
     selected={location.services || []}
     onChange={(selected) =>
       updateBusinessLocation(
