@@ -2421,86 +2421,86 @@ const updateBusinessLocation = (
   </p>
 </div>
 
-    {/* ============================================
-    SPECIALIZZAZIONI
-    ============================================ */}
+        {/* ============================================
+            SPECIALIZZAZIONI
+            ============================================ */}
 
-<div className="mb-4">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Specializzazioni
-  </label>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Specializzazioni
+          </label>
 
-  <MultiSelectCheckbox
-    options={specializations.map(specialization => ({
-      id: specialization.id,
-      name: specialization.name,
-    }))}
-    selected={location.specializations || []}
-    onChange={(selected) =>
-      updateBusinessLocation(
-        index,
-        'specializations',
-        selected
-      )
-    }
-    placeholder={
-      !businessForm.macroCategoryId
-        ? 'Seleziona prima la macro categoria aziendale'
-        : !location.microCategoryId
-          ? 'Seleziona prima la micro categoria'
-          : specializationsLoading
-            ? 'Caricamento specializzazioni...'
-            : specializations.length === 0
-              ? 'Nessuna specializzazione disponibile'
-              : 'Seleziona una o più specializzazioni'
-    }
-  />
+          <MultiSelectCheckbox
+            options={specializations
+              .filter(
+                specialization =>
+                  specialization.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(specialization => ({
+                id: specialization.id,
+                name: specialization.name,
+              }))}
+            selected={location.specializations || []}
+            onChange={(selected) =>
+              updateBusinessLocation(
+                index,
+                'specializations',
+                selected
+              )
+            }
+            placeholder={
+              location.macroCategoryId
+                ? 'Seleziona una o più specializzazioni'
+                : 'Seleziona prima una macro categoria'
+            }
+          />
 
-  <p className="text-xs text-gray-500 mt-1">
-    Puoi selezionare più specializzazioni per questa sede.
-  </p>
-</div>
+          <p className="text-xs text-gray-500 mt-1">
+            Puoi selezionare più specializzazioni.
+          </p>
+        </div>
 
+        {/* ============================================
+            SERVIZI
+            ============================================ */}
 
-{/* ============================================
-    SERVIZI
-    ============================================ */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Servizi Disponibili
+          </label>
 
-<div className="mb-4">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Servizi Disponibili
-  </label>
+          <MultiSelectCheckbox
+            options={services
+              .filter(
+                service =>
+                  service.macro_category_id ===
+                  location.macroCategoryId
+              )
+              .map(service => ({
+                id: service.id,
+                name: service.name,
+              }))}
+            selected={location.services || []}
+            onChange={(selected) =>
+              updateBusinessLocation(
+                index,
+                'services',
+                selected
+              )
+            }
+            placeholder={
+              location.macroCategoryId
+                ? 'Seleziona uno o più servizi'
+                : 'Seleziona prima una macro categoria'
+            }
+          />
 
-  <MultiSelectCheckbox
-    options={services.map(service => ({
-      id: service.id,
-      name: service.name,
-    }))}
-    selected={location.services || []}
-    onChange={(selected) =>
-      updateBusinessLocation(
-        index,
-        'services',
-        selected
-      )
-    }
-    placeholder={
-      !businessForm.macroCategoryId
-        ? 'Seleziona prima la macro categoria aziendale'
-        : !location.microCategoryId
-          ? 'Seleziona prima la micro categoria'
-          : servicesLoading
-            ? 'Caricamento servizi...'
-            : services.length === 0
-              ? 'Nessun servizio disponibile'
-              : 'Seleziona uno o più servizi'
-    }
-  />
+          <p className="text-xs text-gray-500 mt-1">
+            Puoi selezionare più servizi.
+          </p>
+        </div>
 
-  <p className="text-xs text-gray-500 mt-1">
-    Puoi selezionare più servizi per questa sede.
-  </p>
-</div>
         {/* ============================================
             INDIRIZZO
             ============================================ */}
