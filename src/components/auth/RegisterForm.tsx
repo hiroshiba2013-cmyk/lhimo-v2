@@ -413,29 +413,16 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
   const { microCategories: businessMicroCategories } = useMicroCategories(businessForm.macroCategoryId || null);
 
-const { microCategories: locationMicroCategories } =
-  useMicroCategories(
-    businessForm.macroCategoryId || null
+  const { microCategories: locationMicroCategories } = useMicroCategories(
+    businessLocations[0]?.macroCategoryId || businessForm.macroCategoryId || null
+  );
+  const { services, loading: servicesLoading } = useBusinessServices(
+    businessLocations[0]?.macroCategoryId || businessForm.macroCategoryId || null
+  );
+  const { specializations, loading: specializationsLoading } = useSpecializations(
+    businessLocations[0]?.macroCategoryId || businessForm.macroCategoryId || null
   );
 
-const {
-  services,
-  loading: servicesLoading
-} = useBusinessServices(
-  businessForm.macroCategoryId || null
-);
-
-const {
-  specializations,
-  loading: specializationsLoading
-} = useSpecializations(
-  businessForm.macroCategoryId || null
-);
-
-console.log('=== CATALOGO SEDE ===');
-console.log('Macro:', businessForm.macroCategoryId);
-console.log('Servizi ricevuti:', services.length);
-console.log('Specializzazioni ricevute:', specializations.length);
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCustomerForm(prev => ({ ...prev, [name]: value }));
@@ -2443,32 +2430,17 @@ const updateBusinessLocation = (
     Specializzazioni
   </label>
 
-<MultiSelectCheckbox
-  options={specializations
-    .filter(
-      specialization =>
-        specialization.macro_category_id ===
-        businessForm.macroCategoryId
-    )
-    .map(specialization => ({
-      id: specialization.id,
-      name: specialization.name,
-    }))}
-  selected={location.specializations || []}
-  onChange={(selected) =>
-    updateBusinessLocation(
-      index,
-      'specializations',
-      selected
-    )
-  }
-  placeholder={
-    businessForm.macroCategoryId
-      ? 'Seleziona una o più specializzazioni'
-      : 'Seleziona prima una macro categoria'
-  }
-  loading={specializationsLoading}
-/>
+  <MultiSelectCheckbox
+    options={specializations
+      .filter(
+        specialization =>
+          specialization.macro_category_id ===
+          businessForm.macroCategoryId
+      )
+      .map(specialization => ({
+        id: specialization.id,
+        name: specialization.name,
+      }))}
     selected={location.specializations || []}
     onChange={(selected) =>
       updateBusinessLocation(
@@ -2482,7 +2454,7 @@ const updateBusinessLocation = (
         ? 'Seleziona una o più specializzazioni'
         : 'Seleziona prima una macro categoria'
     }
-  
+  />
 
   <p className="text-xs text-gray-500 mt-1">
     Puoi selezionare più specializzazioni.
@@ -2498,32 +2470,17 @@ const updateBusinessLocation = (
     Servizi Disponibili
   </label>
 
-<MultiSelectCheckbox
-  options={services
-    .filter(
-      service =>
-        service.macro_category_id ===
-        businessForm.macroCategoryId
-    )
-    .map(service => ({
-      id: service.id,
-      name: service.name,
-    }))}
-  selected={location.services || []}
-  onChange={(selected) =>
-    updateBusinessLocation(
-      index,
-      'services',
-      selected
-    )
-  }
-  placeholder={
-    businessForm.macroCategoryId
-      ? 'Seleziona uno o più servizi'
-      : 'Seleziona prima una macro categoria'
-  }
-  loading={servicesLoading}
-/>
+  <MultiSelectCheckbox
+    options={services
+      .filter(
+        service =>
+          service.macro_category_id ===
+          businessForm.macroCategoryId
+      )
+      .map(service => ({
+        id: service.id,
+        name: service.name,
+      }))}
     selected={location.services || []}
     onChange={(selected) =>
       updateBusinessLocation(
@@ -2537,7 +2494,7 @@ const updateBusinessLocation = (
         ? 'Seleziona uno o più servizi'
         : 'Seleziona prima una macro categoria'
     }
-  
+  />
 
   <p className="text-xs text-gray-500 mt-1">
     Puoi selezionare più servizi.
