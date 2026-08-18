@@ -18,66 +18,118 @@ export function MultiSelectCheckbox({
   loading = false,
   maxDisplay = 3,
 }: MultiSelectCheckboxProps) {
-  const [showSearch, setShowSearch] = useState(false);
+  const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const needsSearch = options.length > 15;
-
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setShowSearch(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
         setSearchTerm('');
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const toggle = (id: string) => {
     if (selected.includes(id)) {
-      onChange(selected.filter(s => s !== id));
+      onChange(selected.filter(item => item !== id));
     } else {
       onChange([...selected, id]);
     }
   };
 
-  const filteredOptions = searchTerm
-    ? options.filter(o => o.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    : options;
+  const filteredOptions = options.filter(option =>
+    option.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
   const selectedNames = selected
-    .map(id => options.find(o => o.id === id)?.name)
-    .filter(Boolean);
+    .map(id => options.find(option => option.id === id)?.name)
+    .filter((name): name is string => Boolean(name));
 
   return (
-    <div ref={containerRef} className="relative">
-      <div
-        onClick={() => needsSearch ? setShowSearch(!showSearch) : undefined}
-        className={`w-full px-4 py-2 border border-gray-300 rounded-lg bg-white ${needsSearch ? 'cursor-pointer' : ''} min-h-[42px] flex items-center justify-between gap-2 ${showSearch ? 'ring-2 ring-blue-500 border-transparent' : 'hover:border-gray-400'}`}
+    <div
+      ref={containerRef}
+      className="relative w-full"
+    >
+
+      {/* CAMPO PRINCIPALE */}
+      <button
+        type="button"
+        onClick={() => setOpen(prev => !prev)}
+        className={`w-full min-h-[42px] px-4 py-2 border border-gray-300 rounded-lg bg-white flex items-center justify-between gap-2 text-left transition-colors ${
+          open
+            ? 'ring-2 ring-blue-500 border-transparent'
+            : 'hover:border-gray-400'
+        }`}
       >
         <div className="flex-1 flex flex-wrap gap-1.5 min-w-0">
-          {selected.length === 0 ? (
-            <span className="text-sm text-gray-400">{placeholder}</span>
+
+          {selectedNames.length === 0 ? (
+            <span className="text-sm text-gray-400">
+              {placeholder}
+            </span>
           ) : (
             <>
-              {selectedNames.slice(0, maxDisplay).map((name, i) => (
-                <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                  {name}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const id = options.find(o => o.name === name)?.id;
-                      if (id) toggle(id);
-                    }}
-                    className="hover:text-blue-900"
+              {selectedNames
+                .slice(0, maxDisplay)
+                .map((name, index) => (
+                  <span
+                    key={`${name}-${index}`}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full"
                   >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
+                    {name}
+
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(event) => {
+                        event.stopPropagation();
+
+                        const option = options.find(
+                          item => item.name === name
+                        );
+
+                        if (option) {
+                          toggle(option.id);
+                        }
+                      }}
+                      onKeyDown={(event) => {
+                        if (
+                          event.key === 'Enter' ||
+                          event.key === ' '
+                        ) {
+                          event.preventDefault();
+                          event.stopPropagation();
+
+                          const option = options.find(
+                            item => item.name === name
+                          );
+
+                          if (option) {
+                            toggle(option.id);
+                          }
+                        }
+                      }}
+                      className="cursor-pointer hover:text-blue-900"
+                    >
+                      <X className="w-3 h-3" />
+                    </span>
+                  </span>
+                ))}
+
               {selectedNames.length > maxDisplay && (
                 <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
                   +{selectedNames.length - maxDisplay}
@@ -85,79 +137,87 @@ export function MultiSelectCheckbox({
               )}
             </>
           )}
-        </div>
-        {needsSearch && (
-          <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${showSearch ? 'rotate-180' : ''}`} />
-        )}
-      </div>
 
-      {needsSearch && showSearch && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-64 overflow-hidden">
+        </div>
+
+        <ChevronDown
+          className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${
+            open ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+
+      {/* LISTA */}
+      {open && (
+        <div className="relative w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+
+          {/* RICERCA */}
           <div className="p-2 border-b border-gray-100">
             <div className="relative">
+
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(event) =>
+                  setSearchTerm(event.target.value)
+                }
+                onClick={(event) =>
+                  event.stopPropagation()
+                }
                 placeholder="Cerca..."
-                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 autoFocus
               />
+
             </div>
           </div>
-          <div className="overflow-y-auto max-h-48">
+
+
+          {/* CONTENUTO */}
+          <div className="max-h-60 overflow-y-auto">
+
             {loading ? (
-              <div className="px-4 py-3 text-sm text-gray-500">Caricamento...</div>
+              <div className="px-4 py-3 text-sm text-gray-500">
+                Caricamento...
+              </div>
             ) : filteredOptions.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-gray-500">Nessun risultato</div>
+              <div className="px-4 py-3 text-sm text-gray-500">
+                Nessun risultato
+              </div>
             ) : (
               filteredOptions.map(option => (
                 <label
                   key={option.id}
-                  className="flex items-center gap-2.5 px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors"
+                  className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors"
                 >
+
                   <input
                     type="checkbox"
                     checked={selected.includes(option.id)}
                     onChange={() => toggle(option.id)}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-800">{option.name}</span>
+
+                  <span className="text-sm text-gray-800 flex-1">
+                    {option.name}
+                  </span>
+
                   {selected.includes(option.id) && (
-                    <Check className="w-3.5 h-3.5 text-blue-600 ml-auto" />
+                    <Check className="w-4 h-4 text-blue-600 shrink-0" />
                   )}
+
                 </label>
               ))
             )}
+
           </div>
+
         </div>
       )}
 
-      {!needsSearch && (
-        <div className="mt-2 space-y-1.5 max-h-48 overflow-y-auto">
-          {loading ? (
-            <div className="px-4 py-2 text-sm text-gray-500">Caricamento...</div>
-          ) : options.length === 0 ? (
-            <div className="px-4 py-2 text-sm text-gray-400">Nessun elemento disponibile</div>
-          ) : (
-            options.map(option => (
-              <label
-                key={option.id}
-                className="flex items-center gap-2.5 px-3 py-1.5 hover:bg-blue-50 cursor-pointer rounded-lg transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  checked={selected.includes(option.id)}
-                  onChange={() => toggle(option.id)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-800">{option.name}</span>
-              </label>
-            ))
-          )}
-        </div>
-      )}
     </div>
   );
 }
