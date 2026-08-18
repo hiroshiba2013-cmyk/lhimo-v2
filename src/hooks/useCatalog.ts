@@ -151,124 +151,55 @@ export function useSpecializations(macroCategoryId: string | null) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log(
-      '🔵 SPECIALIZZAZIONI - MACRO ID:',
-      macroCategoryId
-    );
-
-    if (!macroCategoryId) {
-      console.log(
-        '🔵 SPECIALIZZAZIONI - Nessuna macro categoria'
-      );
-      setSpecializations([]);
-      setLoading(false);
-      return;
-    }
-
+    if (!macroCategoryId) { setSpecializations([]); return; }
     let cancelled = false;
     setLoading(true);
 
-    async function load() {
-      const { data, error } = await supabase
-        .from('business_specializations')
-        .select('*')
-        .eq('macro_category_id', macroCategoryId)
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true })
-        .order('name', { ascending: true });
-
-      console.log(
-        '🟢 SPECIALIZZAZIONI - RISULTATO:',
-        data
-      );
-
-      console.log(
-        '🔴 SPECIALIZZAZIONI - ERRORE:',
-        error
-      );
-
-      if (!cancelled) {
-        setSpecializations(
-          (data ?? []) as Specialization[]
-        );
-        setLoading(false);
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
+    supabase
+      .from('business_specializations')
+      .select('id, macro_category_id, name, sort_order, is_active')
+      .eq('macro_category_id', macroCategoryId)
+      .eq('is_active', true)
+      .order('sort_order')
+      .order('name')
+      .then(({ data, error }) => {
+        if (!cancelled && !error && data) {
+          setSpecializations(data as Specialization[]);
+        }
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [macroCategoryId]);
 
-  return {
-    specializations,
-    loading,
-  };
+  return { specializations, loading };
 }
-
 
 export function useBusinessServices(macroCategoryId: string | null) {
   const [services, setServices] = useState<BusinessService[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log(
-      '🟣 SERVIZI - MACRO ID:',
-      macroCategoryId
-    );
-
-    if (!macroCategoryId) {
-      console.log(
-        '🟣 SERVIZI - Nessuna macro categoria'
-      );
-      setServices([]);
-      setLoading(false);
-      return;
-    }
-
+    if (!macroCategoryId) { setServices([]); return; }
     let cancelled = false;
     setLoading(true);
 
-    async function load() {
-      const { data, error } = await supabase
-        .from('business_services')
-        .select('*')
-        .eq('macro_category_id', macroCategoryId)
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true })
-        .order('name', { ascending: true });
-
-      console.log(
-        '🟢 SERVIZI - RISULTATO:',
-        data
-      );
-
-      console.log(
-        '🔴 SERVIZI - ERRORE:',
-        error
-      );
-
-      if (!cancelled) {
-        setServices(
-          (data ?? []) as BusinessService[]
-        );
-        setLoading(false);
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
+    supabase
+      .from('business_services')
+      .select('id, macro_category_id, name, sort_order, is_active')
+      .eq('macro_category_id', macroCategoryId)
+      .eq('is_active', true)
+      .order('sort_order')
+      .order('name')
+      .then(({ data, error }) => {
+        if (!cancelled && !error && data) {
+          setServices(data as BusinessService[]);
+        }
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [macroCategoryId]);
 
-  return {
-    services,
-    loading,
-  };
+  return { services, loading };
 }
 
 export function useAllCatalogData() {

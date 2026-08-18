@@ -412,20 +412,14 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   });
 
   const { microCategories: businessMicroCategories } = useMicroCategories(businessForm.macroCategoryId || null);
-const {
-  services,
-  loading: servicesLoading,
-} = useBusinessServices(
-  businessForm.macroCategoryId || null
-);
 
-const {
-  specializations,
-  loading: specializationsLoading,
-} = useSpecializations(
-  businessForm.macroCategoryId || null
-);
   const { microCategories: locationMicroCategories } = useMicroCategories(
+    businessLocations[0]?.macroCategoryId || businessForm.macroCategoryId || null
+  );
+  const { services, loading: servicesLoading } = useBusinessServices(
+    businessLocations[0]?.macroCategoryId || businessForm.macroCategoryId || null
+  );
+  const { specializations, loading: specializationsLoading } = useSpecializations(
     businessLocations[0]?.macroCategoryId || businessForm.macroCategoryId || null
   );
 
@@ -2441,7 +2435,7 @@ const updateBusinessLocation = (
               .filter(
                 specialization =>
                   specialization.macro_category_id ===
-                  businessForm.macroCategoryId
+                  location.macroCategoryId
               )
               .map(specialization => ({
                 id: specialization.id,
@@ -2481,7 +2475,7 @@ const updateBusinessLocation = (
               .filter(
                 service =>
                   service.macro_category_id ===
-                  businessForm.macroCategoryId
+                  location.macroCategoryId
               )
               .map(service => ({
                 id: service.id,
