@@ -2482,7 +2482,7 @@ const updateBusinessLocation = (
         ? 'Seleziona una o più specializzazioni'
         : 'Seleziona prima una macro categoria'
     }
-  />
+  
 
   <p className="text-xs text-gray-500 mt-1">
     Puoi selezionare più specializzazioni.
@@ -2537,7 +2537,7 @@ const updateBusinessLocation = (
         ? 'Seleziona uno o più servizi'
         : 'Seleziona prima una macro categoria'
     }
-  />
+  
 
   <p className="text-xs text-gray-500 mt-1">
     Puoi selezionare più servizi.
