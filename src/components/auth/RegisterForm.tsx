@@ -432,6 +432,10 @@ const {
   businessForm.macroCategoryId || null
 );
 
+console.log('=== CATALOGO SEDE ===');
+console.log('Macro:', businessForm.macroCategoryId);
+console.log('Servizi ricevuti:', services.length);
+console.log('Specializzazioni ricevute:', specializations.length);
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCustomerForm(prev => ({ ...prev, [name]: value }));
@@ -2439,11 +2443,32 @@ const updateBusinessLocation = (
     Specializzazioni
   </label>
 
-  <MultiSelectCheckbox
-options={specializations.map(specialization => ({
-  id: specialization.id,
-  name: specialization.name,
-}))}
+<MultiSelectCheckbox
+  options={specializations
+    .filter(
+      specialization =>
+        specialization.macro_category_id ===
+        businessForm.macroCategoryId
+    )
+    .map(specialization => ({
+      id: specialization.id,
+      name: specialization.name,
+    }))}
+  selected={location.specializations || []}
+  onChange={(selected) =>
+    updateBusinessLocation(
+      index,
+      'specializations',
+      selected
+    )
+  }
+  placeholder={
+    businessForm.macroCategoryId
+      ? 'Seleziona una o più specializzazioni'
+      : 'Seleziona prima una macro categoria'
+  }
+  loading={specializationsLoading}
+/>
     selected={location.specializations || []}
     onChange={(selected) =>
       updateBusinessLocation(
@@ -2473,11 +2498,32 @@ options={specializations.map(specialization => ({
     Servizi Disponibili
   </label>
 
-  <MultiSelectCheckbox
-options={services.map(service => ({
-  id: service.id,
-  name: service.name,
-}))}
+<MultiSelectCheckbox
+  options={services
+    .filter(
+      service =>
+        service.macro_category_id ===
+        businessForm.macroCategoryId
+    )
+    .map(service => ({
+      id: service.id,
+      name: service.name,
+    }))}
+  selected={location.services || []}
+  onChange={(selected) =>
+    updateBusinessLocation(
+      index,
+      'services',
+      selected
+    )
+  }
+  placeholder={
+    businessForm.macroCategoryId
+      ? 'Seleziona uno o più servizi'
+      : 'Seleziona prima una macro categoria'
+  }
+  loading={servicesLoading}
+/>
     selected={location.services || []}
     onChange={(selected) =>
       updateBusinessLocation(
