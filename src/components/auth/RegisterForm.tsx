@@ -413,15 +413,24 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
   const { microCategories: businessMicroCategories } = useMicroCategories(businessForm.macroCategoryId || null);
 
-  const { microCategories: locationMicroCategories } = useMicroCategories(
-    businessLocations[0]?.macroCategoryId || businessForm.macroCategoryId || null
+const { microCategories: locationMicroCategories } =
+  useMicroCategories(
+    businessForm.macroCategoryId || null
   );
-  const { services, loading: servicesLoading } = useBusinessServices(
-    businessLocations[0]?.macroCategoryId || businessForm.macroCategoryId || null
-  );
-  const { specializations, loading: specializationsLoading } = useSpecializations(
-    businessLocations[0]?.macroCategoryId || businessForm.macroCategoryId || null
-  );
+
+const {
+  services,
+  loading: servicesLoading
+} = useBusinessServices(
+  businessForm.macroCategoryId || null
+);
+
+const {
+  specializations,
+  loading: specializationsLoading
+} = useSpecializations(
+  businessForm.macroCategoryId || null
+);
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -2465,7 +2474,7 @@ options={specializations.map(specialization => ({
   </label>
 
   <MultiSelectCheckbox
-   options={services.map(service => ({
+options={services.map(service => ({
   id: service.id,
   name: service.name,
 }))}
