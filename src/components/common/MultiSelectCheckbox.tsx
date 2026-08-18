@@ -18,6 +18,14 @@ export function MultiSelectCheckbox({
   loading = false,
   maxDisplay = 3,
 }: MultiSelectCheckboxProps) {
+    console.log(
+    'MULTISELECT:',
+    'options =',
+    options.length,
+    'selected =',
+    selected.length,
+    options
+  );
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
