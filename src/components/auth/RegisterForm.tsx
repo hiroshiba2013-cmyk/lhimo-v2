@@ -2421,13 +2421,6 @@ const updateBusinessLocation = (
   </p>
 </div>
 
-    console.log('===== SEDE CATALOGO =====');
-console.log('MACRO:', businessForm.macroCategoryId);
-console.log('SPECIALIZZAZIONI:', specializations);
-console.log('SPECIALIZZAZIONI COUNT:', specializations.length);
-console.log('SERVIZI:', services);
-console.log('SERVIZI COUNT:', services.length);
-        
      {/* ============================================
     SPECIALIZZAZIONI
     ============================================ */}
