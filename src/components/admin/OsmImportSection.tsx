@@ -157,7 +157,17 @@ export function OsmImportSection() {
     for (let i = 0; i < tagList.length; i++) {
       if (abortRef.current) break;
       const { tag, label } = tagList[i];
-
+      
+console.log('IMPORT OSM REQUEST:', {
+  city: comune.city,
+  province: comune.province,
+  region: comune.region,
+  osmKey,
+  osmValue: tag,
+  lat,
+  lng,
+});
+      
       updateStep(i, { status: 'fetching' });
       try {
    const { data, error } = await supabase.functions.invoke(
