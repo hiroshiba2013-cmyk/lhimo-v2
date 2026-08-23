@@ -1,289 +1,406 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 interface ImportRequest {
   city: string;
-  province: string;
-  categories?: string[];
-  radius?: number;
+  province?: string | null;
+  region?: string | null;
+  osmKey: string;
+  osmValue: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
-interface OSMElement {
-  type: string;
-  id: number;
-  lat?: number;
-  lon?: number;
-  tags?: {
-    name?: string;
-    "addr:street"?: string;
-    "addr:housenumber"?: string;
-    "addr:city"?: string;
-    "addr:postcode"?: string;
-    phone?: string;
-    website?: string;
-    "contact:phone"?: string;
-    "contact:website"?: string;
-    opening_hours?: string;
-    amenity?: string;
-    shop?: string;
-    cuisine?: string;
-    description?: string;
-  };
-  center?: { lat: number; lon: number };
-}
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.osm.ch/api/interpreter",
+];
 
-interface OSMResponse {
-  elements: OSMElement[];
-}
-
-// Map OSM tags to our categories
-const categoryMapping: Record<string, string> = {
-  restaurant: "Ristoranti",
-  cafe: "Bar e Caffetterie",
-  bar: "Bar e Caffetterie",
-  fast_food: "Ristoranti",
-  pub: "Bar e Caffetterie",
-  bakery: "Alimentari e Gastronomia",
-  supermarket: "Alimentari e Gastronomia",
-  pharmacy: "Farmacie e Salute",
-  doctors: "Farmacie e Salute",
-  dentist: "Farmacie e Salute",
-  hospital: "Farmacie e Salute",
-  hairdresser: "Parrucchieri e Centri Estetici",
-  beauty: "Parrucchieri e Centri Estetici",
-  hotel: "Hotel e Alloggi",
-  car_repair: "Officine e Autofficine",
-  gym: "Palestre e Fitness",
-  bank: "Servizi Finanziari",
-  lawyer: "Servizi Professionali",
-  accountant: "Servizi Professionali",
-  real_estate: "Immobiliare",
-  clothing: "Abbigliamento e Moda",
-  shoes: "Abbigliamento e Moda",
-  furniture: "Arredamento",
-  electronics: "Elettronica",
-  books: "Librerie ed Edicole",
-  florist: "Fioristi",
-  jewelry: "Gioiellerie",
-  optician: "Ottici",
-  pet: "Animali",
-};
-
-function getCategoryFromOSM(tags: OSMElement["tags"]): string | null {
-  if (!tags) return null;
-  
-  const amenity = tags.amenity;
-  const shop = tags.shop;
-  
-  if (amenity && categoryMapping[amenity]) {
-    return categoryMapping[amenity];
-  }
-  
-  if (shop && categoryMapping[shop]) {
-    return categoryMapping[shop];
-  }
-  
-  return null;
-}
-
-function generateVAT(): string {
-  const random = Math.floor(Math.random() * 100000000000);
-  return random.toString().padStart(11, "0");
-}
-
-Deno.serve(async (req: Request) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
+    return new Response("ok", {
       headers: corsHeaders,
     });
   }
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("Missing authorization header");
+    if (req.method !== "POST") {
+      return json(
+        { error: "Metodo non consentito" },
+        405
+      );
+    }
+
+    const body = (await req.json()) as ImportRequest;
+
+    const city = body.city?.trim();
+    const province = body.province?.trim() || null;
+    const region = body.region?.trim() || null;
+    const osmKey = body.osmKey?.trim();
+    const osmValue = body.osmValue?.trim();
+
+    if (!city || !osmKey || !osmValue) {
+      return json(
+        {
+          error:
+            "city, osmKey e osmValue sono obbligatori",
+        },
+        400
+      );
+    }
+
+    const supabaseUrl =
+      Deno.env.get("SUPABASE_URL");
+
+    const serviceRoleKey =
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error(
+        "Variabili Supabase mancanti"
+      );
     }
 
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
+      supabaseUrl,
+      serviceRoleKey
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      throw new Error("Unauthorized");
-    }
+    /*
+     * =========================================================
+     * 1. Recuperiamo la categoria OSM
+     * =========================================================
+     */
 
-    const { city, province, categories, radius = 10000 }: ImportRequest = await req.json();
+    const { data: osmCategory, error: categoryError } =
+      await supabase
+        .from("osm_categories")
+        .select("id, name, osm_key, osm_value")
+        .eq("osm_key", osmKey)
+        .eq("osm_value", osmValue)
+        .maybeSingle();
 
-    if (!city || !province) {
-      throw new Error("City and province are required");
-    }
-
-    // Get city coordinates using Nominatim
-    const geocodeUrl = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(city)}&country=Italy&format=json&limit=1`;
-    const geocodeResponse = await fetch(geocodeUrl, {
-      headers: {
-        "User-Agent": "ItalianBusinessDirectory/1.0"
-      }
-    });
-    const geocodeData = await geocodeResponse.json();
-
-    if (!geocodeData || geocodeData.length === 0) {
-      throw new Error(`City ${city} not found`);
-    }
-
-    const { lat, lon } = geocodeData[0];
-
-    // Build Overpass query
-    const overpassQuery = `
-      [out:json][timeout:90];
-      (
-        node["amenity"](around:${radius},${lat},${lon});
-        way["amenity"](around:${radius},${lat},${lon});
-        node["shop"](around:${radius},${lat},${lon});
-        way["shop"](around:${radius},${lat},${lon});
+    if (categoryError) {
+      throw new Error(
+        `Errore categoria OSM: ${categoryError.message}`
       );
-      out center;
-    `;
-
-    // Query Overpass API
-    const overpassUrl = "https://overpass-api.de/api/interpreter";
-    const overpassResponse = await fetch(overpassUrl, {
-      method: "POST",
-      body: overpassQuery,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
-    });
-
-    const osmData: OSMResponse = await overpassResponse.json();
-
-    // Get existing category IDs
-    const { data: categoriesData } = await supabase
-      .from("business_categories")
-      .select("id, name");
-
-    const categoryMap = new Map(
-      categoriesData?.map(cat => [cat.name, cat.id]) || []
-    );
-
-    // Process and insert businesses
-    const businesses = [];
-    const locations = [];
-
-    for (const element of osmData.elements) {
-      if (!element.tags?.name) continue;
-
-      const category = getCategoryFromOSM(element.tags);
-      if (!category) continue;
-
-      const categoryId = categoryMap.get(category);
-      if (!categoryId) continue;
-
-      const lat = element.lat || element.center?.lat;
-      const lon = element.lon || element.center?.lon;
-
-      if (!lat || !lon) continue;
-
-      const phone = element.tags.phone || element.tags["contact:phone"] || null;
-      const website = element.tags.website || element.tags["contact:website"] || null;
-
-      businesses.push({
-        name: element.tags.name,
-        category_id: categoryId,
-        is_claimed: false,
-        vat_number: generateVAT(),
-      });
-
-      const street = element.tags["addr:street"] || "Via non specificata";
-      const streetNumber = element.tags["addr:housenumber"] || "s.n.";
-
-      locations.push({
-        city: element.tags["addr:city"] || city,
-        province,
-        postal_code: element.tags["addr:postcode"] || null,
-        street_address: `${street}, ${streetNumber}`,
-        street_number: streetNumber,
-        latitude: lat,
-        longitude: lon,
-        phone_number: phone,
-        email: null,
-        business_hours: element.tags.opening_hours || null,
-      });
     }
 
-    if (businesses.length === 0) {
-      return new Response(
-        JSON.stringify({ message: "No businesses found", imported: 0 }),
-        {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
+    if (!osmCategory) {
+      throw new Error(
+        `Categoria OSM non trovata: ${osmKey}=${osmValue}`
+      );
+    }
+
+    /*
+     * =========================================================
+     * 2. Costruiamo query Overpass
+     * =========================================================
+     */
+
+    let overpassQuery: string;
+
+    if (
+      body.lat !== null &&
+      body.lat !== undefined &&
+      body.lng !== null &&
+      body.lng !== undefined
+    ) {
+      overpassQuery = `
+[out:json][timeout:60];
+(
+  node["name"]["${osmKey}"="${osmValue}"](around:5000,${body.lat},${body.lng});
+  way["name"]["${osmKey}"="${osmValue}"](around:5000,${body.lat},${body.lng});
+  relation["name"]["${osmKey}"="${osmValue}"](around:5000,${body.lat},${body.lng});
+);
+out center tags;
+`;
+    } else {
+      const escapedCity = escapeOverpass(city);
+
+      overpassQuery = `
+[out:json][timeout:90];
+area["ISO3166-1"="IT"]->.country;
+area["name"="${escapedCity}"]["boundary"="administrative"](area.country)->.city;
+(
+  node["name"]["${osmKey}"="${osmValue}"](area.city);
+  way["name"]["${osmKey}"="${osmValue}"](area.city);
+  relation["name"]["${osmKey}"="${osmValue}"](area.city);
+);
+out center tags;
+`;
+    }
+
+    /*
+     * =========================================================
+     * 3. Chiamiamo Overpass con fallback
+     * =========================================================
+     */
+
+    let overpassData: any = null;
+    let lastError = "";
+
+    for (const endpoint of OVERPASS_ENDPOINTS) {
+      try {
+        const response = await fetch(
+          endpoint,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/x-www-form-urlencoded",
+            },
+            body:
+              "data=" +
+              encodeURIComponent(
+                overpassQuery
+              ),
+          }
+        );
+
+        if (!response.ok) {
+          lastError =
+            `${endpoint}: HTTP ${response.status}`;
+
+          continue;
         }
+
+        const data = await response.json();
+
+        if (
+          data &&
+          Array.isArray(data.elements)
+        ) {
+          overpassData = data;
+          break;
+        }
+
+        lastError =
+          `${endpoint}: risposta Overpass non valida`;
+      } catch (error) {
+        lastError =
+          error instanceof Error
+            ? error.message
+            : String(error);
+
+        continue;
+      }
+    }
+
+    if (!overpassData) {
+      throw new Error(
+        `Nessun server Overpass disponibile. ${lastError}`
       );
     }
 
-    // Insert businesses
-    const { data: insertedBusinesses, error: businessError } = await supabase
-      .from("businesses")
-      .insert(businesses)
-      .select("id");
+    /*
+     * =========================================================
+     * 4. Elaboriamo i risultati
+     * =========================================================
+     */
 
-    if (businessError) {
-      throw businessError;
+    const elements =
+      overpassData.elements ?? [];
+
+    let found = 0;
+    let imported = 0;
+    let skipped = 0;
+
+    /*
+     * Recuperiamo gli OSM ID già presenti
+     * nella tabella delle attività non rivendicate.
+     */
+
+    const { data: existingRows, error: existingError } =
+      await supabase
+        .from("unclaimed_business_locations")
+        .select("osm_id")
+        .eq("city", city)
+        .not("osm_id", "is", null);
+
+    if (existingError) {
+      throw new Error(
+        `Errore controllo duplicati: ${existingError.message}`
+      );
     }
 
-    // Add business_id to locations
-    const locationsWithBusinessId = locations.map((loc, index) => ({
-      ...loc,
-      business_id: insertedBusinesses![index].id,
-    }));
-
-    // Insert locations
-    const { error: locationError } = await supabase
-      .from("business_locations")
-      .insert(locationsWithBusinessId);
-
-    if (locationError) {
-      throw locationError;
-    }
-
-    return new Response(
-      JSON.stringify({
-        message: "Businesses imported successfully",
-        imported: businesses.length,
-      }),
-      {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      }
+    const existingIds = new Set(
+      (existingRows ?? [])
+        .map((row) => row.osm_id)
+        .filter(Boolean)
     );
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 400,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+
+    /*
+     * =========================================================
+     * 5. Inserimento
+     * =========================================================
+     */
+
+    for (const element of elements) {
+      const tags = element.tags ?? {};
+
+      if (!tags.name) {
+        continue;
       }
+
+      const osmId =
+        `${element.type}/${element.id}`;
+
+      found++;
+
+      if (existingIds.has(osmId)) {
+        skipped++;
+        continue;
+      }
+
+      const latitude =
+        element.lat ??
+        element.center?.lat ??
+        null;
+
+      const longitude =
+        element.lon ??
+        element.center?.lon ??
+        null;
+
+      const businessHours =
+        tags.opening_hours
+          ? {
+              raw: tags.opening_hours,
+            }
+          : null;
+
+      const row = {
+        name: tags.name,
+
+        /*
+         * La classificazione LHIMO verrà fatta
+         * successivamente.
+         */
+        category_id: null,
+
+        city:
+          tags["addr:city"] ??
+          tags["addr:municipality"] ??
+          city,
+
+        province,
+
+        region,
+
+        street:
+          tags["addr:street"] ?? null,
+
+        postal_code:
+          tags["addr:postcode"] ?? null,
+
+        phone:
+          tags.phone ??
+          tags["contact:phone"] ??
+          null,
+
+        website:
+          tags.website ??
+          tags["contact:website"] ??
+          null,
+
+        email:
+          tags.email ??
+          tags["contact:email"] ??
+          null,
+
+        business_hours: businessHours,
+
+        latitude,
+
+        longitude,
+
+        osm_id: osmId,
+
+        is_claimed: false,
+
+        approval_status: "approved",
+      };
+
+      const { error: insertError } =
+        await supabase
+          .from("unclaimed_business_locations")
+          .insert(row);
+
+      if (insertError) {
+        console.error(
+          "Errore inserimento:",
+          insertError
+        );
+
+        skipped++;
+        continue;
+      }
+
+      imported++;
+      existingIds.add(osmId);
+    }
+
+    /*
+     * =========================================================
+     * 6. Risultato
+     * =========================================================
+     */
+
+    return json({
+      success: true,
+      found,
+      imported,
+      skipped,
+      category: osmCategory.name,
+      osm_key: osmKey,
+      osm_value: osmValue,
+    });
+  } catch (error) {
+    console.error(
+      "IMPORT OSM ERROR:",
+      error
+    );
+
+    return json(
+      {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+      },
+      500
     );
   }
 });
+
+function escapeOverpass(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"');
+}
+
+function json(
+  data: unknown,
+  status = 200
+) {
+  return new Response(
+    JSON.stringify(data),
+    {
+      status,
+      headers: {
+        ...corsHeaders,
+        "Content-Type":
+          "application/json",
+      },
+    }
+  );
+}
