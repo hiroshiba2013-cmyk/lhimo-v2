@@ -160,14 +160,43 @@ export function OsmImportSection() {
 
       updateStep(i, { status: 'fetching' });
       try {
-        const { data, error } = await supabase.rpc('import_osm_for_comune', {
-          p_city: comune.city,
-          p_province: comune.province,
-          p_region: comune.region,
-          p_osm_tag: tag,
-          p_lat: lat ?? null,
-          p_lng: lng ?? null,
-        });
+    const { data, error } = await supabase.functions.invoke(
+  'import-osm',
+  {
+    body: {
+      city: comune.city,
+      province: comune.province,
+      region: comune.region,
+      osmKey: osmKey,
+      osmValue: tag,
+      lat: lat ?? null,
+      lng: lng ?? null,
+    },
+  }
+);
+
+if (error) {
+  throw new Error(
+    error.message || 'Errore durante l’import OSM'
+  );
+}
+
+if (!data) {
+  throw new Error(
+    'La Edge Function non ha restituito alcun risultato'
+  );
+}
+
+if (data.error) {
+  throw new Error(data.error);
+}
+
+updateStep(i, {
+  status: 'done',
+  found: data.found ?? 0,
+  imported: data.imported ?? 0,
+  skipped: data.skipped ?? 0,
+});
         if (error) throw new Error(error.message || 'Errore RPC');
         if (data?.error) throw new Error(data.error);
         updateStep(i, {
